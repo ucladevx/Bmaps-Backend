@@ -6,6 +6,11 @@ A single platform for events all over campus. Mappening helps raise awareness of
 ## Prerequisites
 Download [Docker](https://www.docker.com) and clone this repository. 
 
+## Built Using
+* Flask : Web microframework for Python
+* mLab : Database-as-a-Service cloud-hosted MongoDB
+* Pymongo : Database Connector between MongoDB and Flask
+
 ## To Build
 * `cd` to the repository.
 * Build with `docker build -t mappening_backend .`
