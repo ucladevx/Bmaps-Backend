@@ -11,8 +11,8 @@ Download [Docker](https://www.docker.com) and clone this repository.
 * mLab : Database-as-a-Service cloud-hosted MongoDB
 * Pymongo : Database Connector between MongoDB and Flask
 
-## To Build
+## To Run
 * `cd` to the repository.
-* Build with `docker build -t mappening_backend .`
-* Run with `docker run -p 5000:5000 -i -t mappening_backend`
+* Build with `make build`
+* Build + Run with `make run`
 * Navigate to localhost:5000
