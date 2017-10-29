@@ -1,6 +1,6 @@
 # Starter app.py that connects to mlab database
 
-from flask import Flask
+from flask import Flask, jsonify, request, json
 import pymongo
 
 app = Flask(__name__)
@@ -77,6 +77,37 @@ def printFromDB():
     client.close()
 
     return "Success!"
+
+@app.route('/events', methods=['GET'])
+def get_all_events():
+    events_collection = db['map_events']
+
+    output = []
+    for event in events_collection.find():
+      print ("Event: " + event["event_name"])
+      output.append({
+        'event_name': event['event_name'], 
+        'logistics': event['event_logistics'],
+        'free_food': event['free_food'],
+        'people_going': event['people_going']
+      })
+    return jsonify({'map_events': output})
+
+# /<> defaults to strings without any slashes
+@app.route('/event/<event_name>', methods=['GET'])
+def get_one_event(event_name):
+    events_collection = db['map_events']
+    event = events_collection.find_one({'event_name': event_name})
+    if event:
+      output = {
+        'event_name': event['event_name'], 
+        'logistics': event['event_logistics'],
+        'free_food': event['free_food'],
+        'people_going': event['people_going']
+      }
+    else:
+      output = "No event of name '{}'".format(event_name)
+    return jsonify({'map_event': output})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
