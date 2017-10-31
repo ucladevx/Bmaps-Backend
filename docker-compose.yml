@@ -84,12 +84,12 @@ services:
   #     - db_mongo
   #     - db_mysql
 
-  # web_nginx:
-  #   build: ./nginx_app
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./nginx_app:/app
+  web_nginx:
+    build: ./nginx_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx_app:/app
   #   links:
   #     - db_postgres
   #     - db_redis
