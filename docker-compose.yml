@@ -1,0 +1,119 @@
+# base/docker-compose.yml
+# Use this file to set up your containers.
+#
+# You need to select your backend and database(s):
+#   Uncomment the stack block(s) that you want to use
+#     Under 'links' choose the databases(s) you need and uncomment those lines
+#       Don't forget to uncomment 'links:' as well
+#   If you need databases, uncomment their respective blocks under 'services'
+#     e.g. If you need db_postgres and db_redis, uncomment those two lines under 'links'.
+#          Uncomment the "links:" line too. And uncomment the whole "db_postgres:" and
+#          "db_redis:" blocks
+# 
+# DO NOT UNCOMMENT ANY LINES THAT CONTAIN 'MARK:'
+# IF YOU'RE USING RAILS, ALSO UNCOMMENT THE 'vol_gems' BLOCK
+#
+#
+# Author: Nikhil Kansal
+# Version: 1.0.0
+# Date: 06/26/2017
+
+version: '2'
+services:
+  # web_rails:
+  #   build:
+  #     ### MARK:rails_build
+  #   command: './start.sh'
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     ### MARK:rails_volume
+  #   volumes_from:
+  #     - vol_gems
+  #   links:
+  #     - db_postgres
+  #     - db_redis
+  #     - db_mongo
+  #     - db_mysql
+  
+  # web_node:
+  #   build: ./node_app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./node_app:/app
+  #   links:
+  #     - db_postgres
+  #     - db_redis
+  #     - db_mongo
+  #     - db_mysql
+
+  # web_golang:
+  #   build: ./golang_app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./golang_app:/go"
+  #   links:
+  #     - db_postgres
+  #     - db_redis
+  #     - db_mongo
+  #     - db_mysql
+
+  web_python:
+    build: ./python_app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./python_app:/app
+    # links:
+    #   - db_postgres
+    #   - db_redis
+    #   - db_mongo
+    #   - db_mysql
+
+  # web_php:
+  #   build: ./php_app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./php_app/www:/var/www
+  #   links:
+  #     - db_postgres
+  #     - db_redis
+  #     - db_mongo
+  #     - db_mysql
+
+  # web_nginx:
+  #   build: ./nginx_app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./nginx_app:/app
+  #   links:
+  #     - db_postgres
+  #     - db_redis
+  #     - db_mongo
+  #     - db_mysql
+
+  # db_postgres:
+  #   build: ./postgres
+  #   ports:
+  #     - "5432"
+  # db_mongo:
+  #   build: ./mongo
+  #   ports:
+  #     - "27017"
+  # db_redis:
+  #   build: ./redis
+  #   ports:
+  #     - "6379"
+  # db_mysql:
+  #   build: ./mysql
+  #   ports:
+  #     - "3306"
+
+  # vol_gems:
+  #   image: busybox
+  #   volumes:
+  #     - /gems

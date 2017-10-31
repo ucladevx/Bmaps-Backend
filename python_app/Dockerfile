@@ -35,12 +35,10 @@ RUN echo \
   && echo
 
 COPY requirements.txt /tmp
-RUN cd /tmp && pip install -r requirements.txt && pip install pymongo
+RUN cd /tmp && pip install -r requirements.txt
 
 VOLUME ["/app"]
 WORKDIR /app
-
-COPY . .
 
 EXPOSE 5000
 CMD ["python", "app.py"]
