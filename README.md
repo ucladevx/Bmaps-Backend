@@ -11,12 +11,12 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
 * Flask: Web microframework for Python
 * mLab: Database-as-a-Service cloud-hosted MongoDB
 * Pymongo: Database Connector between MongoDB and Flask
-* nginx: Serves static files
+* nginx: Server for static files
 
 ## How To Run
 * `cd` to the repository.
-* Build with `make build`
 * Build + Run with `make run`
+  * Just build with `make build`
 * Navigate to http://localhost:5000
-* Stop with `CTRL+C in the terminal you ran it in or with make stop`
-* Reset with `make reset`
+* Stop running with `CTRL+C` or with `make stop`
+* Reset containers/images with `make reset`
