@@ -1,7 +1,7 @@
 # Starter app.py that connects to mlab database
 
 from flask import Flask, jsonify, request, json
-from flask.ext.cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
 import pymongo
 
 app = Flask(__name__)
