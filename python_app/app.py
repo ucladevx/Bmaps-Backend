@@ -1,9 +1,14 @@
 # Starter app.py that connects to mlab database
 
 from flask import Flask, jsonify, request, json
+from flask.ext.cors import CORS, cross_origin
 import pymongo
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+cors = CORS(app, resources={r"/foo": {"origins": "http://localhost:5000"}})
 
 ### Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data' 
@@ -79,6 +84,7 @@ def printFromDB():
     return "Success!"
 
 @app.route('/events', methods=['GET'])
+@cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
 def get_all_events():
     events_collection = db['map_events']
 
@@ -95,6 +101,7 @@ def get_all_events():
 
 # /<> defaults to strings without any slashes
 @app.route('/event/<event_name>', methods=['GET'])
+@cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
 def get_one_event(event_name):
     events_collection = db['map_events']
     event = events_collection.find_one({'event_name': event_name})
