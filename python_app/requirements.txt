@@ -1,3 +1,4 @@
 flask
 flask_cors
+flask_oauth
 pymongo

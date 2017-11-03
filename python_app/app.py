@@ -2,9 +2,11 @@
 
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
+from FacebookAuth import fb_auth_api
 import pymongo
 
 app = Flask(__name__)
+app.register_blueprint(fb_auth_api)
 app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
 app.config['CORS_HEADERS'] = 'Content-Type'
 
