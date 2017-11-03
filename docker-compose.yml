@@ -18,6 +18,11 @@ services:
   web_nginx:
     build: ./nginx_app
     ports:
-      - "3000:3000"
+      - "80:80"
     volumes:
       - ./nginx_app:/app
+
+  fb_events:
+    image: tobilg/facebook-event-search
+    ports:
+      - "3000:3000"
