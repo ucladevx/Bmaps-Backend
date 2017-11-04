@@ -1,7 +1,7 @@
 FROM alpine:3.6
 
 ENV ALPINE_VERSION=3.6 \
-    PACKAGES="bash ca-certificates python2 py-setuptools"
+    PACKAGES="bash ca-certificates python2 py-setuptools curl"
 
 # replacing default repositories with edge ones
 RUN echo \
