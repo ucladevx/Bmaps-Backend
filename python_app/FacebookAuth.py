@@ -1,7 +1,7 @@
 # Facebook Authentication
 # TODO: logout, store user profiles
 
-from flask import Flask, redirect, url_for, session, request, Blueprint
+from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_oauth import OAuth
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
@@ -52,8 +52,10 @@ def facebook_authorized(resp):
         return redirect(url_for('fb_auth.login'))
     session['oauth_token'] = (resp['access_token'], '')
 
-    me = facebook.get('/me')
-    return 'Logged in as id=%s name=%s' % (me.data['id'], me.data['name'])
+    # TODO: email is not always supplied
+    me = facebook.get('/me?fields=id,name,email,picture')
+    # return 'Logged in as id=%s name=%s' % (me.data['id'], me.data['name'])
+    return jsonify(me.data)
 
 if __name__ == '__main__':
     fb_auth.run()
