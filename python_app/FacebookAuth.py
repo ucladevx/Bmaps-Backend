@@ -30,7 +30,7 @@ facebook = oauth.remote_app('facebook',
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
-@fb_auth.route('/register')
+@fb_auth.route('/api/register')
 def register():
     return redirect(url_for('fb_auth.facebook_register'))
 
@@ -60,7 +60,7 @@ def facebook_authorized(resp):
         user_lastname=me.data['last_name']))
 
 # Only works if already logged in
-@fb_auth.route('/user-id')
+@fb_auth.route('/api/user-id')
 def facebook_user_id():
     me = facebook.get('/me?fields=id')
     return me.data['id']
