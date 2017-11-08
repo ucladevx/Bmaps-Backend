@@ -19,7 +19,7 @@ uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-events_collection = db.test #db.map_events
+events_collection = db.map_events
 
 # Returns JSON of all events
 @Events.route('/api/events', methods=['GET'])
