@@ -29,7 +29,7 @@ def error_message():
 
 # Add a new user to users collection 
 # {user_id, user_name, user_firstname, user_lastname}
-@Users.route('/add-user')
+@Users.route('/api/add-user')
 def add_user():
     user_id = request.args['user_id']
 
