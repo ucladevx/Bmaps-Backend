@@ -2,15 +2,21 @@
 
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
+from FacebookAuth import fb_auth
+from users import Users
 import pymongo
 
+# Configure app and register blueprints
 app = Flask(__name__)
+app.register_blueprint(fb_auth)
+app.register_blueprint(Users)
 app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+# Resolved Cross Origin Resource Sharing for Tanzeela 
 cors = CORS(app, resources={r"/foo": {"origins": "http://localhost:5000"}})
 
-### Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
+# Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data' 
 
 # Set up database connection.
@@ -34,6 +40,7 @@ MAP_POSTS = [
   }
 ]
 
+# Testing various interactions with mlab
 @app.route('/')
 def printFromDB():
     # Get collection (group of documents). Nothing is required to create a 
@@ -83,6 +90,8 @@ def printFromDB():
 
     return "Success!"
 
+# Returns JSON of all events
+# TODO: Use actual event data
 @app.route('/api/events', methods=['GET'])
 @cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
 def get_all_events():
@@ -99,6 +108,7 @@ def get_all_events():
       })
     return jsonify({'map_events': output})
 
+# Returns JSON of singular event by event name
 # /<> defaults to strings without any slashes
 @app.route('/api/event/<event_name>', methods=['GET'])
 @cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
