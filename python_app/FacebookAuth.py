@@ -34,14 +34,14 @@ def get_facebook_oauth_token():
 def register():
     return redirect(url_for('fb_auth.facebook_register'))
 
-@fb_auth.route('/register/facebook')
+@fb_auth.route('/api/register/facebook')
 def facebook_register():
     return facebook.authorize(
       callback=url_for('fb_auth.facebook_authorized',
       next=request.args.get('next') or None, _external=True))
 
 # Checks whether authentication works or access is denied
-@fb_auth.route('/register/authorized')
+@fb_auth.route('/api/register/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None or 'access_token' not in resp:
