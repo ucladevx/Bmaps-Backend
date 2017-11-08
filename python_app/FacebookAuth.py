@@ -1,5 +1,5 @@
 # Facebook Authentication
-# TODO: logout, store user profiles
+# TODO: logout, email
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_oauth import OAuth
@@ -30,19 +30,18 @@ facebook = oauth.remote_app('facebook',
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
-@fb_auth.route('/login')
-def login():
-    return redirect(url_for('fb_auth.facebook_login'))
+@fb_auth.route('/register')
+def register():
+    return redirect(url_for('fb_auth.facebook_register'))
 
-@fb_auth.route('/login/facebook')
-def facebook_login():
+@fb_auth.route('/register/facebook')
+def facebook_register():
     return facebook.authorize(
       callback=url_for('fb_auth.facebook_authorized',
       next=request.args.get('next') or None, _external=True))
 
 # Checks whether authentication works or access is denied
-# If successful, returns some user data
-@fb_auth.route('/login/authorized')
+@fb_auth.route('/register/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None or 'access_token' not in resp:
@@ -52,10 +51,19 @@ def facebook_authorized(resp):
         return redirect(url_for('fb_auth.login'))
     session['oauth_token'] = (resp['access_token'], '')
 
-    # TODO: email is not always supplied
-    me = facebook.get('/me?fields=id,name,email,picture')
-    # return 'Logged in as id=%s name=%s' % (me.data['id'], me.data['name'])
-    return jsonify(me.data)
+    # TODO: email is not always supplied, currently doesn't try to use email
+    me = facebook.get('/me?fields=id,name,first_name,last_name,email,picture')
+
+    # Returns success if new user was added, otherwise error if duplicate
+    return redirect(url_for('Users.add_user', user_id=me.data['id'], 
+        user_name=me.data['name'], user_firstname=me.data['first_name'], 
+        user_lastname=me.data['last_name']))
+
+# Only works if already logged in
+@fb_auth.route('/user-id')
+def facebook_user_id():
+    me = facebook.get('/me?fields=id')
+    return me.data['id']
 
 if __name__ == '__main__':
     fb_auth.run()
