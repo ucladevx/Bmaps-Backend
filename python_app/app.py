@@ -92,7 +92,7 @@ def printFromDB():
 
 # Returns JSON of all events
 # TODO: Use actual event data
-@app.route('/events', methods=['GET'])
+@app.route('/api/events', methods=['GET'])
 @cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
 def get_all_events():
     events_collection = db['map_events']
@@ -110,7 +110,7 @@ def get_all_events():
 
 # Returns JSON of singular event by event name
 # /<> defaults to strings without any slashes
-@app.route('/event/<event_name>', methods=['GET'])
+@app.route('/api/event/<event_name>', methods=['GET'])
 @cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
 def get_one_event(event_name):
     events_collection = db['map_events']
