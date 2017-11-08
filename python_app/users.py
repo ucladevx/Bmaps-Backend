@@ -50,7 +50,7 @@ def add_user():
       return redirect(url_for('Users.error_message', error_code=3))
 
 # Remove a user by user_id from users collection
-@Users.route('/remove-user/<user_id>')
+@Users.route('/api/remove-user/<user_id>')
 def remove_user(user_id):
     # Check that user exists to remove
     if users_collection.find_one({'user_id': user_id}) == None:
@@ -66,7 +66,7 @@ def remove_user(user_id):
       return redirect(url_for('Users.error_message', error_code=5))
 
 # Check that a user exists
-@Users.route('/user-exists/<user_id>')
+@Users.route('/api/user-exists/<user_id>')
 def user_exists(user_id):
     # Check that user exists
     if users_collection.find_one({'user_id': user_id}) != None:
@@ -75,7 +75,7 @@ def user_exists(user_id):
       return redirect(url_for('Users.error_message', error_code=4))
 
 # Get a user_name from user_id 
-@Users.route('/user-name/<user_id>', methods=['GET'])
+@Users.route('/api/user-name/<user_id>', methods=['GET'])
 def get_user_name(user_id):
     # Check that user exists
     if users_collection.find_one({'user_id': user_id}) == None:
