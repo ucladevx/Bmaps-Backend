@@ -1,6 +1,5 @@
 # Facebook Authentication
 # TODO: logout, email
-# BUG: cannot access authentication through nginx, only directly with port 5000
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_oauth import OAuth
