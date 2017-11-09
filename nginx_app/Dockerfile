@@ -7,16 +7,14 @@ RUN apk update && \
     apk add bash curl nginx && \
     rm -rf /var/cache/apk/*
 
-# create working directory
-VOLUME ["/app"]
-RUN mkdir -p /run/nginx
-
-# copy data to app location
-COPY nginx.conf /etc/nginx
-
 # set the working directory and copy source files
 WORKDIR /app
+COPY . .
+
+# copy data to app location
+RUN mkdir -p /run/nginx
+COPY nginx.conf /etc/nginx
 
 # open a port and start the server
-EXPOSE 3000
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

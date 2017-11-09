@@ -20,6 +20,14 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
 * Stop running with `CTRL+C` or with `make stop`
 * Reset containers/images with `make reset`
 
+## How to Run on AWS
+* `cd` to the repository.
+* Build + Push a new image to AWS with `make push`
+  * Just build with `make build`
+* In separate tab/window run `make ssh` to login to AWS instance
+* Deploy with `make deploy`
+* Navigate to 52.53.197.64
+
 ## How to Use
 * Ports
   * Flask: 5000
