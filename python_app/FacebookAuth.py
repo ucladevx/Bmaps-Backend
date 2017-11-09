@@ -1,5 +1,6 @@
 # Facebook Authentication
 # TODO: logout, email
+# BUG: cannot access authentication through nginx, only directly with port 5000
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_oauth import OAuth
@@ -30,18 +31,18 @@ facebook = oauth.remote_app('facebook',
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
-@fb_auth.route('/register')
+@fb_auth.route('/api/register')
 def register():
     return redirect(url_for('fb_auth.facebook_register'))
 
-@fb_auth.route('/register/facebook')
+@fb_auth.route('/api/register/facebook')
 def facebook_register():
     return facebook.authorize(
       callback=url_for('fb_auth.facebook_authorized',
       next=request.args.get('next') or None, _external=True))
 
 # Checks whether authentication works or access is denied
-@fb_auth.route('/register/authorized')
+@fb_auth.route('/api/register/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None or 'access_token' not in resp:
@@ -60,7 +61,7 @@ def facebook_authorized(resp):
         user_lastname=me.data['last_name']))
 
 # Only works if already logged in
-@fb_auth.route('/user-id')
+@fb_auth.route('/api/user-id')
 def facebook_user_id():
     me = facebook.get('/me?fields=id')
     return me.data['id']
