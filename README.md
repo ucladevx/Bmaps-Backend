@@ -13,13 +13,6 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
 * Pymongo: Database Connector between MongoDB and Flask
 * nginx: Server for static files
 
-## How to Run
-* `cd` to the repository.
-* Build + Run with `make run`
-  * Just build with `make build`
-* Stop running with `CTRL+C` or with `make stop`
-* Reset containers/images with `make reset`
-
 ## How to Run on AWS
 * `cd` to the repository.
 * Build + Push a new image to AWS with `make push`
@@ -27,13 +20,9 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
 * In separate tab/window run `make ssh` to login to AWS instance
 * Deploy with `make deploy`
 * Navigate to 52.53.197.64
-
-## How to Use
-* Ports
-  * Flask: 5000
-  * nginx: 80
-  * FacebookEventsByLocation: 3000
-* Can get static files through nginx
-  * e.g http://localhost:80/imgs
-* Can forward requests through nginx to Flask and get response
-  * e.g http://localhost:80/api/v1/events
+  * Access static files with nginx with `/` or `/imgs`
+    * e.g. `52.53.197.64/imgs`
+  * Access flask api by forwarding requests through nginx
+    * Use `/api/v1/insert_api_route_here`
+    * e.g. `52.53.197.64/api/v1/events`
+* Stop running on ubuntu with `CTRL+C`
