@@ -28,7 +28,7 @@ def get_all_events():
     for event in events_collection.find():
       print ("Event: " + event["name"].encode('ascii', 'ignore'))
       output.append({
-        'id': event['id'],
+        '_id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -50,7 +50,7 @@ def get_one_event(event_name):
     event = events_collection.find_one({'name': event_name})
     if event:
       output = {
-        'id': event['id'],
+        '_id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
