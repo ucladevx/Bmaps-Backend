@@ -37,8 +37,9 @@ RUN echo \
 COPY requirements.txt /tmp
 RUN cd /tmp && pip install -r requirements.txt
 
-VOLUME ["/app"]
 WORKDIR /app
+COPY . .
+RUN ls -l
 
 EXPOSE 5000
 CMD ["python", "app.py"]
