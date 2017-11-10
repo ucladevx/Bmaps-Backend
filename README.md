@@ -16,7 +16,7 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
 ## How to Run Locally
 * `cd` to the repository.
 * Build + Run with `make run`
-  * Just build with make build
+  * Just build with `make build-local`
 * Navigate to `localhost`
   * Access static files with nginx with `/` or `/imgs`
     * e.g. `localhost/imgs`
