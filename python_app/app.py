@@ -4,15 +4,16 @@ from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 import pymongo
 
-import urllib, json
+# change to use module requests, much simpler and powerful-er
+import requests
 import time, datetime
-import subprocess, warnings, ast
+import urllib, json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-cors = CORS(app, resources={r"/foo": {"origins": "http://localhost:5000"}})
+cors = CORS(app, resources={r'/foo': {'origins': 'http://localhost:5000'}})
 
 ### Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data' 
@@ -83,42 +84,18 @@ SAMPLE_EVENT = {
 }
 
 def getFacebookData():
-    """
-    https://stackoverflow.com/questions/3058723/programmatically-getting-an-access-token-for-using-the-facebook-graph-api
-    Get Facebook App Access Token using App ID and Secret
-
-    """
-    # warnings to hide warnings about outdated facebook module
-    warnings.filterwarnings('ignore', category=DeprecationWarning)
+    # requests module is awesome
 
     # katrina's app info, how to hide later?
     FACEBOOK_APP_ID = '353855031743097'
     FACEBOOK_APP_SECRET = '2831879e276d90955f3aafe0627d3673'
 
-    # put in URL arguments and their values to a dict
-    oauth_args = dict(  client_id     = FACEBOOK_APP_ID,
-                        client_secret = FACEBOOK_APP_SECRET,
-                        grant_type    = 'client_credentials')
-    # get ready to access by curl command, and construct URL in correct format using above args and vals
-    oauth_curl_cmd = ['curl',
-                    'https://graph.facebook.com/oauth/access_token?' + urllib.urlencode(oauth_args)]
-    # subprocess makes a new child process with Popen: runs the curl command,
-    # PIPE literally is same as bash pipe | (give output of this curl command as input of another)
-    # communicate puts in data for stdin (not used here) and reads data from stdout / stderr into
-    # tuple (stdout, stderr), and [0] accesses the stdout info
-    oauth_response = subprocess.Popen(oauth_curl_cmd,
-                                    stdout = subprocess.PIPE,
-                                    stderr = subprocess.PIPE).communicate()[0]
-    print(type(oauth_response))
-    try:
-        # takes a JSON string and turns into actual JSON, with key access_token
-        app_access_token = ast.literal_eval(oauth_response)['access_token']
-    except KeyError:
-        print('Unable to grab an access token!')
-        exit(1)
-
-    # URL call to endpoint set up by server from https://github.com/tobilg/facebook-events-by-location
-    baseurl = 'http://fb_events:3000/events?'
+    token_args = {'client_id': FACEBOOK_APP_ID, 'client_secret': FACEBOOK_APP_SECRET, 'grant_type': 'client_credentials'}
+    resp = requests.post('https://graph.facebook.com/oauth/access_token', token_args)
+    if resp.status_code != 200:
+        print('Error in getting access code! Status code {}'.format(resp.status_code))
+        return []
+    app_access_token = resp.json()['access_token']
 
     # location of bruin bear
     latitude = 34.070964
@@ -131,23 +108,20 @@ def getFacebookData():
     # sort by some number, options: time, distance, venue, popularity
     sort_type = 'time'
 
-    event_args = dict(  accessToken = app_access_token,
-                        lat         = latitude,
-                        lng         = longitude,
-                        since       = start_t,
-                        until       = end_t,
-                        sort        = sort_type,
-                        distance    = 1 )
-
-    fb_url = baseurl + urllib.urlencode(event_args)
-    print(fb_url)
-
-    response = urllib.urlopen(fb_url)
-    print(type(response))
-    data = json.loads(response.read())
-    print(type(data))
-
-    return data['events']
+    event_args = {  'accessToken'   : app_access_token,
+                    'lat'           : latitude,
+                    'lng'           : longitude,
+                    'since'         : start_t,
+                    'until'         : end_t,
+                    'sort'          : sort_type,
+                    'distance'      : 1 }
+    # URL call to endpoint set up by server from https://github.com/tobilg/facebook-events-by-location
+    baseurl = 'http://fb_events:3000/events'
+    resp = requests.post(baseurl, event_args)
+    if resp.status_code != 200:
+        print('Error in getting events! Status code {}'.format(resp.status_code))
+        return []
+    return resp.json()['events']
 
 @app.route('/')
 def printFromDB():
@@ -165,32 +139,32 @@ def printFromDB():
     # find_one() gets first document in collection
     # print (map_collection.find_one())
     # find_one() with search term
-    print (map_collection.find_one({"id": "1939846499570426"}))
+    print (map_collection.find_one({'id': '1939846499570426'}))
     # find_one() with search term to print particular field
-    # print (map_collection.find_one({"id": 111})['name'])
+    # print (map_collection.find_one({'id': 111})['name'])
 
     # Find more than one document in a collection
     # find() returns a Cursor instance, which allows us to iterate over all 
     # matching documents.
     for post in map_collection.find():
-        # print(post['name'] + " is #" + post['id']) 
-        print("{} = {}".format(post['name'], post['id']))
+        # print(post['name'] + ' is #' + post['id']) 
+        print('{} = {}'.format(post['name'], post['id']))
 
     # Get count of documents matching a query
     print (map_collection.count())
-    # print (map_collection.find({"name": "Dora"}).count())
+    # print (map_collection.find({'name': 'Dora'}).count())
 
     # Update an entry
     # Set value of entry
-    query = {'name': "Women's Volleyball"}
-    map_collection.update_one(query, {'$set': {'name': "Volleyball Thing"}})
-    print (map_collection.find_one({"name": "Volleyball Thing"}))
+    query = {'name': 'Women\'s Volleyball'}
+    map_collection.update_one(query, {'$set': {'name': 'Volleyball Thing'}})
+    print (map_collection.find_one({'name': 'Volleyball Thing'}))
     
     # Increment value of entry
     # WARNING: IDs ARE STRINGS, NOT INTS
-    query = {'name': "Volleyball Thing"}
+    query = {'name': 'Volleyball Thing'}
     map_collection.update_one(query, {'$inc': {'stats.attending': 100}})
-    print (map_collection.find_one({"name": "Volleyball Thing"}))
+    print (map_collection.find_one({'name': 'Volleyball Thing'}))
     
     # Clear collection 
     ### Since this is an example, we'll clean up after ourselves.
@@ -199,15 +173,18 @@ def printFromDB():
     # Only close the connection when your app is terminating
     client.close()
 
-    return "Success!"
+    return 'Success!'
 
 def populateDatabase():
     map_collection = db['map_events']
     # at least 1 event in database
-    if map_collection.count() > 0:
-        return
+    #if map_collection.count() > 0:
+    #    return
+    map_collection.delete_many({})
     current_events = getFacebookData()
     map_collection.insert_many(current_events)
+
+# TODO: SAVE IMAGE DATA TO FILE? CHECK REQUEST ERROR HANDLING
 
 @app.route('/api/events', methods=['GET'])
 @cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
@@ -216,7 +193,7 @@ def get_all_events():
 
     output = []
     for event in events_collection.find():
-      print ("Event: " + event["name"].encode('ascii', 'ignore'))
+      print ('Event: ' + event['name'].encode('ascii', 'ignore'))
       output.append({
         'event_name': event['name'], 
         'logistics': event['venue'],
@@ -239,10 +216,10 @@ def get_one_event(event_name):
         'people_going': event['stats']
       }
     else:
-      output = "No event of name '{}'".format(event_name)
+      output = 'No event of name \'{}\''.format(event_name)
     return jsonify({'map_event': output})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     populateDatabase()
     app.run(host='0.0.0.0', debug=True)
 
