@@ -87,35 +87,12 @@ def populate_ucla_events_database():
 # Gets Facebook App access token using App ID and Secret
 # https://stackoverflow.com/questions/3058723/programmatically-getting-an-access-token-for-using-the-facebook-graph-api
 def get_facebook_events(latitude, longitude):
-    # Hide warnings about outdated Facebook module
-    warnings.filterwarnings('ignore', category=DeprecationWarning)
-
-    # Add URL arguments and their values to a dict
-    oauth_args = dict(  client_id     = FACEBOOK_APP_ID,
-                        client_secret = FACEBOOK_APP_SECRET,
-                        grant_type    = 'client_credentials')
-
-    # Get ready to access by curl command
-    # Construct URL in correct format using oauth_args
-    oauth_curl_cmd = ['curl', 'https://graph.facebook.com/oauth/access_token?' 
-                      + urllib.urlencode(oauth_args)]
-
-    # Subprocess makes a new child process with Popen: 
-    # Runs the curl command,
-    # PIPE is same as bash pipe | (output of this curl command is input to next)
-    # Communicate puts in data for stdin (not used here) and reads data from 
-    # stdout / stderr into tuple (stdout, stderr), and [0] accesses the stdout
-    oauth_response = subprocess.Popen(oauth_curl_cmd,
-                                    stdout = subprocess.PIPE,
-                                    stderr = subprocess.PIPE).communicate()[0]
-    print(type(oauth_response))
-
-    try:
-        # Takes a JSON string and turns into actual JSON, with key access_token
-        app_access_token = ast.literal_eval(oauth_response)['access_token']
-    except KeyError:
-        print('Unable to grab an access token!')
-        exit(1)
+    token_args = {'client_id': FACEBOOK_APP_ID, 'client_secret': FACEBOOK_APP_SECRET, 'grant_type': 'client_credentials'}
+    resp = requests.post('https://graph.facebook.com/oauth/access_token', token_args)
+    if resp.status_code != 200:
+        print('Error in getting access code! Status code {}'.format(resp.status_code))
+        return []
+    app_access_token = resp.json()['access_token']
 
     # URL call to endpoint set up by server from 
     # https://github.com/tobilg/facebook-events-by-location

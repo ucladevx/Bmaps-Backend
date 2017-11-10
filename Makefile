@@ -9,10 +9,12 @@ ecr-login:
 build:
 	docker build ./python_app -t $(APP_NAME_FLASK)
 	docker build ./nginx_app -t $(APP_NAME_NGINX)
-	# docker-compose build
 
-run: build
-	docker-compose up
+build-local:
+	docker-compose -f docker-compose.local.yml build
+
+run: build-local
+	docker-compose -f docker-compose.local.yml up
 
 push: ecr-login build
 	docker tag $(APP_NAME_FLASK):latest $(ECR_REPO)/$(APP_NAME_FLASK):latest
