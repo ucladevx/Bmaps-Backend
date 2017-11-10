@@ -3,18 +3,29 @@ APP_NAME_FLASK=web_flask
 APP_NAME_NGINX=web_nginx
 EC2_IP=52.53.197.64
 
-ecr-login:
-	$(shell aws ecr get-login --no-include-email --region us-west-1)
-
-build:
-	docker build ./python_app -t $(APP_NAME_FLASK)
-	docker build ./nginx_app -t $(APP_NAME_NGINX)
+############################## FOR RUNNING LOCALLY #############################
 
 build-local:
 	docker-compose -f docker-compose.local.yml build
 
 run: build-local
 	docker-compose -f docker-compose.local.yml up
+
+stop:
+	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
+
+reset:
+	-docker ps -a | tail -n +2 | cut -d ' ' -f 1 | xargs docker rm
+	-docker images | tail -n +2 | tr -s ' ' | cut -d ' ' -f 3 | xargs docker rmi --force
+
+################################ DEPLOYING ON AWS ##############################
+
+ecr-login:
+	$(shell aws ecr get-login --no-include-email --region us-west-1)
+
+build:
+	docker build ./python_app -t $(APP_NAME_FLASK)
+	docker build ./nginx_app -t $(APP_NAME_NGINX)
 
 push: ecr-login build
 	docker tag $(APP_NAME_FLASK):latest $(ECR_REPO)/$(APP_NAME_FLASK):latest
@@ -29,10 +40,3 @@ ssh:
 deploy: ecr-login
 	docker-compose pull
 	docker-compose up
-
-stop:
-	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
-
-reset:
-	-docker ps -a | tail -n +2 | cut -d ' ' -f 1 | xargs docker rm
-	-docker images | tail -n +2 | tr -s ' ' | cut -d ' ' -f 3 | xargs docker rmi --force
