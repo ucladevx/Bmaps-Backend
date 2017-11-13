@@ -23,7 +23,7 @@ error_codes_to_messages = {
 }
 
 # Error messages for adding a new user
-@Users.route('/user-results')
+@Users.route('/user-results', methods=['GET'])
 def error_message():
     return error_codes_to_messages[int(request.args['error_code'])]
 
