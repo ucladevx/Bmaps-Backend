@@ -28,7 +28,7 @@ def get_all_events():
     for event in events_collection.find():
       print ("Event: " + event["name"].encode('ascii', 'ignore'))
       output.append({
-        '_id': event['id'],
+        'id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -50,7 +50,7 @@ def get_event_by_name(event_name):
     event = events_collection.find_one({'name': event_name})
     if event:
       output = {
-        '_id': event['id'],
+        'id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -73,7 +73,7 @@ def get_event_by_id(event_id):
     event = events_collection.find_one({'id': event_id})
     if event:
       output = {
-        '_id': event['id'],
+        'id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -98,7 +98,7 @@ def get_event_by_category(event_category):
     if events_cursor.count() > 0:
         for event in events_cursor:
           output.append({
-            '_id': event['id'],
+            'id': event['id'],
             'event_name': event['name'], 
             'description': event['description'],
             'start_time': event['startTime'],
@@ -123,7 +123,7 @@ def get_event_by_food():
     if events_cursor.count() > 0:
         for event in events_cursor:
           output.append({
-            '_id': event['id'],
+            'id': event['id'],
             'event_name': event['name'], 
             'description': event['description'],
             'start_time': event['startTime'],
