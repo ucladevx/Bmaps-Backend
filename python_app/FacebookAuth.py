@@ -64,7 +64,7 @@ def facebook_authorized(resp):
         user_lastname=me.data['last_name']))
 
 # Only works if already logged in
-@FbAuth.route('/api/user-id')
+@fb_auth.route('/api/user-id', methods=['GET'])
 def facebook_user_id():
     me = facebook.get('/me?fields=id')
     return me.data['id']
