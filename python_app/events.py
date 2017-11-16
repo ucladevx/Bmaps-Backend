@@ -2,12 +2,17 @@
 # TODO: hide app id/secret
 
 from flask import Flask, jsonify, request, json, Blueprint
+from flask_cors import CORS, cross_origin
 import pymongo
 import urllib, json
 import time, datetime
 import subprocess, warnings, ast
 
+
 Events = Blueprint('Events', __name__)
+
+# Enable Cross Origin Resource Sharing (CORS)
+cors = CORS(Events)
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 FACEBOOK_APP_ID = '353855031743097'

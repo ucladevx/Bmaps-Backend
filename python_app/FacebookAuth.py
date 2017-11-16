@@ -2,6 +2,7 @@
 # TODO: logout, email
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
+from flask_cors import CORS, cross_origin
 from flask_oauth import OAuth
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
@@ -14,6 +15,9 @@ fb_auth = Blueprint('fb_auth', __name__)
 fb_auth.debug = DEBUG
 fb_auth.secret_key = SECRET_KEY
 oauth = OAuth()
+
+# Enable Cross Origin Resource Sharing (CORS)
+cors = CORS(fb_auth)
 
 # OAuth for authentication. Also supports Google Authentication.
 facebook = oauth.remote_app('facebook',
