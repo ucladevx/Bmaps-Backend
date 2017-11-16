@@ -3,6 +3,7 @@
 
 from flask import Flask, jsonify, request, json, Blueprint
 import pymongo
+import re
 import urllib, json
 import time, datetime
 import subprocess, warnings, ast
@@ -41,6 +42,19 @@ def get_all_events():
         'ticketing': event['ticketing'] if 'ticketing' in event else "None",
         'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
       })
+    return jsonify(output)
+
+# Returns JSON of matching event names
+@Events.route('/api/search/<search_term>', methods=['GET'])
+def get_events_for_search(search_term):
+    output = []
+    search_regex = re.compile(search_term, re.IGNORECASE)
+    events_cursor = events_collection.find({'name': search_regex})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append(event['name'])
+    else:
+        output = "No event(s) matched '{}'".format(search_term)
     return jsonify(output)
 
 # Returns JSON of singular event by event name
