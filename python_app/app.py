@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.register_blueprint(FbAuth)
 app.register_blueprint(Users)
 app.register_blueprint(Events)
+app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
 
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(app)
