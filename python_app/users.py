@@ -1,9 +1,13 @@
 # Interacting with users collection in mlab
 
 from flask import Flask, redirect, url_for, request, Blueprint
+from flask_cors import CORS, cross_origin
 import pymongo
 
 Users = Blueprint('Users', __name__)
+
+# Enable Cross Origin Resource Sharing (CORS)
+cors = CORS(Users)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'
@@ -23,7 +27,7 @@ error_codes_to_messages = {
 }
 
 # Error messages for adding a new user
-@Users.route('/user-results', methods=['GET'])
+@Users.route('/api/user-results', methods=['GET'])
 def error_message():
     return error_codes_to_messages[int(request.args['error_code'])]
 
@@ -83,6 +87,3 @@ def get_user_name(user_id):
 
     # Get user email
     return users_collection.find_one({'user_id': user_id})['user_name']
-
-if __name__ == '__main__':
-    Users.run()
