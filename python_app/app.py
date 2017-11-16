@@ -2,14 +2,14 @@
 
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
-from FacebookAuth import fb_auth
+from facebookAuth import FbAuth
 from users import Users
 from events import Events
 import pymongo
 
 # Configure app and register blueprints
 app = Flask(__name__)
-app.register_blueprint(fb_auth)
+app.register_blueprint(FbAuth)
 app.register_blueprint(Users)
 app.register_blueprint(Events)
 
@@ -29,5 +29,4 @@ def index():
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
-
     # Flask defaults to port 5000
