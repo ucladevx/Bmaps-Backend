@@ -3,6 +3,7 @@
 
 from flask import Flask, jsonify, request, json, Blueprint
 import pymongo
+import re
 import urllib, json
 import time, datetime
 import subprocess, warnings, ast
@@ -28,7 +29,7 @@ def get_all_events():
     for event in events_collection.find():
       print ("Event: " + event["name"].encode('ascii', 'ignore'))
       output.append({
-        '_id': event['id'],
+        'id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -43,14 +44,27 @@ def get_all_events():
       })
     return jsonify(output)
 
+# Returns JSON of matching event names
+@Events.route('/api/search/<search_term>', methods=['GET'])
+def get_events_for_search(search_term):
+    output = []
+    search_regex = re.compile(search_term, re.IGNORECASE)
+    events_cursor = events_collection.find({'name': search_regex})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append(event['name'])
+    else:
+        output = "No event(s) matched '{}'".format(search_term)
+    return jsonify(output)
+
 # Returns JSON of singular event by event name
 # /<> defaults to strings without any slashes
-@Events.route('/api/event/<event_name>', methods=['GET'])
-def get_one_event(event_name):
+@Events.route('/api/event-name/<event_name>', methods=['GET'])
+def get_event_by_name(event_name):
     event = events_collection.find_one({'name': event_name})
     if event:
       output = {
-        '_id': event['id'],
+        'id': event['id'],
         'event_name': event['name'], 
         'description': event['description'],
         'start_time': event['startTime'],
@@ -65,7 +79,80 @@ def get_one_event(event_name):
       }
     else:
       output = "No event of name '{}'".format(event_name)
-    return jsonify({'map_event': output})
+    return jsonify(output)
+
+# Returns JSON of singular event by event id
+@Events.route('/api/event-id/<event_id>', methods=['GET'])
+def get_event_by_id(event_id):
+    event = events_collection.find_one({'id': event_id})
+    if event:
+      output = {
+        'id': event['id'],
+        'event_name': event['name'], 
+        'description': event['description'],
+        'start_time': event['startTime'],
+        'end_time': event['endTime'],
+        'venue': event['venue'],
+        'stats': event['stats'],
+        'category': event['category'],
+        'cover_picture': event['coverPicture'],
+        'is_cancelled': event['isCancelled'],
+        'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+        'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+      }
+    else:
+      output = "No event of id '{}'".format(event_id)
+    return jsonify(output)
+
+# Returns JSON of events by event category
+@Events.route('/api/event-category/<event_category>', methods=['GET'])
+def get_event_by_category(event_category):
+    output = []
+    events_cursor = events_collection.find({'category': event_category})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append({
+            'id': event['id'],
+            'event_name': event['name'], 
+            'description': event['description'],
+            'start_time': event['startTime'],
+            'end_time': event['endTime'],
+            'venue': event['venue'],
+            'stats': event['stats'],
+            'category': event['category'],
+            'cover_picture': event['coverPicture'],
+            'is_cancelled': event['isCancelled'],
+            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+          })
+    else:
+        output = "No event(s) of category '{}'".format(event_category)
+    return jsonify(output)
+
+# Returns JSON of events with free food
+@Events.route('/api/event-food', methods=['GET'])
+def get_event_by_food():
+    output = []
+    events_cursor = events_collection.find({'category': 'EVENT_FOOD'})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append({
+            'id': event['id'],
+            'event_name': event['name'], 
+            'description': event['description'],
+            'start_time': event['startTime'],
+            'end_time': event['endTime'],
+            'venue': event['venue'],
+            'stats': event['stats'],
+            'category': event['category'],
+            'cover_picture': event['coverPicture'],
+            'is_cancelled': event['isCancelled'],
+            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+          })
+    else:
+        output = "No event(s) with free food"
+    return jsonify(output)
 
 # Get all UCLA-related Facebook events and add to database
 # TODO: Don't add duplicates, error checking
