@@ -87,6 +87,3 @@ def get_user_name(user_id):
 
     # Get user email
     return users_collection.find_one({'user_id': user_id})['user_name']
-
-if __name__ == '__main__':
-    Users.run()
