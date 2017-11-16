@@ -1,9 +1,13 @@
 # Interacting with users collection in mlab
 
 from flask import Flask, redirect, url_for, request, Blueprint
+from flask_cors import CORS, cross_origin
 import pymongo
 
 Users = Blueprint('Users', __name__)
+
+# Enable Cross Origin Resource Sharing (CORS)
+cors = CORS(Users)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'

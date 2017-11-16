@@ -12,11 +12,9 @@ app = Flask(__name__)
 app.register_blueprint(fb_auth)
 app.register_blueprint(Users)
 app.register_blueprint(Events)
-app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
-app.config['CORS_HEADERS'] = 'Content-Type'
 
-# Resolved Cross Origin Resource Sharing for Tanzeela 
-cors = CORS(app, resources={r"/foo": {"origins": "http://localhost:5000"}})
+# Enable Cross Origin Resource Sharing (CORS)
+cors = CORS(app)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data' 
