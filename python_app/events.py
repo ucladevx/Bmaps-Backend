@@ -76,9 +76,10 @@ def get_events_for_search(search_term):
 # /<> defaults to strings without any slashes
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
+    output = []
     event = events_collection.find_one({'name': event_name})
     if event:
-      output = {
+      output.append({
         'id': event['id'],
         'type': 'Feature',
         'geometry': {
@@ -101,7 +102,7 @@ def get_event_by_name(event_name):
             'ticketing': event['ticketing'] if 'ticketing' in event else "None",
             'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
         }
-      }
+      })
     else:
       return "No event of name '{}'".format(event_name)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
@@ -109,9 +110,10 @@ def get_event_by_name(event_name):
 # Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
+    output = []
     event = events_collection.find_one({'id': event_id})
     if event:
-      output = {
+      output.append({
         'id': event['id'],
         'type': 'Feature',
         'geometry': {
@@ -134,7 +136,7 @@ def get_event_by_id(event_id):
             'ticketing': event['ticketing'] if 'ticketing' in event else "None",
             'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
         }
-      }
+      })
     else:
       return "No event of id '{}'".format(event_id)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
