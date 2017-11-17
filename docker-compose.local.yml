@@ -5,13 +5,17 @@ services:
     build: ./python_app
     ports:
       - "5000:5000"
+    volumes:
+      - ./python_app:/app
 
   web_nginx:
     build: ./nginx_app
     ports:
       - "80:80"
+    volumes:
+      - ./nginx_app:/app
 
   fb_events:
     image: tobilg/facebook-event-search
     ports:
-      - "3000:3000"
+       - "3000:3000"
