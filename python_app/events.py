@@ -57,7 +57,7 @@ def get_all_events():
             'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
         }
       })
-    return jsonify({'features': output})
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
@@ -104,7 +104,7 @@ def get_event_by_name(event_name):
       }
     else:
       return "No event of name '{}'".format(event_name)
-    return jsonify({'features': output})
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
@@ -137,7 +137,7 @@ def get_event_by_id(event_id):
       }
     else:
       return "No event of id '{}'".format(event_id)
-    return jsonify({'features': output})
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of events by event category
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
@@ -172,7 +172,7 @@ def get_event_by_category(event_category):
           })
     else:
         return "No event(s) of category '{}'".format(event_category)
-    return jsonify({'features': output})
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of events with free food
 @Events.route('/api/event-food', methods=['GET'])
@@ -207,7 +207,7 @@ def get_event_by_food():
           })
     else:
         return "No event(s) with free food"
-    return jsonify({'features': output})
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Get all UCLA-related Facebook events and add to database
 # TODO: Don't add duplicates, error checking
