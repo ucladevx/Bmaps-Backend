@@ -27,7 +27,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 events_collection = db.map_events
 
-# Returns JSON of all events
+# Returns JSON of all events in format that Mapbox likes
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
     output = []
@@ -35,19 +35,29 @@ def get_all_events():
       print ("Event: " + event["name"].encode('ascii', 'ignore'))
       output.append({
         'id': event['id'],
-        'event_name': event['name'], 
-        'description': event['description'],
-        'start_time': event['startTime'],
-        'end_time': event['endTime'],
-        'venue': event['venue'],
-        'stats': event['stats'],
-        'category': event['category'],
-        'cover_picture': event['coverPicture'],
-        'is_cancelled': event['isCancelled'],
-        'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-        'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        'type': 'Feature',
+        'geometry': {
+            'coordinates': [
+                event['venue']['location']['longitude'],
+                event['venue']['location']['latitude']
+            ],
+            'type': 'Point'
+        },
+        'properties': {
+            'event_name': event['name'], 
+            'description': event['description'],
+            'start_time': event['startTime'],
+            'end_time': event['endTime'],
+            'venue': event['venue'],
+            'stats': event['stats'],
+            'category': event['category'],
+            'cover_picture': event['coverPicture'],
+            'is_cancelled': event['isCancelled'],
+            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        }
       })
-    return jsonify(output)
+    return jsonify({'features': output})
 
 # Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
@@ -70,21 +80,31 @@ def get_event_by_name(event_name):
     if event:
       output = {
         'id': event['id'],
-        'event_name': event['name'], 
-        'description': event['description'],
-        'start_time': event['startTime'],
-        'end_time': event['endTime'],
-        'venue': event['venue'],
-        'stats': event['stats'],
-        'category': event['category'],
-        'cover_picture': event['coverPicture'],
-        'is_cancelled': event['isCancelled'],
-        'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-        'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        'type': 'Feature',
+        'geometry': {
+            'coordinates': [
+                event['venue']['location']['longitude'],
+                event['venue']['location']['latitude']
+            ],
+            'type': 'Point'
+        },
+        'properties': {
+            'event_name': event['name'], 
+            'description': event['description'],
+            'start_time': event['startTime'],
+            'end_time': event['endTime'],
+            'venue': event['venue'],
+            'stats': event['stats'],
+            'category': event['category'],
+            'cover_picture': event['coverPicture'],
+            'is_cancelled': event['isCancelled'],
+            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        }
       }
     else:
-      output = "No event of name '{}'".format(event_name)
-    return jsonify(output)
+      return "No event of name '{}'".format(event_name)
+    return jsonify({'features': output})
 
 # Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
@@ -93,21 +113,31 @@ def get_event_by_id(event_id):
     if event:
       output = {
         'id': event['id'],
-        'event_name': event['name'], 
-        'description': event['description'],
-        'start_time': event['startTime'],
-        'end_time': event['endTime'],
-        'venue': event['venue'],
-        'stats': event['stats'],
-        'category': event['category'],
-        'cover_picture': event['coverPicture'],
-        'is_cancelled': event['isCancelled'],
-        'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-        'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        'type': 'Feature',
+        'geometry': {
+            'coordinates': [
+                event['venue']['location']['longitude'],
+                event['venue']['location']['latitude']
+            ],
+            'type': 'Point'
+        },
+        'properties': {
+            'event_name': event['name'], 
+            'description': event['description'],
+            'start_time': event['startTime'],
+            'end_time': event['endTime'],
+            'venue': event['venue'],
+            'stats': event['stats'],
+            'category': event['category'],
+            'cover_picture': event['coverPicture'],
+            'is_cancelled': event['isCancelled'],
+            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+        }
       }
     else:
-      output = "No event of id '{}'".format(event_id)
-    return jsonify(output)
+      return "No event of id '{}'".format(event_id)
+    return jsonify({'features': output})
 
 # Returns JSON of events by event category
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
@@ -118,21 +148,31 @@ def get_event_by_category(event_category):
         for event in events_cursor:
           output.append({
             'id': event['id'],
-            'event_name': event['name'], 
-            'description': event['description'],
-            'start_time': event['startTime'],
-            'end_time': event['endTime'],
-            'venue': event['venue'],
-            'stats': event['stats'],
-            'category': event['category'],
-            'cover_picture': event['coverPicture'],
-            'is_cancelled': event['isCancelled'],
-            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+            'type': 'Feature',
+            'geometry': {
+                'coordinates': [
+                    event['venue']['location']['longitude'],
+                    event['venue']['location']['latitude']
+                ],
+                'type': 'Point'
+            },
+            'properties': {
+                'event_name': event['name'], 
+                'description': event['description'],
+                'start_time': event['startTime'],
+                'end_time': event['endTime'],
+                'venue': event['venue'],
+                'stats': event['stats'],
+                'category': event['category'],
+                'cover_picture': event['coverPicture'],
+                'is_cancelled': event['isCancelled'],
+                'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+                'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+            }
           })
     else:
-        output = "No event(s) of category '{}'".format(event_category)
-    return jsonify(output)
+        return "No event(s) of category '{}'".format(event_category)
+    return jsonify({'features': output})
 
 # Returns JSON of events with free food
 @Events.route('/api/event-food', methods=['GET'])
@@ -143,21 +183,31 @@ def get_event_by_food():
         for event in events_cursor:
           output.append({
             'id': event['id'],
-            'event_name': event['name'], 
-            'description': event['description'],
-            'start_time': event['startTime'],
-            'end_time': event['endTime'],
-            'venue': event['venue'],
-            'stats': event['stats'],
-            'category': event['category'],
-            'cover_picture': event['coverPicture'],
-            'is_cancelled': event['isCancelled'],
-            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+            'type': 'Feature',
+            'geometry': {
+                'coordinates': [
+                    event['venue']['location']['longitude'],
+                    event['venue']['location']['latitude']
+                ],
+                'type': 'Point'
+            },
+            'properties': {
+                'event_name': event['name'], 
+                'description': event['description'],
+                'start_time': event['startTime'],
+                'end_time': event['endTime'],
+                'venue': event['venue'],
+                'stats': event['stats'],
+                'category': event['category'],
+                'cover_picture': event['coverPicture'],
+                'is_cancelled': event['isCancelled'],
+                'ticketing': event['ticketing'] if 'ticketing' in event else "None",
+                'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
+            }
           })
     else:
-        output = "No event(s) with free food"
-    return jsonify(output)
+        return "No event(s) with free food"
+    return jsonify({'features': output})
 
 # Get all UCLA-related Facebook events and add to database
 # TODO: Don't add duplicates, error checking
