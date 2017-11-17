@@ -23,8 +23,10 @@ Clone this repository with `git clone https://github.com/ucladevx/Mappening-Back
   * Access flask api by forwarding requests through nginx
     * Use `/api/v1/insert_api_route_here`
     * e.g. `localhost/api/v1/events`
+    * nginx forwards to AWS to serve api requests. Be aware of this if trying to test changes locally.
   * Can also access flask server directly at port 5000
     * e.g. `localhost:5000/api/events`
+    * Better for testing local changes
 * Stop running with `CTRL+C` or with `make stop`
 * Reset containers/images with `make reset`
 
