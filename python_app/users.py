@@ -2,6 +2,7 @@
 
 from flask import Flask, redirect, url_for, request, Blueprint
 from flask_cors import CORS, cross_origin
+from datetime import datetime
 import pymongo
 
 Users = Blueprint('Users', __name__)
@@ -45,7 +46,8 @@ def add_user():
     users_collection.insert_one({"user_id": user_id, 
         "user_name": request.args['user_name'], 
         "user_firstname": request.args['user_firstname'], 
-        "user_lastname": request.args['user_lastname']})
+        "user_lastname": request.args['user_lastname'],
+        "joined_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
 
     # Check that user was successfully added to collection
     if users_collection.find({'user_id': user_id}).count() > 0:
@@ -87,3 +89,13 @@ def get_user_name(user_id):
 
     # Get user email
     return users_collection.find_one({'user_id': user_id})['user_name']
+
+# Get a when user joined from user_id 
+@Users.route('/api/user-joined/<user_id>', methods=['GET'])
+def get_when_user_joined(user_id):
+    # Check that user exists
+    if users_collection.find_one({'user_id': user_id}) == None:
+      return redirect(url_for('Users.error_message', error_code=4))
+
+    # Get user email
+    return users_collection.find_one({'user_id': user_id})['joined_time']
