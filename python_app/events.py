@@ -5,10 +5,9 @@ from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import pymongo
 import re
-import urllib, json
+import requests, urllib
 import time, datetime
-import subprocess, warnings, ast
-
+import event_caller
 
 Events = Blueprint('Events', __name__)
 
@@ -215,10 +214,18 @@ def get_event_by_food():
 # TODO: Don't add duplicates, error checking
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
+    
+    current_events = event_caller.get_facebook_events()
+    print('New event call: {}'.format(current_events))
     # Location of Bruin Bear
     current_events = get_facebook_events(34.070964, -118.444757)
-    events_collection.insert_many(current_events)
-    return "Populated events database!"
+    # metadata block has total event count
+    if 'metadata' in current_events:
+        if current_events['metadata']['events'] > 0:
+            events_collection.insert_many(current_events)
+        else:
+            return 'No new events to save!'
+    return 'Populated events database!'
 
 # Can also access fb events this way
 # http://localhost:3000/events?
@@ -229,15 +236,18 @@ def populate_ucla_events_database():
 # &accessToken=353855031743097|2831879e276d90955f3aafe0627d3673
 
 # Gets Facebook App access token using App ID and Secret
-# https://stackoverflow.com/questions/3058723/programmatically-getting-an-access-token-for-using-the-facebook-graph-api
 def get_facebook_events(latitude, longitude):
     token_args = {'client_id': FACEBOOK_APP_ID, 'client_secret': FACEBOOK_APP_SECRET, 'grant_type': 'client_credentials'}
-    resp = requests.post('https://graph.facebook.com/oauth/access_token', token_args)
+    resp = requests.get('https://graph.facebook.com/oauth/access_token', token_args)
     if resp.status_code != 200:
         print('Error in getting access code! Status code {}'.format(resp.status_code))
         return []
     app_access_token = resp.json()['access_token']
+    print('APP ACCESS TOKEN {}'.format(app_access_token))
 
+    """
+    OLD CODE
+    """
     # URL call to endpoint set up by server from 
     # https://github.com/tobilg/facebook-events-by-location
     baseurl = 'http://fb_events:3000/events?'
@@ -269,6 +279,6 @@ def get_facebook_events(latitude, longitude):
     response = urllib.urlopen(fb_url)
     print(type(response))
     data = json.loads(response.read())
-    print(type(data))
+    print(data)
 
     return data['events']
