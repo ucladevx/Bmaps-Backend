@@ -1,20 +1,40 @@
 import requests
 import json
-from pprint import pprint
+import datetime
 
+# specify version in case most updated version (default if not specified) removes functionality, causing errors
+API_VERSION_STR = 'v2.10/'
+BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 FACEBOOK_APP_ID = '789442111228959'
 FACEBOOK_APP_SECRET = '6ec0e473acf4d91b4ea3346b75e05268'
-ACCESS_TOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
+ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
-SEARCH_URL = 'https://graph.facebook.com/search'
-# coordinates of Bruin Bear
+SEARCH_URL = BASE_URL + 'search'
+# updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
 SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
+# get events by adding page ID and events field
+BASE_EVENT_URL = BASE_URL
+# id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
+EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_end', 'end_time',
+                'attending_count', 'maybe_count', 'picture.type(normal)']
+
 s = requests.Session()
+
+def format_time(time):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time)
+
+def get_event_time_bounds():
+    back_jump = 6       # arbitrarily allow events that started up to 6 hours ago
+    forward_jump = 24   # and 24 hours into the future
+    now = datetime.datetime.now()
+    before_time = now - datetime.timedelta(hours=back_jump)
+    after_time = now + datetime.timedelta(hours=forward_jump)
+    return (format_time(before_time), format_time(after_time))
 
 def get_app_token():
     token_args = {
@@ -114,11 +134,35 @@ def find_ucla_entities(app_access_token):
     return ucla_entities
 
 def get_events_from_pages(pages_by_id, app_access_token):
-    return []
+    # array of JSON format dicts, 1 for each event
+    total_events = []
+    for i, page_id in enumerate(pages_by_id):
+        # don't call events too many times, even batched ID requests all count individually
+        if i >= 100:
+            break
+
+        time_window = get_event_time_bounds()
+        # find events in certain time range, get place + attendance info + time + other info
+        # use FB API's nested queries, get subfields of events by braces and comma-separated keys
+        # when using format on string, put {{}} for literal curly braces, then inside put variable argument,
+        # OR here: use nested keys as 'function calls', like fields()
+        event_args = {
+            'fields': 'events.fields({0}).since({1}).until({2})'
+                .format(','.join(EVENT_FIELDS), time_window[0], time_window[1]),
+            'access_token': app_access_token
+        }
+        # could specify list of ids to call at once, but limited to 50 at a time, and counts as 50 calls
+        resp = s.get(BASE_EVENT_URL + page_id, params=event_args)
+        if resp.status_code != 200:
+            print(
+                'Error getting events from FB page {0}! Status code {1}'
+                .format(pages_by_id[page_id], resp.status_code)
+            )
+            break
+    return total_events
 
 def get_facebook_events():
-    APP_ACCESS_TOKEN = get_app_token()
-    # print(APP_ACCESS_TOKEN)
+    app_access_token = get_app_token()
     
     # search for UCLA-associated places and groups
     # limit to as high as possible, go until no pages left
@@ -126,12 +170,12 @@ def get_facebook_events():
     # type = pages: search with reserved terms, limit = 1000, check location as well
     # 2 types of places: ones with events, ones without, cannot do anything about without events
     # pre-filtering: only store places / pages with UCLA zip code, or LA CA, or no place at all (filter events later)
-    pages_by_id = find_ucla_entities(APP_ACCESS_TOKEN)
-    with open('pages.json', 'w') as file:
-        json.dump(pages_by_id, file, sort_keys=True, indent=4, separators=(',', ': '))
-    # pprint(pages_by_id)
+    pages_by_id = find_ucla_entities(app_access_token)
+
+    all_events = get_events_from_pages(pages_by_id, app_access_token)
     return {'End message': 'Success!'}
     
 
 if __name__ == '__main__':
     get_facebook_events()
+
