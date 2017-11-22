@@ -26,7 +26,9 @@ error_codes_to_messages = {
     4: 'USER_DOES_NOT_EXIST',
     5: 'REMOVING_USER_FAILED',
     6: 'USER_PREFERENCE_ALREADY_EXISTS',
-    7: 'ADDING_USER_PREFERENCE_FAILED'
+    7: 'ADDING_USER_PREFERENCE_FAILED',
+    8: 'USER_PREFERENCE_DOES_NOT_EXIST',
+    9: 'REMOVING_USER_PREFERENCE_FAILED'
 }
 
 # Error messages for adding a new user
@@ -58,9 +60,25 @@ def add_user():
     else:
       return redirect(url_for('Users.error_message', error_code=3))
 
-# Add user preferences
-@Users.route('/api/add-user-preferences')
-def add_user_preferences():
+# Remove a user by user_id from users collection
+@Users.route('/api/remove-user/<user_id>')
+def remove_user(user_id):
+    # Check that user exists to remove
+    if users_collection.find_one({'user_id': user_id}) == None:
+      return redirect(url_for('Users.error_message', error_code=4))
+
+    # Delete user
+    users_collection.find_one_and_delete({'user_id': user_id})
+
+    # Check that user was successfully deleted from collection
+    if users_collection.find_one({'user_id': user_id}) == None:
+      return redirect(url_for('Users.error_message', error_code=0))
+    else:
+      return redirect(url_for('Users.error_message', error_code=5))
+
+# Add user preference
+@Users.route('/api/add-user-preference')
+def add_user_preference():
     pref = request.args['preference']
     u_id = request.args['user_id']
 
@@ -85,21 +103,30 @@ def add_user_preferences():
     else:
       return redirect(url_for('Users.error_message', error_code=7))
 
-# Remove a user by user_id from users collection
-@Users.route('/api/remove-user/<user_id>')
-def remove_user(user_id):
-    # Check that user exists to remove
-    if users_collection.find_one({'user_id': user_id}) == None:
+# Remove user preference
+@Users.route('/api/remove-user-preference')
+def remove_user_preference():
+    pref = request.args['preference']
+    u_id = request.args['user_id']
+
+    user = users_collection.find_one({'user_id': u_id})
+
+    # Check that user exists
+    if user == None:
       return redirect(url_for('Users.error_message', error_code=4))
 
-    # Delete user
-    users_collection.find_one_and_delete({'user_id': user_id})
-
-    # Check that user was successfully deleted from collection
-    if users_collection.find_one({'user_id': user_id}) == None:
-      return redirect(url_for('Users.error_message', error_code=0))
+    # If preference exists in user preferences list, remove it
+    if pref in user['preferences']:
+      users_collection.update({'user_id': u_id}, 
+        {'$pull': {'preferences': pref}})
     else:
-      return redirect(url_for('Users.error_message', error_code=5))
+      return redirect(url_for('Users.error_message', error_code=8))      
+
+    # Check that preference was successfully removed from user preferences
+    if pref in user['preferences']:
+      return redirect(url_for('Users.error_message', error_code=9))
+    else:
+      return redirect(url_for('Users.error_message', error_code=0))
 
 # Check that a user exists
 @Users.route('/api/user-exists/<user_id>')
