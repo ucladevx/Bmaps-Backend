@@ -98,6 +98,7 @@ def add_user_preference():
         {'$push': {'preferences': pref}})
 
     # Check that preference was successfully added to user
+    user = users_collection.find_one({'user_id': u_id})
     if pref in user['preferences']:
       return redirect(url_for('Users.error_message', error_code=0))
     else:
@@ -123,6 +124,7 @@ def remove_user_preference():
       return redirect(url_for('Users.error_message', error_code=8))      
 
     # Check that preference was successfully removed from user preferences
+    user = users_collection.find_one({'user_id': u_id})
     if pref in user['preferences']:
       return redirect(url_for('Users.error_message', error_code=9))
     else:
