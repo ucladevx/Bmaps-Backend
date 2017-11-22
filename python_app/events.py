@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 import pymongo
 import re
 import requests, urllib
-import time, datetime
+import datetime
 import event_caller
 
 Events = Blueprint('Events', __name__)
