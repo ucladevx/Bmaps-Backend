@@ -24,7 +24,8 @@ error_codes_to_messages = {
     2: 'USER_ALREADY_EXISTS',
     3: 'ADDING_USER_FAILED',
     4: 'USER_DOES_NOT_EXIST',
-    5: 'REMOVING_USER_FAILED'
+    5: 'REMOVING_USER_FAILED',
+    6: 'ADDING_USER_PREFERENCE_FAILED'
 }
 
 # Error messages for adding a new user
@@ -55,6 +56,28 @@ def add_user():
       return redirect(url_for('Users.error_message', error_code=0))
     else:
       return redirect(url_for('Users.error_message', error_code=3))
+
+# Add user preferences
+@Users.route('/api/add-user-preferences')
+def add_user_preferences():
+    pref = request.args['preference']
+    u_id = request.args['user_id']
+
+    # Check that user exists
+    if users_collection.find_one({'user_id': u_id}) == None:
+      return redirect(url_for('Users.error_message', error_code=4))
+
+    # Update user to add preference
+    # If preferences list does not already exist, adds field
+    users_collection.update({'user_id': u_id}, 
+      {'$push': {'preferences': pref}})
+
+    # Check that preference was successfully added to user
+    user = users_collection.find_one({'user_id': u_id})
+    if pref in user['preferences']:
+      return redirect(url_for('Users.error_message', error_code=0))
+    else:
+      return redirect(url_for('Users.error_message', error_code=6))
 
 # Remove a user by user_id from users collection
 @Users.route('/api/remove-user/<user_id>')
