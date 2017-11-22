@@ -1,6 +1,6 @@
 # Interacting with users collection in mlab
 
-from flask import Flask, redirect, url_for, request, Blueprint
+from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_cors import CORS, cross_origin
 from datetime import datetime
 import pymongo
@@ -28,7 +28,8 @@ error_codes_to_messages = {
     6: 'USER_PREFERENCE_ALREADY_EXISTS',
     7: 'ADDING_USER_PREFERENCE_FAILED',
     8: 'USER_PREFERENCE_DOES_NOT_EXIST',
-    9: 'REMOVING_USER_PREFERENCE_FAILED'
+    9: 'REMOVING_USER_PREFERENCE_FAILED',
+    10: 'NO_USER_PREFERENCES'
 }
 
 # Error messages for adding a new user
@@ -129,6 +130,22 @@ def remove_user_preference():
       return redirect(url_for('Users.error_message', error_code=9))
     else:
       return redirect(url_for('Users.error_message', error_code=0))
+
+# Get a user preferences from user_id 
+@Users.route('/api/user-preferences/<user_id>', methods=['GET'])
+def get_user_preferences(user_id):
+    # Check that user exists
+    if users_collection.find_one({'user_id': user_id}) == None:
+      return redirect(url_for('Users.error_message', error_code=4))
+
+    # Get user preferences
+    preferences = users_collection.find_one({'user_id': user_id})['preferences']
+
+    # Check if preferences is empty
+    if not preferences:
+        return redirect(url_for('Users.error_message', error_code=10))
+        
+    return jsonify(preferences)
 
 # Check that a user exists
 @Users.route('/api/user-exists/<user_id>')
