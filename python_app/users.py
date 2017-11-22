@@ -29,7 +29,8 @@ error_codes_to_messages = {
     7: 'ADDING_USER_PREFERENCE_FAILED',
     8: 'USER_PREFERENCE_DOES_NOT_EXIST',
     9: 'REMOVING_USER_PREFERENCE_FAILED',
-    10: 'NO_USER_PREFERENCES'
+    10: 'NO_USER_PREFERENCES',
+    11: 'USER_PREFERENCE_EXISTS'
 }
 
 # Error messages for adding a new user
@@ -144,8 +145,26 @@ def get_user_preferences(user_id):
     # Check if preferences is empty
     if not preferences:
         return redirect(url_for('Users.error_message', error_code=10))
-        
+
     return jsonify(preferences)
+
+# Check whether a user preference exists for a certain user_id
+@Users.route('/api/user-preference-exists', methods=['GET'])
+def user_preference_exists():
+    pref = request.args['preference']
+    u_id = request.args['user_id']
+
+    user = users_collection.find_one({'user_id': u_id})
+
+    # Check that user exists
+    if user == None:
+      return redirect(url_for('Users.error_message', error_code=4))
+
+    # Check if preference exists in user preferences list
+    if pref in user['preferences']:
+      return redirect(url_for('Users.error_message', error_code=11))
+    else:
+      return redirect(url_for('Users.error_message', error_code=8))
 
 # Check that a user exists
 @Users.route('/api/user-exists/<user_id>')
