@@ -166,6 +166,17 @@ def user_preference_exists():
     else:
       return redirect(url_for('Users.error_message', error_code=8))
 
+# Get all users with that preference
+@Users.route('/api/users-with-preference/<pref>', methods=['GET'])
+def get_users_with_preference(pref):
+    output = []
+    for doc in users_collection.find():
+      if pref in doc['preferences']:
+        output.append({'user_id': doc['user_id'],
+                       'user_name': doc['user_name']})
+
+    return jsonify(output)
+
 # Check that a user exists
 @Users.route('/api/user-exists/<user_id>')
 def user_exists(user_id):
@@ -185,7 +196,7 @@ def get_user_name(user_id):
     # Get user email
     return users_collection.find_one({'user_id': user_id})['user_name']
 
-# Get a when user joined from user_id 
+# Get when user joined from user_id 
 @Users.route('/api/user-joined/<user_id>', methods=['GET'])
 def get_when_user_joined(user_id):
     # Check that user exists
