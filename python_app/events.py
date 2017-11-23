@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 import pymongo
 import re
 import requests, urllib
-import datetime
+import time, datetime
 import event_caller
 
 Events = Blueprint('Events', __name__)
@@ -18,8 +18,10 @@ cors = CORS(Events)
 FACEBOOK_APP_ID = '353855031743097'
 FACEBOOK_APP_SECRET = '2831879e276d90955f3aafe0627d3673'
 
+MLAB_USERNAME = 'devx_dora'
+MLAB_PASSWORD = '3map5me'
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'
+uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
@@ -214,19 +216,28 @@ def get_event_by_food():
 # TODO: Don't add duplicates, error checking
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
-    
-    current_events = event_caller.get_facebook_events()
-    print('New event call: {}'.format(current_events))
     # Location of Bruin Bear
-    current_events = get_facebook_events(34.070964, -118.444757)
+    # current_events = get_facebook_events(34.070964, -118.444757)
+
+    # DUMB WAY to refresh database: delete all data, then insert all new
+    # GOAL: update data already there, insert new, delete leftover data (not in new events)
+    delete_result = events_collection.delete_many({})
+
+    current_events = event_caller.get_facebook_events()
+    # debugging events output
+    # with open('new_out.json', 'w') as outfile:
+    #     json.dump(current_events, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+
     # metadata block has total event count
-    if 'metadata' in current_events:
-        if current_events['metadata']['events'] > 0:
-            events_collection.insert_many(current_events)
-        else:
-            return 'No new events to save!'
+    # insert_many takes in array of dictionaries
+    if current_events['metadata']['events'] > 0:
+        events_collection.insert_many(current_events['events'])
+    else:
+        return 'No new events to save!'
     return 'Populated events database!'
 
+"""
+# DEPRECATED
 # Can also access fb events this way
 # http://localhost:3000/events?
 # lat=40.710803
@@ -245,9 +256,6 @@ def get_facebook_events(latitude, longitude):
     app_access_token = resp.json()['access_token']
     print('APP ACCESS TOKEN {}'.format(app_access_token))
 
-    """
-    OLD CODE
-    """
     # URL call to endpoint set up by server from 
     # https://github.com/tobilg/facebook-events-by-location
     baseurl = 'http://fb_events:3000/events?'
@@ -282,3 +290,4 @@ def get_facebook_events(latitude, longitude):
     print(data)
 
     return data['events']
+"""
