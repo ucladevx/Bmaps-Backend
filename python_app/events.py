@@ -68,7 +68,7 @@ def get_events_for_search(search_term):
     events_cursor = events_collection.find({'name': search_regex})
     if events_cursor.count() > 0:
         for event in events_cursor:
-          output.append(event['name'])
+          output.append({'event_name': event['name']})
     else:
         output = "No event(s) matched '{}'".format(search_term)
     return jsonify(output)
