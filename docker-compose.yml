@@ -2,6 +2,8 @@ version: '2'
 services:
 
   web_python:
+    environment:
+      - PYTHONUNBUFFERED=0
     build: ./python_app
     ports:
       - "5000:5000"
