@@ -88,6 +88,7 @@ def get_events_for_search(search_term):
           output.append({'event_name': event['name']})
     else:
         output = "No event(s) matched '{}'".format(search_term)
+    print(type(output), type(output[0]))
     return jsonify(output)
 
 # Returns JSON of singular event by event name
@@ -286,7 +287,7 @@ def process_event_info(event):
             # no coordinates? default to Bruin Bear
             'coordinates': [
                 event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
-                event['place']['location'].get('longitude', event_caller.CENTER_LATITUDE)
+                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
             ],
             'type': 'Point'
         },
