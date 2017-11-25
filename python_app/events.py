@@ -32,6 +32,7 @@ events_collection = db.map_events
 CHANGES
 when search for category, just put actual name ('EVENT' not needed)
 everything calls find_events_in_database, giving search terms and options if needed
+HEADS UP: make sure special Unicode characters handled!
 
 in processing data from database (process_event_info):
 'venue' is now 'place' and has less info: name, id, and location
@@ -44,7 +45,7 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 # Returns JSON of all events in format that Mapbox likes
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
-    return find_events_in_database()
+    return find_events_in_database(print_results=True)
     """
     output = []
     for event in events_collection.find():
@@ -80,7 +81,7 @@ def get_all_events():
 @Events.route('/api/search/<search_term>', methods=['GET'])
 def get_events_for_search(search_term):
     output = []
-    search_regex = re.compile(search_term, re.IGNORECASE)
+    search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
     events_cursor = events_collection.find({'name': search_regex})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -253,20 +254,25 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
         search_pair[find_key] = find_value
 
     if one_result_expected:
-        single_event = events_collection.find_one({find_key: find_value})
+        single_event = events_collection.find_one(search_pair)
         if single_event:
-            output.append(single_event)
+            output.append(process_event_info(single_event))
             if print_results:
-                print('Event: {0}'.format(single_event.get('name', 'No Name')))
+                print(u'Event: {0}'.format(single_event.get('name', '<No Name>')))
         else:
             return 'Cannot find single event with attribute {0}: value {1}'.format(find_key, find_value)
     else:
-        events_cursor = events_collection.find({find_key: find_value})
+        events_cursor = events_collection.find(search_pair)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                output.append(event)
+                output.append(process_event_info(event))
                 if print_results:
-                    print('Event: {0}'.format(event.get('name', 'No Name')))
+                    # Python 2 sucks
+                    # event['name'] returns unicode string
+                    # to use with format(), another unicode string must be parent
+                    # unicode strings have 'u' in the front, as below
+                    # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
+                    print(u'Event: {0}'.format(event.get('name', '<No Name>')))
         else:
             return 'Cannot find multiple events with attribute {0}: value {1}'.format(find_key, find_value)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
@@ -326,10 +332,7 @@ def populate_ucla_events_database():
     # insert_many takes in array of dictionaries
     # process and format events before inserting database
     if raw_events_data['metadata']['events'] > 0:
-        formatted_events = []
-        for event_obj in raw_events_data['events']:
-            formatted_events.append(process_event_info(event_obj))
-        events_collection.insert_many(formatted_events)
+        events_collection.insert_many(raw_events_data['events'])
     else:
         return 'No new events to save!'
     return 'Populated events database!'
