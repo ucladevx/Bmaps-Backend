@@ -88,7 +88,6 @@ def get_events_for_search(search_term):
           output.append({'event_name': event['name']})
     else:
         output = "No event(s) matched '{}'".format(search_term)
-    print(type(output), type(output[0]))
     return jsonify(output)
 
 # Returns JSON of singular event by event name
