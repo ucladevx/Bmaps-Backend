@@ -46,36 +46,6 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
     return find_events_in_database(print_results=True)
-    """
-    output = []
-    for event in events_collection.find():
-      print ("Event: " + event["name"].encode('ascii', 'ignore'))
-      output.append({
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            'coordinates': [
-                event['place']['location']['longitude'],
-                event['place']['location']['latitude']
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event['name'], 
-            'description': event['description'],
-            'start_time': event['startTime'],
-            'end_time': event['endTime'],
-            'venue': event['place'],
-            'stats': event['stats'],
-            'category': event['category'],
-            'cover_picture': event['coverPicture'],
-            'is_cancelled': event['isCancelled'],
-            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
-        }
-      })
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
-    """
 
 # Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
@@ -95,75 +65,11 @@ def get_events_for_search(search_term):
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
     return find_events_in_database('name', event_name, True)
-    """
-    output = []
-    event = events_collection.find_one({'name': event_name})
-    if event:
-      output.append({
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            'coordinates': [
-                event['place']['location']['longitude'],
-                event['place']['location']['latitude']
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event['name'], 
-            'description': event['description'],
-            'start_time': event['startTime'],
-            'end_time': event['endTime'],
-            'venue': event['place'],
-            'stats': event['stats'],
-            'category': event['category'],
-            'cover_picture': event['coverPicture'],
-            'is_cancelled': event['isCancelled'],
-            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
-        }
-      })
-    else:
-      return "No event of name '{}'".format(event_name)
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
-    """
 
 # Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
     return find_events_in_database('id', event_id, True)
-    """
-    output = []
-    event = events_collection.find_one({'id': event_id})
-    if event:
-      output.append({
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            'coordinates': [
-                event['place']['location']['longitude'],
-                event['place']['location']['latitude']
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event['name'], 
-            'description': event['description'],
-            'start_time': event['startTime'],
-            'end_time': event['endTime'],
-            'venue': event['place'],
-            'stats': event['stats'],
-            'category': event['category'],
-            'cover_picture': event['coverPicture'],
-            'is_cancelled': event['isCancelled'],
-            'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-            'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
-        }
-      })
-    else:
-      return "No event of id '{}'".format(event_id)
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
-    """
 
 # Returns JSON of events by event category
 # Event category examples: food, THEATER
@@ -173,77 +79,11 @@ def get_event_by_category(event_category):
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
     return find_events_in_database('category', cat_regex_obj)
-    """
-    output = []
-    events_cursor = events_collection.find({'category': event_category})
-    if events_cursor.count() > 0:
-        for event in events_cursor:
-          output.append({
-            'id': event['id'],
-            'type': 'Feature',
-            'geometry': {
-                'coordinates': [
-                    event['place']['location']['longitude'],
-                    event['place']['location']['latitude']
-                ],
-                'type': 'Point'
-            },
-            'properties': {
-                'event_name': event['name'], 
-                'description': event['description'],
-                'start_time': event['startTime'],
-                'end_time': event['endTime'],
-                'venue': event['place'],
-                'stats': event['stats'],
-                'category': event['category'],
-                'cover_picture': event['coverPicture'],
-                'is_cancelled': event['isCancelled'],
-                'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-                'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
-            }
-          })
-    else:
-        return "No event(s) of category '{}'".format(event_category)
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
-    """
 
 # Returns JSON of events with free food
 @Events.route('/api/event-food', methods=['GET'])
 def get_event_by_food():
     return get_event_by_category('food')
-    """
-    output = []
-    events_cursor = events_collection.find({'category': 'EVENT_FOOD'})
-    if events_cursor.count() > 0:
-        for event in events_cursor:
-          output.append({
-            'id': event['id'],
-            'type': 'Feature',
-            'geometry': {
-                'coordinates': [
-                    event['venue']['location']['longitude'],
-                    event['venue']['location']['latitude']
-                ],
-                'type': 'Point'
-            },
-            'properties': {
-                'event_name': event['name'], 
-                'description': event['description'],
-                'start_time': event['startTime'],
-                'end_time': event['endTime'],
-                'venue': event['venue'],
-                'stats': event['stats'],
-                'category': event['category'],
-                'cover_picture': event['coverPicture'],
-                'is_cancelled': event['isCancelled'],
-                'ticketing': event['ticketing'] if 'ticketing' in event else "None",
-                'free_food': 'YES' if event['category'] == 'EVENT_FOOD' else 'No'
-            }
-          })
-    else:
-        return "No event(s) with free food"
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
-    """
 
 # find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
@@ -336,59 +176,3 @@ def populate_ucla_events_database():
     else:
         return 'No new events to save!'
     return 'Populated events database!'
-
-"""
-# DEPRECATED
-# Can also access fb events this way
-# http://localhost:3000/events?
-# lat=40.710803
-# &lng=-73.964040
-# &distance=100
-# &sort=venue
-# &accessToken=353855031743097|2831879e276d90955f3aafe0627d3673
-
-# Gets Facebook App access token using App ID and Secret
-def get_facebook_events(latitude, longitude):
-    token_args = {'client_id': FACEBOOK_APP_ID, 'client_secret': FACEBOOK_APP_SECRET, 'grant_type': 'client_credentials'}
-    resp = requests.get('https://graph.facebook.com/oauth/access_token', token_args)
-    if resp.status_code != 200:
-        print('Error in getting access code! Status code {}'.format(resp.status_code))
-        return []
-    app_access_token = resp.json()['access_token']
-    print('APP ACCESS TOKEN {}'.format(app_access_token))
-
-    # URL call to endpoint set up by server from 
-    # https://github.com/tobilg/facebook-events-by-location
-    baseurl = 'http://fb_events:3000/events?'
-
-    # Location
-    fb_latitude = latitude
-    fb_longitude = longitude
-
-    # Going back and forward in days using seconds
-    seconds_in_day = 86400
-    now_time = time.mktime(datetime.datetime.now().timetuple())
-    start_t = now_time
-    end_t = now_time + seconds_in_day
-
-    # Sort by some number, options: time, distance, venue, popularity
-    sort_type = 'time'
-
-    event_args = dict(  accessToken = app_access_token,
-                        lat         = latitude,
-                        lng         = longitude,
-                        since       = start_t,
-                        until       = end_t,
-                        sort        = sort_type,
-                        distance    = 1 )
-
-    fb_url = baseurl + urllib.urlencode(event_args)
-    print(fb_url)
-
-    response = urllib.urlopen(fb_url)
-    print(type(response))
-    data = json.loads(response.read())
-    print(data)
-
-    return data['events']
-"""
