@@ -3,6 +3,9 @@ FROM alpine:3.6
 ENV ALPINE_VERSION=3.6 \
     PACKAGES="bash ca-certificates python2 py-setuptools curl"
 
+# Set the PYTHON STUPID UNICODE EOFUBDHSKJOIWEJNOIEFNODKL
+ENV PYTHONIOENCODING UTF-8
+
 # replacing default repositories with edge ones
 RUN echo \
   && echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" > /etc/apk/repositories \

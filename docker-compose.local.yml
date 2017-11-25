@@ -2,6 +2,8 @@ version: '2'
 services:
 
   web_python:
+    environment:
+      - PYTHONUNBUFFERED=0
     build: ./python_app
     ports:
       - "5000:5000"
@@ -15,7 +17,7 @@ services:
     volumes:
       - ./nginx_app:/app
 
-  fb_events:
-    image: tobilg/facebook-event-search
-    ports:
-       - "3000:3000"
+  #fb_events:
+    #image: tobilg/facebook-event-search
+    #ports:
+       #- "3000:3000"
