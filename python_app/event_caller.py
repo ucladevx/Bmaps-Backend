@@ -137,8 +137,8 @@ def find_ucla_entities(app_access_token):
     return ucla_entities
 
 def get_events_from_pages(pages_by_id, app_access_token):
-    # array of JSON format dicts, 1 for each event
-    total_events = []
+    # dict of event ids mapped to their info, for fast duplicate checking
+    total_events = {}
     # time_window is tuple of start and end time, right now end not used (all the way to future)
     time_window = get_event_time_bounds()
     # find events in certain time range, get place + attendance info + time + other info
@@ -201,7 +201,8 @@ def get_events_from_pages(pages_by_id, app_access_token):
             if 'place' not in event or 'location' not in event['place']:
                 continue
             if entity_in_right_location(event['place']['location']):
-                total_events.append(event)
+                if event['id'] not in total_events:
+                    total_events[event['id']] = event
     return total_events
 
 def get_facebook_events():
@@ -215,7 +216,8 @@ def get_facebook_events():
     # pre-filtering: only store places / pages with UCLA zip code, or LA CA, or no place at all (filter events later)
     pages_by_id = find_ucla_entities(app_access_token)
 
-    all_events = get_events_from_pages(pages_by_id, app_access_token)
+    # turn event ID dict to array of their values
+    all_events = get_events_from_pages(pages_by_id, app_access_token).values()
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     return total_event_object
