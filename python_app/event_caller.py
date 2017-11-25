@@ -22,8 +22,8 @@ UCLA_ZIP_STRINGS = ['90024', '90095']
 BASE_EVENT_URL = BASE_URL
 # id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time',
-                'attending_count', 'maybe_count', 'interested_count', 'is_canceled',
-                'ticket_uri', 'cover', 'picture.type(normal)']
+                'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
+                'ticket_uri', 'cover']
 
 s = requests.Session()
 

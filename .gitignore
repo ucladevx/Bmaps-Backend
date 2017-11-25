@@ -1,5 +1,7 @@
 # Mappening
 id_rsa_mappening.pem
+# Debug Output
+*.json
 
 # Mac Stuff
 .DS_Store
