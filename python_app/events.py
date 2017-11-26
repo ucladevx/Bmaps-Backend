@@ -55,7 +55,15 @@ def get_events_for_search(search_term):
     events_cursor = events_collection.find({'name': search_regex})
     if events_cursor.count() > 0:
         for event in events_cursor:
-          output.append({'event_name': event['name']})
+          output.append({
+            'id': event['id'],
+            'properties': {
+                'event_name': event.get('name', '<No Name>'), 
+                'start_time': event.get('start_time', '<Unknown Start Time>'),
+                'venue': event['place'],
+                'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
+                'category': event.get('category', '<No Category Chosen>'),
+            }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
     return jsonify(output)
