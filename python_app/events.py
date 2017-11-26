@@ -61,6 +61,7 @@ def get_events_for_search(search_term):
                 'event_name': event.get('name', '<No Name>'), 
                 'start_time': event.get('start_time', '<Unknown Start Time>'),
                 'venue': event['place'],
+                'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
                 'category': event.get('category', '<No Category Chosen>'),
             }})
     else:
