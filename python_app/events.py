@@ -56,11 +56,13 @@ def get_events_for_search(search_term):
     if events_cursor.count() > 0:
         for event in events_cursor:
           output.append({
-            'event_name': event.get('name', '<No Name>'), 
-            'start_time': event.get('start_time', '<Unknown Start Time>'),
-            'location': event['place']['location'],  
-            'category': event.get('category', '<No Category Chosen>'),
-            })
+            'id': event['id'],
+            'properties': {
+                'event_name': event.get('name', '<No Name>'), 
+                'start_time': event.get('start_time', '<Unknown Start Time>'),
+                'venue': event['place'],
+                'category': event.get('category', '<No Category Chosen>'),
+            }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
     return jsonify(output)
