@@ -6,12 +6,15 @@ from flask_cors import CORS, cross_origin
 from flask_oauth import OAuth
 from datetime import datetime
 import pymongo
+import json
+
+data = json.load(open('secrets.json'))
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 DEBUG = True
-SECRET_KEY = 'development key'
-FACEBOOK_APP_ID = '353855031743097'
-FACEBOOK_APP_SECRET = '2831879e276d90955f3aafe0627d3673'
+SECRET_KEY = data['FACEBOOK_SECRET_KEY']
+FACEBOOK_APP_ID = data['FACEBOOK_APP_ID']
+FACEBOOK_APP_SECRET = data['FACEBOOK_APP_SECRET']
 
 FbAuth = Blueprint('FbAuth', __name__)
 FbAuth.debug = DEBUG
@@ -22,7 +25,10 @@ oauth = OAuth()
 cors = CORS(FbAuth)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'
+MLAB_USERNAME = data['MLAB_USERNAME']
+MLAB_PASSWORD = data['MLAB_PASSWORD']
+
+uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
