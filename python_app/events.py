@@ -59,7 +59,7 @@ def get_events_for_search(search_term):
             'id': event['id'],
             'properties': {
                 'event_name': event.get('name', '<No Name>'), 
-                'start_time': event.get('start_time', '<Unknown Start Time>'),
+                'start_time': processed_time(event.get('start_time', '<Unknown Start Time>')),
                 'venue': event['place'],
                 'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
                 'category': event.get('category', '<No Category Chosen>'),
@@ -141,8 +141,8 @@ def process_event_info(event):
         'properties': {
             'event_name': event.get('name', '<No Name>'), 
             'description': event.get('description', '<No Description>'),
-            'start_time': event.get('start_time', '<Unknown Start Time>'),
-            'end_time': event.get('end_time', '<No End Time>'),
+            'start_time': processed_time(event.get('start_time', '<Unknown Start Time>')),
+            'end_time': processed_time(event.get('end_time', '<No End Time>')),
             'venue': event['place'],
             'stats': {
                 'attending': event['attending_count'],
@@ -160,6 +160,16 @@ def process_event_info(event):
         }
     }
     return formatted_info
+
+def processed_time(old_time_str):
+    # if not valid time string, return default value from dict.get()
+    try:
+        # need to cut off time zone, not parseable in Python 2
+        time_obj = datetime.datetime.strptime(old_time_str[:19], '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        return old_time_str
+    res_time_str = datetime.datetime.strftime(time_obj, '%-I:%M %p, %b %-d, %y')
+    return res_time_str
 
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
