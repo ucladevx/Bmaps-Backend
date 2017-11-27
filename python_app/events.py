@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 import pymongo
 import re
 import requests, urllib
-import time, datetime
+import time, datetime, dateutil.parser
 import event_caller
 
 Events = Blueprint('Events', __name__)
@@ -164,11 +164,13 @@ def process_event_info(event):
 def processed_time(old_time_str):
     # if not valid time string, return default value from dict.get()
     try:
-        # need to cut off time zone, not parseable in Python 2
-        time_obj = datetime.datetime.strptime(old_time_str[:19], '%Y-%m-%dT%H:%M:%S')
+        # use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(old_time_str)
     except ValueError:
         return old_time_str
-    res_time_str = datetime.datetime.strftime(time_obj, '%-I:%M %p, %b %-d, %y')
+    # Formatting according to date.parse() requirements
+    # time zone offset always off of GMT
+    res_time_str = datetime.datetime.strftime(time_obj, '%a, %d %b %Y %H:%M:%S GMT%z')
     return res_time_str
 
 # Get all UCLA-related Facebook events and add to database
