@@ -168,10 +168,7 @@ def processed_time(old_time_str):
         time_obj = datetime.datetime.strptime(old_time_str[:19], '%Y-%m-%dT%H:%M:%S')
     except ValueError:
         return old_time_str
-    # Formatting according to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse
-    # %a, %d %b %Y %H:%M:%S GMT-0800 = "Fri, 01 Dec 2017 09:30:00 GMT-0800"
-    # '%-I:%M %p, %b %-d, %y' = "9:30 AM, Dec 1, 17"
-    # https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+    # Formatting according to date.parse() requirements
     res_time_str = datetime.datetime.strftime(time_obj, '%a, %d %b %Y %H:%M:%S GMT-0800')
     return res_time_str
 
