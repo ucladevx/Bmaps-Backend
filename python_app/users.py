@@ -4,6 +4,9 @@ from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_cors import CORS, cross_origin
 from datetime import datetime
 import pymongo
+import json
+
+data = json.load(open('secrets.json'))
 
 Users = Blueprint('Users', __name__)
 
@@ -11,7 +14,10 @@ Users = Blueprint('Users', __name__)
 cors = CORS(Users)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-uri = 'mongodb://devx_dora:3map5me@ds044709.mlab.com:44709/mappening_data'
+MLAB_USERNAME = data['MLAB_USERNAME']
+MLAB_PASSWORD = data['MLAB_PASSWORD']
+
+uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
