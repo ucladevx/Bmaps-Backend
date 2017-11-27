@@ -2,25 +2,31 @@ import requests
 import json
 import time, datetime
 from pprint import pprint
+import json
 
-# specify version in case most updated version (default if not specified) removes functionality, causing errors
+data = json.load(open('secrets.json'))
+
+# Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
+
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
-FACEBOOK_APP_ID = '353855031743097' # '789442111228959'
-FACEBOOK_APP_SECRET = '2831879e276d90955f3aafe0627d3673' # '6ec0e473acf4d91b4ea3346b75e05268'
+FACEBOOK_APP_ID = data['FACEBOOK_APP_ID']
+FACEBOOK_APP_SECRET = data['FACEBOOK_APP_SECRET']
 ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
 SEARCH_URL = BASE_URL + 'search'
-# updated coordinates of Bruin Bear
+
+# Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
 SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
-# get events by adding page ID and events field
+# Get events by adding page ID and events field
 BASE_EVENT_URL = BASE_URL
-# id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
+
+# Id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time',
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
