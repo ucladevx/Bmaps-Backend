@@ -60,12 +60,14 @@ def add_user():
       return redirect(url_for('Users.error_message', error_code=0))
 
     # Insert new user
-    users_collection.insert_one({"user_id": user_id, 
+    users_collection.insert_one({
+        "user_id": user_id, 
         "user_name": request.args['user_name'], 
         "user_firstname": request.args['user_firstname'], 
         "user_lastname": request.args['user_lastname'],
         "joined_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        "preferences": []})
+        "preferences": []
+      })
 
     # Check that user was successfully added to collection
     if users_collection.find({'user_id': user_id}).count() > 0:
