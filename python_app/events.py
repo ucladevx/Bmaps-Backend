@@ -168,7 +168,7 @@ def processed_time(old_time_str):
         time_obj = datetime.datetime.strptime(old_time_str[:19], '%Y-%m-%dT%H:%M:%S')
     except ValueError:
         return old_time_str
-    res_time_str = datetime.datetime.strftime(time_obj, '%I:%M %p, %b %d %y')
+    res_time_str = datetime.datetime.strftime(time_obj, '%-I:%M %p, %b %-d, %y')
     return res_time_str
 
 # Get all UCLA-related Facebook events and add to database
