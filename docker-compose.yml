@@ -13,6 +13,11 @@ services:
     ports:
       - "80:80"
 
+  web_node:
+     build: ./node_app
+     ports:
+       - "8000:8000"
+
   #fb_events:
     #image: tobilg/facebook-event-search
     #ports:
