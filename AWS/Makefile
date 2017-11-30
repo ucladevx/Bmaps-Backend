@@ -25,6 +25,9 @@ push: ecr-login
 	docker tag $(APP_NAME_NODE):latest $(ECR_REPO)/$(APP_NAME_NODE):latest
 	docker push $(ECR_REPO)/$(APP_NAME_NODE):latest
 
+ssh:
+	ssh ubuntu@$(EC2_IP) -i id_rsa_mappening.pem
+
 deploy: ecr-login
 	sudo docker-compose pull
 	sudo docker-compose up
