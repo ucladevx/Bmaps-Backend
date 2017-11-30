@@ -2,7 +2,7 @@ ECR_REPO=698514710897.dkr.ecr.us-west-1.amazonaws.com
 APP_NAME_FLASK=web_flask
 APP_NAME_NGINX=web_nginx
 APP_NAME_NODE=web_node
-EC2_IP=52.53.197.64
+EC2_IP=54.193.65.104
 
 ############################## FOR RUNNING LOCALLY #############################
 
