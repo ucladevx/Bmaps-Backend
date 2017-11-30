@@ -23,8 +23,3 @@ services:
        - "8000:8000"
      volumes:
        - ./node_app:/app
-
-  #fb_events:
-    #image: tobilg/facebook-event-search
-    #ports:
-       #- "3000:3000"
