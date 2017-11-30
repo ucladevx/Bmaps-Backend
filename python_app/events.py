@@ -66,7 +66,7 @@ def get_events_for_search(search_term):
                 'start_time': processed_time(event.get('start_time', '<Unknown Start Time>')),
                 'venue': event['place'],
                 'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
-                'category': event.get('category', '<No Category Chosen>'),
+                'category': event.get('category', 'None'),
             }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
@@ -154,13 +154,13 @@ def process_event_info(event):
                 'interested': event['interested_count'],
                 'maybe': event['maybe_count']
             },    
-            'category': event.get('category', '<No Category Chosen>'),
+            'category': event.get('category', 'None'),
             'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
             'is_cancelled': event.get('is_canceled', False),
             'ticketing': {
                 'ticket_uri': event.get('ticket_uri', '<No Ticketing Link>')
             },
-            'free_food': 'YES' if 'category' in event and 'FOOD' in event['category'] else 'NO'
+            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO'
         }
     }
     return formatted_info

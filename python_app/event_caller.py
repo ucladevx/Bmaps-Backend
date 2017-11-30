@@ -203,12 +203,19 @@ def get_events_from_pages(pages_by_id, app_access_token):
             continue
 
         # only want events with the specified accepted location within UCLA
+        # event is a dict of a bunch of attributes for each event
         for event in events_list['data']:
             if 'place' not in event or 'location' not in event['place']:
                 continue
             if entity_in_right_location(event['place']['location']):
                 if event['id'] not in total_events:
+                    if 'category' in event:
+                        if event['category'].startswith('EVENT_'):
+                            event['category'] = event['category'][6:]
+                        elif event['category'].endswith('_EVENT'):
+                            event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
+
     return total_events
 
 def get_facebook_events():
