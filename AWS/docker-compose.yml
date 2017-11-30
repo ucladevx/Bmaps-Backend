@@ -1,0 +1,17 @@
+version: '2'
+services:
+
+  web_python:
+    image: 698514710897.dkr.ecr.us-west-1.amazonaws.com/web_flask:latest
+    ports:
+      - "5000:5000"
+
+  web_nginx:
+    image: 698514710897.dkr.ecr.us-west-1.amazonaws.com/web_nginx:latest
+    ports:
+      - "80:80"
+
+  web_node:
+    image: 698514710897.dkr.ecr.us-west-1.amazonaws.com/web_node:latest
+    ports:
+      - "8000:8000"

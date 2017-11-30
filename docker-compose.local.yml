@@ -17,7 +17,9 @@ services:
     volumes:
       - ./nginx_app:/app
 
-  #fb_events:
-    #image: tobilg/facebook-event-search
-    #ports:
-       #- "3000:3000"
+  web_node:
+     build: ./node_app
+     ports:
+       - "8000:8000"
+     volumes:
+       - ./node_app:/app

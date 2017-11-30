@@ -4,32 +4,18 @@ APP_NAME_NGINX=web_nginx
 APP_NAME_NODE=web_node
 EC2_IP=54.193.65.104
 
-############################## FOR RUNNING LOCALLY #############################
-
-build-local:
-	docker-compose -f docker-compose.local.yml build
-
-run: build-local
-	docker-compose -f docker-compose.local.yml up
-
-stop:
-	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
-
-reset:
-	-docker ps -a | tail -n +2 | cut -d ' ' -f 1 | xargs docker rm
-	-docker images | tail -n +2 | tr -s ' ' | cut -d ' ' -f 3 | xargs docker rmi --force
-
-################################ DEPLOYING ON AWS ##############################
-
 ecr-login:
-	$(shell aws ecr get-login --no-include-email --region us-west-1)
+	sudo $(shell /home/ubuntu/.local/bin/aws ecr get-login --no-include-email --region us-west-1)
 
 build:
 	docker build ./python_app -t $(APP_NAME_FLASK)
 	docker build ./nginx_app -t $(APP_NAME_NGINX)
 	docker build ./node_app -t $(APP_NAME_NODE)
 
-push: ecr-login build
+run: build
+	docker-compose up
+
+push: ecr-login
 	docker tag $(APP_NAME_FLASK):latest $(ECR_REPO)/$(APP_NAME_FLASK):latest
 	docker push $(ECR_REPO)/$(APP_NAME_FLASK):latest
 
@@ -43,5 +29,5 @@ ssh:
 	ssh ubuntu@$(EC2_IP) -i id_rsa_mappening.pem
 
 deploy: ecr-login
-	docker-compose pull
-	docker-compose up
+	sudo docker-compose pull
+	sudo docker-compose up
