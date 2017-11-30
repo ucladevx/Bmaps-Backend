@@ -87,14 +87,33 @@ def get_event_by_id(event_id):
 # Event category examples: food, THEATER
 # use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
-def get_event_by_category(event_category):
+def get_events_by_category(event_category):
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
     return find_events_in_database('category', cat_regex_obj)
 
+# Returns JSON of events by event date
+# Returns all events starting on the passed in date
+@Events.route('/api/event-date/<date>', methods=['GET'])
+def get_events_by_date(date):
+    # Try to parse date
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(date)
+    except ValueError:
+        # Got invalid date string
+        return 'Failed to get events using the date {0}'.format(date)
+
+    # Get the date string by YYYY-MM-DD format
+    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
+
+    date_regex_str = '^{0}.*'.format(time_str)
+    date_regex_obj = re.compile(date_regex_str)
+    return find_events_in_database('start_time', date_regex_obj)
+
 # Returns JSON of events with free food
 @Events.route('/api/event-food', methods=['GET'])
-def get_event_by_food():
+def get_events_by_food():
     return get_event_by_category('food')
 
 # find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
