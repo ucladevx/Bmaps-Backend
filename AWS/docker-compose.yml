@@ -10,3 +10,8 @@ services:
     image: 698514710897.dkr.ecr.us-west-1.amazonaws.com/web_nginx:latest
     ports:
       - "80:80"
+
+  web_node:
+    image: 698514710897.dkr.ecr.us-west-1.amazonaws.com/web_node:latest
+    ports:
+      - "8000:8000"
