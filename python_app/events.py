@@ -62,11 +62,13 @@ def get_events_for_search(search_term):
           output.append({
             'id': event['id'],
             'properties': {
-                'event_name': event.get('name', '<No Name>'), 
-                'start_time': processed_time(event.get('start_time', '<Unknown Start Time>')),
+                'event_name': event.get('name', '<NONE>'), 
+                'description': event.get('description', '<NONE>'),
+                'start_time': processed_time(event.get('start_time', '<NONE>')),
+                'end_time': processed_time(event.get('end_time', '<NONE>')),
                 'venue': event['place'],
-                'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
-                'category': event.get('category', '<No Category Chosen>'),
+                'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
+                'category': event.get('category', '<NONE>'),
             }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
@@ -129,7 +131,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
-                print(u'Event: {0}'.format(single_event.get('name', '<No Name>')))
+                print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
         else:
             return 'Cannot find single event with attribute {0}: value {1}'.format(find_key, find_value)
     else:
@@ -143,7 +145,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # to use with format(), another unicode string must be parent
                     # unicode strings have 'u' in the front, as below
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
-                    print(u'Event: {0}'.format(event.get('name', '<No Name>')))
+                    print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
             return 'Cannot find multiple events with attribute {0}: value {1}'.format(find_key, find_value)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
@@ -162,10 +164,10 @@ def process_event_info(event):
             'type': 'Point'
         },
         'properties': {
-            'event_name': event.get('name', '<No Name>'), 
-            'description': event.get('description', '<No Description>'),
-            'start_time': processed_time(event.get('start_time', '<Unknown Start Time>')),
-            'end_time': processed_time(event.get('end_time', '<No End Time>')),
+            'event_name': event.get('name', '<NONE>'), 
+            'description': event.get('description', '<NONE>'),
+            'start_time': processed_time(event.get('start_time', '<NONE>')),
+            'end_time': processed_time(event.get('end_time', '<NONE>')),
             'venue': event['place'],
             'stats': {
                 'attending': event['attending_count'],
@@ -173,11 +175,11 @@ def process_event_info(event):
                 'interested': event['interested_count'],
                 'maybe': event['maybe_count']
             },    
-            'category': event.get('category', '<No Category Chosen>'),
-            'cover_picture': event['cover'].get('source', '<No Cover Image>') if 'cover' in event else '<No Cover Info>',
+            'category': event.get('category', '<NONE>'),
+            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
             'is_cancelled': event.get('is_canceled', False),
             'ticketing': {
-                'ticket_uri': event.get('ticket_uri', '<No Ticketing Link>')
+                'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
             'free_food': 'YES' if 'category' in event and 'FOOD' in event['category'] else 'NO'
         }
