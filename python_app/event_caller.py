@@ -172,6 +172,7 @@ def get_events_from_pages(pages_by_id, app_access_token):
     print('Start searching pages.')
     # page_id = keys to pages_by_id dictionary
     id_list = []
+    id_jsons = {}
     for i, page_id in enumerate(pages_by_id):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
@@ -204,10 +205,12 @@ def get_events_from_pages(pages_by_id, app_access_token):
                 .format(pages_by_id[page_id], resp.status_code)
             )
             break
+        id_jsons.update(resp.json())
 
-        if 'events' not in resp.json():
+    for page_info in id_jsons.values():
+        if 'events' not in page_info:
             continue
-        events_list = resp.json()['events']
+        events_list = page_info['events']
 
         if 'data' not in events_list:
             print('Missing data field from event results of page {0}!'.format(pages_by_id[page_id]))
@@ -226,7 +229,6 @@ def get_events_from_pages(pages_by_id, app_access_token):
                         elif event['category'].endswith('_EVENT'):
                             event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
-
     return total_events
 
 def get_facebook_events():
