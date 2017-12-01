@@ -229,7 +229,7 @@ def get_events_from_pages(pages_by_id, app_access_token):
                         elif event['category'].endswith('_EVENT'):
                             event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
-    return total_events
+    return total_events.values()
 
 def get_facebook_events():
     app_access_token = get_app_token()
@@ -243,7 +243,7 @@ def get_facebook_events():
     pages_by_id = find_ucla_entities(app_access_token)
 
     # turn event ID dict to array of their values
-    all_events = get_events_from_pages(pages_by_id, app_access_token).values()
+    all_events = get_events_from_pages(pages_by_id, app_access_token)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     return total_event_object
