@@ -81,7 +81,7 @@ def get_events_for_search(search_term):
             }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
-    return jsonify(output)
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event name
 # /<> defaults to strings without any slashes
