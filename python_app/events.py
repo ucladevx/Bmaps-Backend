@@ -61,6 +61,15 @@ def get_events_for_search(search_term):
         for event in events_cursor:
           output.append({
             'id': event['id'],
+            'type': 'Feature',
+            'geometry': {
+                # Default to Bruin Bear coordinates
+                'coordinates': [
+                    event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                    event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+                ],
+                'type': 'Point'
+            },
             'properties': {
                 'event_name': event.get('name', '<NONE>'), 
                 'description': event.get('description', '<NONE>'),
@@ -72,7 +81,7 @@ def get_events_for_search(search_term):
             }})
     else:
         output = "No event(s) matched '{}'".format(search_term)
-    return jsonify(output)
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event name
 # /<> defaults to strings without any slashes
