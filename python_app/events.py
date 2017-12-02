@@ -206,7 +206,7 @@ def populate_ucla_events_database():
 
     # DUMB WAY to refresh database: delete all data, then insert all new
     # TODO: update data already there, insert new, delete leftover data (not in new events)
-    # delete_result = events_collection.delete_many({})
+    delete_result = events_collection.delete_many({})
 
     raw_events_data = event_caller.get_facebook_events()
     # debugging events output
