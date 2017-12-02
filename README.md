@@ -3,15 +3,23 @@
 ## Overview
 A single platform for events all over campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising.
 
-## Prerequisites
-Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
-Clone this repository with `git clone https://github.com/ucladevx/Mappening-Backend.git` 
-
 ## Built With
 * Flask (Port 5000): Web microframework for Python
 * mLab: Database-as-a-Service cloud-hosted MongoDB
 * Pymongo: Database Connector between MongoDB and Flask
-* nginx (Port 80): Server for static files
+* nginx (Port 80): Server for static files, forwards requests to backend and serves results
+* AWS EC2/Elastic Container Service for deployment
+
+## Setting Up the Environment
+* Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
+* Clone this repository 
+  * `git clone https://github.com/ucladevx/Mappening-Backend.git`  
+* `cd Mappening-Backend`
+* Clone the frontend repository to the name `node_app`
+  * `git clone https://github.com/ucladevx/Mappening-Frontend.git node_app`
+  * `cd node_app`
+  * Install necessary packages
+    * `npm install`
 
 ## How to Run Locally
 * `cd` to the repository.
