@@ -183,14 +183,14 @@ def process_event_info(event):
                 'noreply': event['noreply_count'],
                 'interested': event['interested_count'],
                 'maybe': event['maybe_count']
-            },    
+            },
             'category': event.get('category', '<NONE>'),
             'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
             'is_cancelled': event.get('is_canceled', False),
             'ticketing': {
                 'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
-            'free_food': 'YES' if 'category' in event and 'FOOD' in event['category'] else 'NO'
+            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO'
         }
     }
     return formatted_info
