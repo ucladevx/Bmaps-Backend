@@ -8,14 +8,14 @@ Contains all the files for deployment. Should be maintained alongside files in A
   * Just build with `make build`
 * In separate tab/window run `make ssh` to login to AWS instance
 * Deploy with `make deploy`
-* Navigate to `54.193.65.104`
+* Navigate to `52.53.72.98`
   * Access static files with nginx with `/` or `/imgs`
-    * e.g. `54.193.65.104/imgs`
+    * e.g. `52.53.72.98/imgs`
   * Access flask api by forwarding requests through nginx
     * Use `/api/v1/insert_api_route_here`
-    * e.g. `54.193.65.104/api/v1/events`
+    * e.g. `52.53.72.98/api/v1/events`
   * Can also access flask server directly at port 5000
-    * e.g. `54.193.65.104:5000/api/events`
+    * e.g. `52.53.72.98:5000/api/events`
 * Stop running on ubuntu with `CTRL+C`
 
 ## To Add New Container
