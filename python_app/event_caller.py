@@ -163,17 +163,21 @@ def get_events_from_pages(pages_by_id, app_access_token):
         'limit({})'.format(100)
     ]
 
+    # will add an ids field to search many pages at the same time
     page_call_args = {
         'fields': '.'.join(event_args), # join all event args with periods between
         'access_token': app_access_token
     }
 
+    print('Start searching pages.')
     # page_id = keys to pages_by_id dictionary
+    id_list = []
+    id_jsons = {}
     for i, page_id in enumerate(pages_by_id):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
-        if i >= 1500:
-            break
+        # if i >= 1500:
+        #     break
 
         # can use this to space out event calls in future
         # 200 calls / hour allowed, but finding pages itself also took some calls
@@ -182,10 +186,18 @@ def get_events_from_pages(pages_by_id, app_access_token):
         time.sleep(20)
         """
 
-        # could specify list of ids to call at once, but limited to 50 at a time, and counts as 50 calls
-        resp = s.get(BASE_EVENT_URL + page_id, params=page_call_args)
-        if i % 10 == 0:
-            print('Checking page {0}'.format(i))
+        # specify list of ids to call at once, limited to 50 at a time, and counts as 50 API calls
+        # still is faster than individual calls
+        
+        if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
+            id_list.append(page_id)
+            continue
+        
+        print('Checking page {0}'.format(i))
+        # pass in whole comma separated list of ids
+        page_call_args['ids'] = ','.join(id_list)
+        resp = s.get(BASE_EVENT_URL, params=page_call_args)
+        id_list = []
         # print(resp.url)
         if resp.status_code != 200:
             print(
@@ -193,23 +205,31 @@ def get_events_from_pages(pages_by_id, app_access_token):
                 .format(pages_by_id[page_id], resp.status_code)
             )
             break
+        id_jsons.update(resp.json())
 
-        if 'events' not in resp.json():
+    for page_info in id_jsons.values():
+        if 'events' not in page_info:
             continue
-        events_list = resp.json()['events']
+        events_list = page_info['events']
 
         if 'data' not in events_list:
             print('Missing data field from event results of page {0}!'.format(pages_by_id[page_id]))
             continue
 
         # only want events with the specified accepted location within UCLA
+        # event is a dict of a bunch of attributes for each event
         for event in events_list['data']:
             if 'place' not in event or 'location' not in event['place']:
                 continue
             if entity_in_right_location(event['place']['location']):
                 if event['id'] not in total_events:
+                    if 'category' in event:
+                        if event['category'].startswith('EVENT_'):
+                            event['category'] = event['category'][6:]
+                        elif event['category'].endswith('_EVENT'):
+                            event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
-    return total_events
+    return total_events.values()
 
 def get_facebook_events():
     app_access_token = get_app_token()
@@ -223,7 +243,7 @@ def get_facebook_events():
     pages_by_id = find_ucla_entities(app_access_token)
 
     # turn event ID dict to array of their values
-    all_events = get_events_from_pages(pages_by_id, app_access_token).values()
+    all_events = get_events_from_pages(pages_by_id, app_access_token)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     return total_event_object
