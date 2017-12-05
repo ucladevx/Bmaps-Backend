@@ -102,13 +102,16 @@ def get_event_by_id(event_id):
 def get_event_categories():
     # Iterate through all events and get unique list of all categories
     # TODO: sort by quantity?
+    uniqueList = []
     output = []
     
     events_cursor = events_collection.find({"category": {"$exists": True}})
     if events_cursor.count() > 0:
         for event in events_cursor:
-            if event["category"].title() not in output:
-                output.append(event["category"].title())
+            if event["category"].title() not in uniqueList:
+                uniqueList.append(event["category"].title())
+        for category in uniqueList:
+            output.append({"category": category})
     else:
         return 'Cannot find multiple events with categories!'
     return jsonify({'categories': output})
