@@ -95,6 +95,28 @@ def get_event_by_id(event_id):
     return find_events_in_database('id', event_id, True)
 
 # Returns JSON of events by event category
+# Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
+# Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
+# Party, Religion, Shopping, Sports, Theater, Wellness
+@Events.route('/api/event-categories', methods=['GET'])
+def get_event_categories():
+    # Iterate through all events and get unique list of all categories
+    # TODO: sort by quantity?
+    uniqueList = []
+    output = []
+    
+    events_cursor = events_collection.find({"category": {"$exists": True}})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+            if event["category"].title() not in uniqueList:
+                uniqueList.append(event["category"].title())
+        for category in uniqueList:
+            output.append({"category": category})
+    else:
+        return 'Cannot find multiple events with categories!'
+    return jsonify({'categories': output})
+
+# Returns JSON of currently existing event categories
 # Event category examples: food, THEATER
 # use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
@@ -156,7 +178,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
-            return 'Cannot find multiple events with attribute {0}: value {1}'.format(find_key, find_value)
+            return 'Cannot find multiple events with matching {0} attribute.'.format(find_key)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
