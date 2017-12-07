@@ -94,6 +94,58 @@ def get_event_by_name(event_name):
 def get_event_by_id(event_id):
     return find_events_in_database('id', event_id, True)
 
+# Returns JSON of events by event date
+# Returns all events starting on the passed in date
+@Events.route('/api/event-date/<date>', methods=['GET'])
+def get_events_by_date(date):
+    # Try to parse date
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(date)
+    except ValueError:
+        # Got invalid date string
+        return 'Failed to get events using the date {0}'.format(date)
+
+    # Get the date string by YYYY-MM-DD format
+    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
+
+    date_regex_str = '^{0}.*'.format(time_str)
+    date_regex_obj = re.compile(date_regex_str)
+    return find_events_in_database('start_time', date_regex_obj)
+
+# Returns JSON of events by event category & date
+@Events.route('/api/event-categories-by-date/<date>', methods=['GET'])
+def get_event_categories_by_date(date):
+    # Get cursor to all events on a certain day and get unique categories list
+    # Iterate through all events and get unique list of all categories
+    uniqueList = []
+    output = []
+
+    # Try to parse date
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(date)
+    except ValueError:
+        # Got invalid date string
+        return 'Failed to get events using the date {0}'.format(date)
+
+    # Get the date string by YYYY-MM-DD format
+    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
+
+    date_regex_str = '^{0}.*'.format(time_str)
+    date_regex_obj = re.compile(date_regex_str)
+    
+    events_cursor = events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+            if event["category"].title() not in uniqueList:
+                uniqueList.append(event["category"].title())
+        for category in uniqueList:
+            output.append({"category": category})
+    else:
+        return 'Cannot find multiple events with categories!'
+    return jsonify({'categories': output})
+
 # Returns JSON of events by event category
 # Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
 # Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
@@ -124,25 +176,6 @@ def get_events_by_category(event_category):
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
     return find_events_in_database('category', cat_regex_obj)
-
-# Returns JSON of events by event date
-# Returns all events starting on the passed in date
-@Events.route('/api/event-date/<date>', methods=['GET'])
-def get_events_by_date(date):
-    # Try to parse date
-    try:
-        # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(date)
-    except ValueError:
-        # Got invalid date string
-        return 'Failed to get events using the date {0}'.format(date)
-
-    # Get the date string by YYYY-MM-DD format
-    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
-
-    date_regex_str = '^{0}.*'.format(time_str)
-    date_regex_obj = re.compile(date_regex_str)
-    return find_events_in_database('start_time', date_regex_obj)
 
 # Returns JSON of events with free food
 @Events.route('/api/event-food', methods=['GET'])
