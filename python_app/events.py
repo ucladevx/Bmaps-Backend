@@ -146,6 +146,41 @@ def get_event_categories_by_date(date):
         return 'Cannot find multiple events with categories!'
     return jsonify({'categories': output})
 
+# Returns JSON of events by event category & date
+@Events.route('/api/events-by-category-and-date', methods=['GET'])
+def get_events_by_category_and_date():
+    date = request.args['date']
+    event_category = request.args['category']
+
+    # Get cursor to all events on a certain day and of a certain category
+    output = []
+
+    # Try to parse date
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(date)
+    except ValueError:
+        # Got invalid date string
+        return 'Failed to get events using the date {0}'.format(date)
+
+    # Get the date string by YYYY-MM-DD format
+    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
+
+    date_regex_str = '^{0}.*'.format(time_str)
+    date_regex_obj = re.compile(date_regex_str)
+
+    # Handle event category
+    regex_str = '^{0}|{0}$'.format(event_category.upper())
+    cat_regex_obj = re.compile(regex_str)
+    
+    events_cursor = events_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+            output.append(process_event_info(event))
+    else:
+        return 'Cannot find multiple events with matching category and date!'
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
+
 # Returns JSON of events by event category
 # Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
 # Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
