@@ -123,7 +123,7 @@ def get_event_categories_by_date(date):
         for category in uniqueList:
             output.append({"category": category})
     else:
-        print 'Cannot find multiple events with categories!'
+        print 'Cannot find any events with categories!'
     return jsonify({'categories': output})
 
 # Returns JSON of events by event category & date
@@ -148,7 +148,7 @@ def get_events_by_category_and_date():
         for event in events_cursor:
             output.append(process_event_info(event))
     else:
-        print 'Cannot find multiple events with matching category and date!'
+        print 'Cannot find any events with matching category and date!'
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of events by event category
@@ -170,7 +170,7 @@ def get_event_categories():
         for category in uniqueList:
             output.append({"category": category})
     else:
-        print 'Cannot find multiple events with categories!'
+        print 'Cannot find any events with categories!'
     return jsonify({'categories': output})
 
 # Returns JSON of currently existing event categories
