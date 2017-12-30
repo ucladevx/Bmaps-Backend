@@ -289,6 +289,7 @@ def processed_time(old_time_str):
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
+    print('Call to populate database with events.')
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
 
