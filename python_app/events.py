@@ -80,7 +80,7 @@ def get_events_for_search(search_term):
                 'category': event.get('category', '<NONE>'),
             }})
     else:
-        output = "No event(s) matched '{}'".format(search_term)
+        print "No event(s) matched '{}'".format(search_term)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event name
