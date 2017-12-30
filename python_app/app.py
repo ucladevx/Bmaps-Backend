@@ -4,9 +4,11 @@ from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 from facebookAuth import FbAuth
 from users import Users
-from events import Events
+from events import Events, populate_ucla_events_database
 import pymongo
 import json
+import schedule
+import time
 
 data = json.load(open('secrets.json'))
 
@@ -35,5 +37,13 @@ def index():
     return "Mappening is running!"
     
 if __name__ == "__main__":
+    # schedule.every().day.at('15:39').do(populate_ucla_events_database)
+    # schedule.every().minute.do(populate_ucla_events_database)
+    # while True:
+    #     print('check schedule for jobs')
+    #     schedule.run_pending()
+    #     time.sleep(10)
+
     app.run(host='0.0.0.0', debug=True)
     # Flask defaults to port 5000
+
