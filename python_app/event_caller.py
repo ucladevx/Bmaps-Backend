@@ -20,7 +20,7 @@ SEARCH_URL = BASE_URL + 'search'
 # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
-SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa']
+SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'campus events commission']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
 # Get events by adding page ID and events field
@@ -38,7 +38,7 @@ def format_time(time):
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
 def get_event_time_bounds():
-    back_jump = 1       # arbitrarily allow events that started up to 1 day ago
+    back_jump = 0       # arbitrarily allow events that start TODAY (0 days ago)
     forward_jump = 60   # and 60 days into the future
     now = datetime.datetime.now()
     before_time = now - datetime.timedelta(days=back_jump)
@@ -69,7 +69,7 @@ def entity_in_right_location(loc_data):
             return True
     return False
 
-# for searching both place and page
+# for searching all types: place, page, and group
 def find_ucla_entities(app_access_token):
     ucla_entities = {}
     page_search_args = {
@@ -97,6 +97,8 @@ def find_ucla_entities(app_access_token):
             # if no location, must keep for now, else check its location
             if 'location' not in page or entity_in_right_location(page['location']):
                 ucla_entities[page['id']] = page['name']
+
+
 
     # don't need a query string for this, still need to filter out by location
     place_search_args = {
@@ -163,9 +165,10 @@ def get_events_from_pages(pages_by_id, app_access_token):
         'limit({})'.format(100)
     ]
 
-    # will add an ids field to search many pages at the same time
+    info_desired = ['name', '.'.join(event_args)] # join all event params with periods between
+    # ids field added later to search many pages at the same time
     page_call_args = {
-        'fields': '.'.join(event_args), # join all event args with periods between
+        'fields': ','.join(info_desired), # join name and event args
         'access_token': app_access_token
     }
 
@@ -176,15 +179,8 @@ def get_events_from_pages(pages_by_id, app_access_token):
     for i, page_id in enumerate(pages_by_id):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
-        # if i >= 1500:
+        # if i >= 51:
         #     break
-
-        # can use this to space out event calls in future
-        # 200 calls / hour allowed, but finding pages itself also took some calls
-        # so let's say 1 hour / 180 calls = 20 seconds per call
-        """
-        time.sleep(20)
-        """
 
         # specify list of ids to call at once, limited to 50 at a time, and counts as 50 API calls
         # still is faster than individual calls
@@ -192,8 +188,10 @@ def get_events_from_pages(pages_by_id, app_access_token):
         if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
             id_list.append(page_id)
             continue
-        
-        print('Checking page {0}'.format(i))
+
+        # id_list.append(page_id)
+
+        print('Checking page {0}'.format(i+1))
         # pass in whole comma separated list of ids
         page_call_args['ids'] = ','.join(id_list)
         resp = s.get(BASE_EVENT_URL, params=page_call_args)
@@ -201,14 +199,17 @@ def get_events_from_pages(pages_by_id, app_access_token):
         # print(resp.url)
         if resp.status_code != 200:
             print(
-                'Error getting events from FB page {0}! Status code {1}'
+                'Error getting events from FB pages, starting at {0}! Status code {1}'
                 .format(pages_by_id[page_id], resp.status_code)
             )
             break
         id_jsons.update(resp.json())
 
+    page_event_counts = {}
     for page_info in id_jsons.values():
         if 'events' not in page_info:
+            # no events = 0 count
+            page_event_counts[page_info['name']] = 0
             continue
         events_list = page_info['events']
 
@@ -218,10 +219,13 @@ def get_events_from_pages(pages_by_id, app_access_token):
 
         # only want events with the specified accepted location within UCLA
         # event is a dict of a bunch of attributes for each event
+        event_count = 0
         for event in events_list['data']:
             if 'place' not in event or 'location' not in event['place']:
+                # many places have location in name only, TODO: get these out
                 continue
             if entity_in_right_location(event['place']['location']):
+                event_count += 1    # count any events associated to current page, in actual location
                 if event['id'] not in total_events:
                     if 'category' in event:
                         if event['category'].startswith('EVENT_'):
@@ -229,6 +233,10 @@ def get_events_from_pages(pages_by_id, app_access_token):
                         elif event['category'].endswith('_EVENT'):
                             event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
+        # only count "useful" events: actually located around UCLA
+        page_event_counts[page_info['name']] = event_count
+    with open('page_stats.json', 'w') as outfile:
+        json.dump(page_event_counts, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return total_events.values()
 
 def get_facebook_events():
@@ -247,7 +255,6 @@ def get_facebook_events():
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     return total_event_object
-    
 
 if __name__ == '__main__':
     get_facebook_events()
