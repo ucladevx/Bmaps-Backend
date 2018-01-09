@@ -20,7 +20,8 @@ SEARCH_URL = BASE_URL + 'search'
 # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
-SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'campus events commission']
+SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta',
+                'campus events commission', 'foundations choreography', 'cssaucla']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
 # Get events by adding page ID and events field
@@ -69,36 +70,48 @@ def entity_in_right_location(loc_data):
             return True
     return False
 
+def general_search_results(search_term, search_args):
+    current_entities = {}
+    search_args['q'] = search_term
+    resp = s.get(SEARCH_URL, params=search_args)
+    if resp.status_code != 200:
+        print(
+            'Error searching for {0}s with term {1}! Status code {2}: {3}'
+            .format(search_args.get('type', 'page'), search_term, resp.status_code, resp.json().get('error', 'No error message'))
+        )
+        return {}
+    elif 'data' not in resp.json():
+        print('{0} search results missing data field!'.format(search_args.get('type', 'page')))
+        return {}
+
+    for entity in resp.json()['data']:
+        # filter out pages definitely not near UCLA
+        # if no location, must keep for now, else check its location
+        if 'location' not in entity or entity_in_right_location(entity['location']):
+            current_entities[entity['id']] = entity['name']
+    return current_entities
+
 # for searching all types: place, page, and group
 def find_ucla_entities(app_access_token):
     ucla_entities = {}
+    # args for pages
     page_search_args = {
         'type': 'page',
         'limit': '500',     # limit is as high as desired, but these searches top out at ~350 entries now
         'fields': 'name,location',
         'access_token': app_access_token
     }
+    # group search args
+    group_search_args = {
+        'type': 'group',
+        'limit': '1000',    # returns about 550 groups, from last check
+        'fields': 'name',   # groups do not have location
+        'access_token': app_access_token
+    }
+
     for term in SEARCH_TERMS:
-        page_search_args['q'] = term
-
-        resp = s.get(SEARCH_URL, params=page_search_args)
-        if resp.status_code != 200:
-            print(
-                'Error searching for pages with term {0}! Status code {1}'
-                .format(term, resp.status_code)
-            )
-            break
-        elif 'data' not in resp.json():
-            print('Page search results missing data field!')
-            break
-
-        for page in resp.json()['data']:
-            # filter out pages definitely not near UCLA
-            # if no location, must keep for now, else check its location
-            if 'location' not in page or entity_in_right_location(page['location']):
-                ucla_entities[page['id']] = page['name']
-
-
+        ucla_entities.update(general_search_results(term, page_search_args))
+        ucla_entities.update(general_search_results(term, group_search_args))
 
     # don't need a query string for this, still need to filter out by location
     place_search_args = {
