@@ -80,7 +80,7 @@ def get_events_for_search(search_term):
                 'category': event.get('category', '<NONE>'),
             }})
     else:
-        output = "No event(s) matched '{}'".format(search_term)
+        print "No event(s) matched '{}'".format(search_term)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event name
@@ -98,19 +98,9 @@ def get_event_by_id(event_id):
 # Returns all events starting on the passed in date
 @Events.route('/api/event-date/<date>', methods=['GET'])
 def get_events_by_date(date):
-    # Try to parse date
-    try:
-        # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(date)
-    except ValueError:
-        # Got invalid date string
-        return 'Failed to get events using the date {0}'.format(date)
-
-    # Get the date string by YYYY-MM-DD format
-    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
-
-    date_regex_str = '^{0}.*'.format(time_str)
-    date_regex_obj = re.compile(date_regex_str)
+    date_regex_obj = construct_date_regex(date)
+    if not date_regex_obj:
+        return jsonify({'error': 'Invalid date string to be parsed.'})
     return find_events_in_database('start_time', date_regex_obj)
 
 # Returns JSON of events by event category & date
@@ -121,19 +111,9 @@ def get_event_categories_by_date(date):
     uniqueList = []
     output = []
 
-    # Try to parse date
-    try:
-        # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(date)
-    except ValueError:
-        # Got invalid date string
-        return 'Failed to get events using the date {0}'.format(date)
-
-    # Get the date string by YYYY-MM-DD format
-    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
-
-    date_regex_str = '^{0}.*'.format(time_str)
-    date_regex_obj = re.compile(date_regex_str)
+    date_regex_obj = construct_date_regex(date)
+    if not date_regex_obj:
+        return jsonify({'error': 'Invalid date string to be parsed.'})
     
     events_cursor = events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     if events_cursor.count() > 0:
@@ -143,7 +123,7 @@ def get_event_categories_by_date(date):
         for category in uniqueList:
             output.append({"category": category})
     else:
-        return 'Cannot find multiple events with categories!'
+        print 'Cannot find any events with categories!'
     return jsonify({'categories': output})
 
 # Returns JSON of events by event category & date
@@ -155,19 +135,9 @@ def get_events_by_category_and_date():
     # Get cursor to all events on a certain day and of a certain category
     output = []
 
-    # Try to parse date
-    try:
-        # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(date)
-    except ValueError:
-        # Got invalid date string
-        return 'Failed to get events using the date {0}'.format(date)
-
-    # Get the date string by YYYY-MM-DD format
-    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
-
-    date_regex_str = '^{0}.*'.format(time_str)
-    date_regex_obj = re.compile(date_regex_str)
+    date_regex_obj = construct_date_regex(date)
+    if not date_regex_obj:
+        return jsonify({'error': 'Invalid date string to be parsed.'})
 
     # Handle event category
     regex_str = '^{0}|{0}$'.format(event_category.upper())
@@ -178,7 +148,7 @@ def get_events_by_category_and_date():
         for event in events_cursor:
             output.append(process_event_info(event))
     else:
-        return 'Cannot find multiple events with matching category and date!'
+        print 'Cannot find any events with matching category and date!'
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of events by event category
@@ -200,7 +170,7 @@ def get_event_categories():
         for category in uniqueList:
             output.append({"category": category})
     else:
-        return 'Cannot find multiple events with categories!'
+        print 'Cannot find any events with categories!'
     return jsonify({'categories': output})
 
 # Returns JSON of currently existing event categories
@@ -217,6 +187,23 @@ def get_events_by_category(event_category):
 def get_events_by_food():
     return get_event_by_category('food')
 
+def construct_date_regex(raw_date):
+    # Try to parse date
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(raw_date)
+    except ValueError:
+        # Got invalid date string
+        print 'Invalid date string, cannot be parsed!'
+        return None
+
+    # Get the date string by YYYY-MM-DD format
+    time_str = datetime.datetime.strftime(time_obj, '%Y-%m-%d')
+
+    date_regex_str = '^{0}.*'.format(time_str)
+    date_regex_obj = re.compile(date_regex_str)
+    return date_regex_obj
+
 # find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
     output = []
@@ -232,7 +219,9 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
             if print_results:
                 print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
         else:
-            return 'Cannot find single event with attribute {0}: value {1}'.format(find_key, find_value)
+            # careful: output is still empty here; make sure output list never set ANYWHERE else
+            # i.e. no other conditional branch is entered after this one, same with multiple event case below
+            print 'No single event with attribute {0}: value {1}'.format(find_key, find_value)
     else:
         events_cursor = events_collection.find(search_pair)
         if events_cursor.count() > 0:
@@ -246,7 +235,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
-            return 'Cannot find multiple events with matching {0} attribute.'.format(find_key)
+            print 'No events found with search pair {0}: {1}.'.format(find_key, find_value)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
@@ -300,6 +289,7 @@ def processed_time(old_time_str):
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
+    print('Call to populate database with events.')
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
 
