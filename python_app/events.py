@@ -185,6 +185,7 @@ def get_events_by_category_and_date():
 # Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
 # Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
 # Party, Religion, Shopping, Sports, Theater, Wellness
+# Conference, Lecture, Neighborhood, Networking
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
     # Iterate through all events and get unique list of all categories
