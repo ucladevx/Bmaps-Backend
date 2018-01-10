@@ -13,6 +13,7 @@ BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 FACEBOOK_APP_ID = data['FACEBOOK_APP_ID']
 FACEBOOK_APP_SECRET = data['FACEBOOK_APP_SECRET']
+USER_ACCESS_TOKEN = data['USER_ACCESS_TOKEN']
 ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
 SEARCH_URL = BASE_URL + 'search'
@@ -218,18 +219,20 @@ def get_events_from_pages(pages_by_id, app_access_token):
             break
         id_jsons.update(resp.json())
 
-    page_event_counts = {}
+    all_entity_info = {}
     for page_info in id_jsons.values():
+        single_entity_info = {}
+        single_entity_info['name'] = page_info['name']
         if 'events' not in page_info:
             # no events = 0 count
-            page_event_counts[page_info['name']] = 0
+            single_entity_info['events_count'] = 0
+            all_entity_info[page_info['id']] = single_entity_info
             continue
         events_list = page_info['events']
 
         if 'data' not in events_list:
             print('Missing data field from event results of page {0}!'.format(pages_by_id[page_id]))
             continue
-
         # only want events with the specified accepted location within UCLA
         # event is a dict of a bunch of attributes for each event
         event_count = 0
@@ -247,13 +250,16 @@ def get_events_from_pages(pages_by_id, app_access_token):
                             event['category'] = event['category'][:-6]
                     total_events[event['id']] = event
         # only count "useful" events: actually located around UCLA
-        page_event_counts[page_info['name']] = event_count
+        single_entity_info['events_count'] = event_count
+        all_entity_info[page_info['id']] = single_entity_info
+
     with open('page_stats.json', 'w') as outfile:
-        json.dump(page_event_counts, outfile, indent=4, sort_keys=True, separators=(',', ': '))
+        json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return total_events.values()
 
 def get_facebook_events():
-    app_access_token = get_app_token()
+    # app_access_token = get_app_token()
+    app_access_token = USER_ACCESS_TOKEN
     
     # search for UCLA-associated places and groups
     # limit to as high as possible, go until no pages left
