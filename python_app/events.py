@@ -32,6 +32,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 events_collection = db.map_events
 pages_collection = db.saved_pages
+total_events_collection = db.total_events
 
 """
 CHANGES
@@ -156,6 +157,7 @@ def get_events_by_category_and_date():
 # Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
 # Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
 # Party, Religion, Shopping, Sports, Theater, Wellness
+# Conference, Lecture, Neighborhood, Networking
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
     # Iterate through all events and get unique list of all categories
@@ -308,6 +310,19 @@ def populate_ucla_events_database():
     # process and format events before inserting database
     if raw_events_data['metadata']['events'] > 0:
         events_collection.insert_many(raw_events_data['events'])
+
+        # Also add all new events to total_events
+        for event in events_collection.find():
+            # See if event already existed
+            update_event = total_events_collection.find_one({'id': event['id']})
+
+            # If it existed then replace it with potentially updated event
+            if update_event:
+                total_events_collection.delete_one({'id': event['id']})
+                total_events_collection.insert_one(event)
+            # Otherwise just insert the new event
+            else:
+                total_events_collection.insert_one(event)
     else:
         return 'No new events to save!'
     return 'Populated events database!'
