@@ -29,7 +29,7 @@ UCLA_ZIP_STRINGS = ['90024', '90095']
 BASE_EVENT_URL = BASE_URL
 
 # Id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
-EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time',
+EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
 
@@ -219,14 +219,15 @@ def get_events_from_pages(pages_by_id, app_access_token):
             break
         id_jsons.update(resp.json())
 
-    all_entity_info = {}
+    all_entity_info = []
     for page_info in id_jsons.values():
         single_entity_info = {}
+        single_entity_info['id'] = page_info['id']
         single_entity_info['name'] = page_info['name']
         if 'events' not in page_info:
             # no events = 0 count
             single_entity_info['events_count'] = 0
-            all_entity_info[page_info['id']] = single_entity_info
+            all_entity_info.append(single_entity_info)
             continue
         events_list = page_info['events']
 
@@ -251,11 +252,11 @@ def get_events_from_pages(pages_by_id, app_access_token):
                     total_events[event['id']] = event
         # only count "useful" events: actually located around UCLA
         single_entity_info['events_count'] = event_count
-        all_entity_info[page_info['id']] = single_entity_info
+        all_entity_info.append(single_entity_info)
 
-    with open('page_stats.json', 'w') as outfile:
-        json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
-    return total_events.values()
+    # with open('page_stats.json', 'w') as outfile:
+    #     json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
+    return all_entity_info, total_events.values()
 
 def get_facebook_events():
     # app_access_token = get_app_token()
@@ -270,9 +271,9 @@ def get_facebook_events():
     pages_by_id = find_ucla_entities(app_access_token)
 
     # turn event ID dict to array of their values
-    all_events = get_events_from_pages(pages_by_id, app_access_token)
+    all_pages, all_events = get_events_from_pages(pages_by_id, app_access_token)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
-    total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
+    total_event_object = {'events': all_events, 'pages': all_pages, 'metadata': {'events': len(all_events), 'pages': len(all_pages)}}
     return total_event_object
 
 if __name__ == '__main__':
