@@ -305,6 +305,11 @@ def populate_ucla_events_database():
     # with open('new_out.json', 'w') as outfile:
     #     json.dump(current_events, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
+    # TODO: update just like below
+    pages_collection.delete_many({})
+    # remember: insert_many takes in an ARRAY of JSON objects
+    pages_collection.insert_many(raw_events_data['pages'])
+
     # metadata block has total event count
     # insert_many takes in array of dictionaries
     # process and format events before inserting database
