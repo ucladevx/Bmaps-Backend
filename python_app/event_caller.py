@@ -40,7 +40,7 @@ def format_time(time):
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
 def get_event_time_bounds():
-    back_jump = 0       # arbitrarily allow events that start TODAY (0 days ago)
+    back_jump = 1       # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
     forward_jump = 60   # and 60 days into the future
     now = datetime.datetime.now()
     before_time = now - datetime.timedelta(days=back_jump)
@@ -161,7 +161,15 @@ def find_ucla_entities(app_access_token):
 def get_events_from_pages(pages_by_id, app_access_token):
     # dict of event ids mapped to their info, for fast duplicate checking
     total_events = {}
-    # time_window is tuple of start and end time, right now end not used (all the way to future)
+    # time_window is tuple of start and end time of searching, since() and until() parameters
+    # start time VERY IMPORTANT: all events found by search are guaranteed to start after it,
+    # including the START TIME of the FIRST EVENT of MULTI DAY EVENTS
+    # e.g. if an event happens weekly starting from 1/1, and the window start time is 1/2,
+    # that event will not appear at all!
+
+    # so trick is: make sure event is searched up before start time passes, extract all
+    # sub-events (which have own start and end time), store in db and don't delete until
+    # THOSE start times are passed
     time_window = get_event_time_bounds()
     # find events in certain time range, get place + attendance info + time + other info
     # use FB API's nested queries, get subfields of events by braces and comma-separated keys
@@ -198,18 +206,14 @@ def get_events_from_pages(pages_by_id, app_access_token):
 
         # specify list of ids to call at once, limited to 50 at a time, and counts as 50 API calls
         # still is faster than individual calls
-        
+        id_list.append(page_id)
         if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
-            id_list.append(page_id)
             continue
-
-        # id_list.append(page_id)
 
         print('Checking page {0}'.format(i+1))
         # pass in whole comma separated list of ids
         page_call_args['ids'] = ','.join(id_list)
         resp = s.get(BASE_EVENT_URL, params=page_call_args)
-        id_list = []
         # print(resp.url)
         if resp.status_code != 200:
             print(
@@ -217,8 +221,16 @@ def get_events_from_pages(pages_by_id, app_access_token):
                 .format(pages_by_id[page_id], resp.status_code)
             )
             break
-        id_jsons.update(resp.json())
+        curr_jsons = resp.json()
+        # pprint(curr_jsons)
+        id_jsons.update(curr_jsons)
+        id_list = []
 
+    # URL parameters for extra API calls of multi day events
+    sub_event_call_args = {
+        'fields': ','.join(EVENT_FIELDS),
+        'access_token': app_access_token
+    }
     all_entity_info = []
     for page_info in id_jsons.values():
         single_entity_info = {}
@@ -242,14 +254,38 @@ def get_events_from_pages(pages_by_id, app_access_token):
                 # many places have location in name only, TODO: get these out
                 continue
             if entity_in_right_location(event['place']['location']):
-                event_count += 1    # count any events associated to current page, in actual location
-                if event['id'] not in total_events:
-                    if 'category' in event:
-                        if event['category'].startswith('EVENT_'):
-                            event['category'] = event['category'][6:]
-                        elif event['category'].endswith('_EVENT'):
-                            event['category'] = event['category'][:-6]
-                    total_events[event['id']] = event
+                # check for multi-day events, need API call again
+                sub_event_list = []
+                if 'event_times' in event:
+                    # need to call URL with reduced arguments, since most info is same as main event
+                    # batch call with multiple IDs: slightly faster from less network traffic, Facebook's end
+                    sub_ids = []
+                    for sub_event_header in event['event_times']:
+                        sub_ids.append(sub_event_header['id'])
+                    sub_event_call_args['ids'] = ','.join(sub_ids)
+                    resp = s.get(BASE_EVENT_URL, params=sub_event_call_args)
+                    # print(resp.url)
+                    if resp.status_code != 200:
+                        print(
+                            'Error trying to retrieve sub-event data of event {0}: Status code {1}'
+                            .format(event['id'], resp.status_code)
+                        )
+                        # just skip this multi-day event if sub-events not successfully retrieved
+                        continue
+                    sub_event_list = resp.json().values()
+                else:
+                    sub_event_list.append(event)
+
+                for event_occurence in sub_event_list:
+                    event_count += 1    # count any events associated to current page, in actual location
+                    if event_occurence['id'] not in total_events:
+                        # clean the category attribute if needed
+                        if 'category' in event_occurence:
+                            if event_occurence['category'].startswith('EVENT_'):
+                                event_occurence['category'] = event_occurence['category'][6:]
+                            elif event_occurence['category'].endswith('_EVENT'):
+                                event_occurence['category'] = event_occurence['category'][:-6]
+                        total_events[event_occurence['id']] = event_occurence
         # only count "useful" events: actually located around UCLA
         single_entity_info['events_count'] = event_count
         all_entity_info.append(single_entity_info)
@@ -277,5 +313,5 @@ def get_facebook_events():
     return total_event_object
 
 if __name__ == '__main__':
-    get_facebook_events()
+    pprint(get_facebook_events())
 
