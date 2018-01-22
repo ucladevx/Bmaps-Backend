@@ -297,7 +297,10 @@ def populate_ucla_events_database():
     # current_events = get_facebook_events(34.070964, -118.444757)
 
     # DUMB WAY to refresh database: delete all data, then insert all new
-    # TODO: update data already there, insert new, delete leftover data (not in new events)
+    # TODO: update data already there, insert new, delete data where START TIME HAS PASSED
+    # seems best way is to load all from DB, process here, then push all back in
+    # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
+    # to tell if multi-day event, check "multi_day" tag
     delete_result = events_collection.delete_many({})
 
     raw_events_data = event_caller.get_facebook_events()
