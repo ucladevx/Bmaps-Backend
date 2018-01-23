@@ -296,22 +296,26 @@ def populate_ucla_events_database():
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
 
-    # DUMB WAY to refresh database: delete all data, then insert all new
-    # TODO: update data already there, insert new, delete data where START TIME HAS PASSED
-    # seems best way is to load all from DB, process here, then push all back in
+    # load all current events from DB as list, process here, then push all back in
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "API_refresh" tag
-    delete_result = events_collection.delete_many({})
 
+    # retrieve all data from database at once, do work here: faster than single transactions, probly
+    current_events = events_collection.find()
+    accumulated_events = total_events_collection.find()
+
+    # TODO: get_facebook_events should search from existing collection of pages (in event_caller)
+    # events with "API_refresh" need to call event_caller to make sure info is updated
+    # THEN after events are updated to DB, update pages below (don't delete, only update or insert by ID)
     raw_events_data = event_caller.get_facebook_events()
     # debugging events output
     # with open('new_out.json', 'w') as outfile:
     #     json.dump(current_events, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     # TODO: update just like below
-    pages_collection.delete_many({})
-    # remember: insert_many takes in an ARRAY of JSON objects
-    pages_collection.insert_many(raw_events_data['pages'])
+    # pages_collection.delete_many({})
+    # remember: insert_many takes in a LIST of JSON objects
+    # pages_collection.insert_many(raw_events_data['pages'])
 
     # metadata block has total event count
     # insert_many takes in array of dictionaries
@@ -321,6 +325,11 @@ def populate_ucla_events_database():
 
         # Also add all new events to total_events
         for event in events_collection.find():
+            # to prevent many events with repeated description appearing (multi-day) and messing up the ML,
+            # only include the 1st event of each multi-day event; this happens to not have "API_refresh" tag
+            if 'API_refresh' in event:
+                continue
+
             # See if event already existed
             update_event = total_events_collection.find_one({'id': event['id']})
 
