@@ -52,6 +52,39 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 def get_all_events():
     return find_events_in_database(print_results=True)
 
+# Returns JSON of matching event names
+@Events.route('/api/search/<search_term>', methods=['GET'])
+def get_events_today_for_search(search_term):
+    output = []
+    search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
+    events_cursor = events_collection.find({'name': search_regex}) # put today in the search terms
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append({
+            'id': event['id'],
+            'type': 'Feature',
+            'geometry': {
+                # Default to Bruin Bear coordinates
+                'coordinates': [
+                    event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                    event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+                ],
+                'type': 'Point'
+            },
+            'properties': {
+                'event_name': event.get('name', '<NONE>'),
+                'description': event.get('description', '<NONE>'),
+                'start_time': processed_time(event.get('start_time', '<NONE>')),
+                'end_time': processed_time(event.get('end_time', '<NONE>')),
+                'venue': event['place'],
+                'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
+                'category': event.get('category', '<NONE>'),
+            }})
+    else:
+        print "No event(s) matched '{}'".format(search_term)
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
+
+
 # Returns JSON of matching event names today
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
