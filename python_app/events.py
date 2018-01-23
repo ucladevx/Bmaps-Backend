@@ -300,7 +300,7 @@ def populate_ucla_events_database():
     # TODO: update data already there, insert new, delete data where START TIME HAS PASSED
     # seems best way is to load all from DB, process here, then push all back in
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
-    # to tell if multi-day event, check "multi_day" tag
+    # to tell if multi-day event, check "API_refresh" tag
     delete_result = events_collection.delete_many({})
 
     raw_events_data = event_caller.get_facebook_events()
