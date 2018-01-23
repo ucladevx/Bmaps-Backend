@@ -159,6 +159,7 @@ def find_ucla_entities(app_access_token):
     return ucla_entities
 
 def get_events_from_pages(pages_by_id, app_access_token):
+    # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
     total_events = {}
     # time_window is tuple of start and end time of searching, since() and until() parameters
@@ -273,19 +274,25 @@ def get_events_from_pages(pages_by_id, app_access_token):
                         # just skip this multi-day event if sub-events not successfully retrieved
                         continue
                     sub_event_list = resp.json().values()
+                    # add special "API_refresh" tag for event occurrences in the future that
+                    # won't be searchable, because the 1st event start time has passed already
+                    # don't need to refresh for the 1st event, since that matches the total event start time
+                    for e, sub_event in enumerate(sub_event_list):
+                        if sub_event['start_time'] != event['start_time']:
+                            sub_event['API_refresh'] = True
                 else:
                     sub_event_list.append(event)
 
-                for event_occurence in sub_event_list:
+                for event_occurrence in sub_event_list:
                     event_count += 1    # count any events associated to current page, in actual location
-                    if event_occurence['id'] not in total_events:
+                    if event_occurrence['id'] not in total_events:
                         # clean the category attribute if needed
-                        if 'category' in event_occurence:
-                            if event_occurence['category'].startswith('EVENT_'):
-                                event_occurence['category'] = event_occurence['category'][6:]
-                            elif event_occurence['category'].endswith('_EVENT'):
-                                event_occurence['category'] = event_occurence['category'][:-6]
-                        total_events[event_occurence['id']] = event_occurence
+                        if 'category' in event_occurrence:
+                            if event_occurrence['category'].startswith('EVENT_'):
+                                event_occurrence['category'] = event_occurrence['category'][6:]
+                            elif event_occurrence['category'].endswith('_EVENT'):
+                                event_occurrence['category'] = event_occurrence['category'][:-6]
+                        total_events[event_occurrence['id']] = event_occurrence
         # only count "useful" events: actually located around UCLA
         single_entity_info['events_count'] = event_count
         all_entity_info.append(single_entity_info)
@@ -313,5 +320,5 @@ def get_facebook_events():
     return total_event_object
 
 if __name__ == '__main__':
-    pprint(get_facebook_events())
+    pprint(get_facebook_events()['metadata'])
 
