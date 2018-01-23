@@ -29,7 +29,7 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
-db = client['mappening_data'] 
+db = client['mappening_data']
 events_collection = db.map_events
 total_events_collection = db.total_events
 
@@ -52,12 +52,13 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 def get_all_events():
     return find_events_in_database(print_results=True)
 
-# Returns JSON of matching event names
-@Events.route('/api/search/<search_term>', methods=['GET'])
-def get_events_for_search(search_term):
+# Returns JSON of matching event names today
+@Events.route('/api/search/<search_term>/<date>', methods=['GET'])
+def get_events_for_search(search_term, date):
+    date_regex_obj = construct_date_regex(date)
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
-    events_cursor = events_collection.find({'name': search_regex})
+    events_cursor = events_collection.find({'name': search_regex, 'start_time': date_regex_obj}) # put today in the search terms
     if events_cursor.count() > 0:
         for event in events_cursor:
           output.append({
@@ -72,7 +73,7 @@ def get_events_for_search(search_term):
                 'type': 'Point'
             },
             'properties': {
-                'event_name': event.get('name', '<NONE>'), 
+                'event_name': event.get('name', '<NONE>'),
                 'description': event.get('description', '<NONE>'),
                 'start_time': processed_time(event.get('start_time', '<NONE>')),
                 'end_time': processed_time(event.get('end_time', '<NONE>')),
@@ -115,7 +116,7 @@ def get_event_categories_by_date(date):
     date_regex_obj = construct_date_regex(date)
     if not date_regex_obj:
         return jsonify({'error': 'Invalid date string to be parsed.'})
-    
+
     events_cursor = events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -143,7 +144,7 @@ def get_events_by_category_and_date():
     # Handle event category
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
-    
+
     events_cursor = events_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -154,7 +155,7 @@ def get_events_by_category_and_date():
 
 # Returns JSON of events by event category
 # Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
-# Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
+# Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
 # Party, Religion, Shopping, Sports, Theater, Wellness
 # Conference, Lecture, Neighborhood, Networking
 @Events.route('/api/event-categories', methods=['GET'])
@@ -163,7 +164,7 @@ def get_event_categories():
     # TODO: sort by quantity?
     uniqueList = []
     output = []
-    
+
     events_cursor = events_collection.find({"category": {"$exists": True}})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -254,7 +255,7 @@ def process_event_info(event):
             'type': 'Point'
         },
         'properties': {
-            'event_name': event.get('name', '<NONE>'), 
+            'event_name': event.get('name', '<NONE>'),
             'description': event.get('description', '<NONE>'),
             'start_time': processed_time(event.get('start_time', '<NONE>')),
             'end_time': processed_time(event.get('end_time', '<NONE>')),
