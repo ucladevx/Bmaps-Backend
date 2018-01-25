@@ -20,6 +20,15 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Login, build, and push image to AWS
   - `make push`
 
+## How to Run Backend Locally
+- Build and run container
+  - `make dev`
+- Navigate to `localhost`
+- Access flask api directly at port 5000
+  - Use `localhost:5000/api/<insert_api_route_here>`
+  - e.g. `localhost:5000/api/events`
+- Stop running with `CTRL+C` or `make stop` in a separate terminal window
+
 ## More Info
 - Checkout the [frontend](https://github.com/ucladevx/Mappening-Frontend) repository
 - Checkout the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
