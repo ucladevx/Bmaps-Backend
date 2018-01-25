@@ -7,7 +7,7 @@ ecr-login:
 
 # Build backend image
 build:
-	docker build . -t mappening/$(APP_NAME)
+	docker build ./python_app -t mappening/$(APP_NAME)
 
 # Login, build, and push latest image to AWS
 push: ecr-login build
