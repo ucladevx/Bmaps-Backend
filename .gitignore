@@ -1,6 +1,5 @@
 # Mappening
 id_rsa_mappening.pem
-./python_app/secrets.json
 
 # Debug Output
 *.json

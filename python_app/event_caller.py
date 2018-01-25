@@ -3,16 +3,15 @@ import json
 import time, datetime
 from pprint import pprint
 import json
-
-data = json.load(open('secrets.json'))
+import os
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
-FACEBOOK_APP_ID = data['FACEBOOK_APP_ID']
-FACEBOOK_APP_SECRET = data['FACEBOOK_APP_SECRET']
+FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
 SEARCH_URL = BASE_URL + 'search'
