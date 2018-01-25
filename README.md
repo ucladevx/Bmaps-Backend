@@ -12,7 +12,8 @@ A single platform for events across campus. Mappening helps raise awareness of e
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
 - Clone this repository 
-  - `git clone https://github.com/ucladevx/Mappening-Backend.git`  
+  - `git clone https://github.com/ucladevx/Mappening-Backend.git`
+- Get the `.env` file which contains sensitive information from a dev and add it to python_app/
 
 ## How to Push Image to AWS ECS
 - Enter the repository
@@ -30,6 +31,6 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Stop running with `CTRL+C` or `make stop` in a separate terminal window
 
 ## More Info
-- Checkout the [frontend](https://github.com/ucladevx/Mappening-Frontend) repository
-- Checkout the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
+- Check out the [frontend](https://github.com/ucladevx/Mappening-Frontend) repository
+- Check out the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
   - Contains instructions for local development and production
