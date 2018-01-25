@@ -3,6 +3,14 @@
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS, cross_origin
 
+import os
+from dotenv import load_dotenv
+
+# Get environment vars for keeping sensitive info secure
+# Has to come before blueprints that use the env vars
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 from facebookAuth import FbAuth
 from users import Users
 from events import Events, populate_ucla_events_database
@@ -13,21 +21,19 @@ import schedule
 import time
 from threading import Thread
 
-data = json.load(open('secrets.json'))
-
 # Configure app and register blueprints
 app = Flask(__name__)
 app.register_blueprint(FbAuth)
 app.register_blueprint(Users)
 app.register_blueprint(Events)
-app.config['SECRET_KEY'] = data['APP_SECRET_KEY']
+app.config['SECRET_KEY'] = os.getenv('APP_SECRET_KEY')
 
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(app)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = data['MLAB_USERNAME']
-MLAB_PASSWORD = data['MLAB_PASSWORD']
+MLAB_USERNAME = os.getenv('MLAB_USERNAME')
+MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
 
 uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
