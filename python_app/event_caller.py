@@ -4,6 +4,9 @@ import time, datetime
 from pprint import pprint
 import json
 
+# for sys.exit()
+import sys
+
 data = json.load(open('secrets.json'))
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
@@ -40,6 +43,7 @@ def format_time(time):
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
 def get_event_time_bounds():
+    # back_jump = 60    # for repeating events that started a long time ago
     back_jump = 1       # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
     forward_jump = 60   # and 60 days into the future
     now = datetime.datetime.now()
@@ -57,7 +61,9 @@ def get_app_token():
     if resp.status_code != 200:
         print('Error in getting access code! Status code {}'.format(resp.status_code))
         return ''
-    return resp.json()['access_token']
+    # don't use app access token for now, not allowed to search groups
+    # return resp.json()['access_token']
+    return USER_ACCESS_TOKEN
 
 # if zip code, check in UCLA zip codes (first 5 digits)
 # if no zip code, check that in Los Angeles, CA
@@ -199,6 +205,7 @@ def get_events_from_pages(pages_by_id, app_access_token):
     # page_id = keys to pages_by_id dictionary
     id_list = []
     id_jsons = {}
+    # pages_by_id is dict of page IDs to names
     for i, page_id in enumerate(pages_by_id):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
@@ -233,6 +240,35 @@ def get_events_from_pages(pages_by_id, app_access_token):
         'access_token': app_access_token
     }
     all_entity_info = []
+
+    """
+    id_jsons is dict from each PAGE ID to all the events on that page
+    So, id_jsons.values() takes all "page_id" values (dicts themselves) and turns into list
+    format of id_jsons:
+    {
+        "page_id_1": {
+            "events": {
+                "data": [ {
+                    "hoster": {
+                        "id": <page_id>,
+                        "name": <page_name>,
+                        ...
+                    }
+                },
+                ... ],
+                "paging": {
+                    "cursors": {},
+                    "next": <URL>,
+                    "previous": <URL>
+                }
+            }
+            "id": <page_id>,
+            "name": <page_name>
+        },
+        "page_id_2": { ... },
+        ...
+    }
+    """
     for page_info in id_jsons.values():
         single_entity_info = {}
         single_entity_info['id'] = page_info['id']
@@ -301,9 +337,31 @@ def get_events_from_pages(pages_by_id, app_access_token):
     #     json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return all_entity_info, total_events.values()
 
+# called from events.py AFTER get_facebook_events, app_access_token passed back in from events.py
+# event_ids_to_entities = dict, all event IDs relevant mapped to all their hosting page info dicts
+def update_current_events(event_ids_to_entities, app_access_token):
+    sub_event_call_args = {
+        'fields': ','.join(EVENT_FIELDS),
+        'access_token': app_access_token
+    }
+    # take out the IDs (keys) of the events dict
+    sub_event_call_args['ids'] = ','.join(event_ids_to_entities.keys())
+    resp = s.get(BASE_EVENT_URL, params=sub_event_call_args)
+    # print(resp.url)
+    if resp.status_code != 200:
+        print('Error trying to update data of current multi-day events: Status code {0}'.format(resp.status_code))
+        # return empty list: couldn't get any updated info
+        return []
+    sub_event_dict = resp.json()
+    # add back in the "hoster" attribute of each event (info about the page that posted the event)
+    for event_key in sub_event_dict:
+        sub_event_dict[event_key]["hoster"] = event_ids_to_entities[event_key]
+    # turn dict into list
+    return sub_event_list.values()
+
 def get_facebook_events():
-    # app_access_token = get_app_token()
-    app_access_token = USER_ACCESS_TOKEN
+    app_access_token = get_app_token()
+    # app_access_token = USER_ACCESS_TOKEN
     
     # search for UCLA-associated places and groups
     # limit to as high as possible, go until no pages left
@@ -320,5 +378,5 @@ def get_facebook_events():
     return total_event_object
 
 if __name__ == '__main__':
-    pprint(get_facebook_events()['metadata'])
+    pprint(get_facebook_events())
 

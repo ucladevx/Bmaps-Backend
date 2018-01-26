@@ -295,6 +295,7 @@ def populate_ucla_events_database():
     print('Call to populate database with events.')
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
+    access_token = event_caller.get_app_token()
 
     # load all current events from DB as list, process here, then push all back in
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
