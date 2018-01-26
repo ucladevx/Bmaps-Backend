@@ -9,8 +9,7 @@ import requests, urllib
 import time, datetime, dateutil.parser
 import event_caller
 import json
-
-data = json.load(open('secrets.json'))
+import os
 
 Events = Blueprint('Events', __name__)
 
@@ -18,12 +17,12 @@ Events = Blueprint('Events', __name__)
 cors = CORS(Events)
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
-FACEBOOK_APP_ID = data['FACEBOOK_APP_ID']
-FACEBOOK_APP_SECRET = data['FACEBOOK_APP_SECRET']
+FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = data['MLAB_USERNAME']
-MLAB_PASSWORD = data['MLAB_PASSWORD']
+MLAB_USERNAME = os.getenv('MLAB_USERNAME')
+MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
 
 uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 

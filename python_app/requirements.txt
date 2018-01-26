@@ -6,3 +6,4 @@ pymongo
 requests
 python-dateutil
 schedule
+python-dotenv

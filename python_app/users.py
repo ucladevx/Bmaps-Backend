@@ -5,8 +5,7 @@ from flask_cors import CORS, cross_origin
 from datetime import datetime
 import pymongo
 import json
-
-data = json.load(open('secrets.json'))
+import os
 
 Users = Blueprint('Users', __name__)
 
@@ -14,8 +13,8 @@ Users = Blueprint('Users', __name__)
 cors = CORS(Users)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = data['MLAB_USERNAME']
-MLAB_PASSWORD = data['MLAB_PASSWORD']
+MLAB_USERNAME = os.getenv('MLAB_USERNAME')
+MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
 
 uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
