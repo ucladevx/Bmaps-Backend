@@ -16,10 +16,6 @@ Events = Blueprint('Events', __name__)
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(Events)
 
-# Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
-FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
-FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
-
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 MLAB_USERNAME = os.getenv('MLAB_USERNAME')
 MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
