@@ -4,11 +4,11 @@
 A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising. 
 
 ## Built With
+- Python 2.7.14
 - Flask (Port 5000): Web microframework for Python
 - mLab: Database-as-a-Service cloud-hosted MongoDB
 - Pymongo: Database Connector between MongoDB and Flask
 - AWS EC2/Elastic Container Service for deployment
-- Python 2.7.14
 
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
