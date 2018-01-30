@@ -1,3 +1,5 @@
+#TODO: use this to replace the repetition in all these files
+
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
