@@ -284,6 +284,12 @@ def processed_time(old_time_str):
     res_time_str = datetime.datetime.strftime(time_obj, '%a, %d %b %Y %H:%M:%S GMT%z')
     return res_time_str
 
+# TODO: new endpoint to manually add Facebook page to DB
+# use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
+# then use Flask's request.args.get('key', ''), http://flask.pocoo.org/docs/0.12/quickstart/#the-request-object
+# Call event_caller's add_facebook_page() to find the official info from Graph API,
+# returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
+
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
