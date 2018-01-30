@@ -8,6 +8,16 @@ import json
 import sys
 import os
 
+# for testing just this file
+# COMMENT IT OUT IF RUNNING DOCKER
+from dotenv import load_dotenv
+
+# Get environment vars for keeping sensitive info secure
+# Has to come before blueprints that use the env vars
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
@@ -41,10 +51,10 @@ def format_time(time):
     # %z gets time zone difference in +/-HHMM from UTC
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
-def get_event_time_bounds():
-    # back_jump = 60    # for repeating events that started a long time ago
-    back_jump = 1       # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
-    forward_jump = 60   # and 60 days into the future
+def get_event_time_bounds(days_before=1):
+    # back_jump = 60        # for repeating events that started a long time ago
+    back_jump = days_before # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
+    forward_jump = 60       # and 60 days into the future
     now = datetime.datetime.now()
     before_time = now - datetime.timedelta(days=back_jump)
     after_time = now + datetime.timedelta(days=forward_jump)
@@ -163,6 +173,49 @@ def find_ucla_entities(app_access_token):
 
     return ucla_entities
 
+# TODO: add facebook page by exact name that appears in URL, or ID
+"""
+RULES TO INSERT:
+In General: to GUARANTEE the ID, Inspect Element
+    --> under <head> tag, find <meta property=... content="fb://group OR page/?id=<id>">
+    ** may need some scrolling
+Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
+Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
+Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
+"""
+def add_facebook_page(page_type='group', id='', name=''):
+    page_id = str(id)
+    # convert integer IDs to strings
+    # if no info given then just don't do anything
+    if not page_id and not name:
+        return {}
+
+    app_access_token = get_app_token()
+    
+    # if ID given, always use that
+    # call API directly with just the ID, should work
+    if page_id:
+        return {}
+
+    search_args = {
+        'limit': '3',   # want small limit, since only expecting 1 page anyway
+        'fields': 'name',
+        'access_token': app_access_token
+    }
+
+    # by here, must have a name to search
+    if page_type == 'page':
+        # try call API directly, but if not alias, will give error
+        # in that case, need to search, try both pages and places
+        return {}
+    elif page_type == 'group':
+        search_args['type'] = 'group'
+        return {}
+    elif page_type == 'place':
+        search_args['type'] = 'place'
+        return {}
+    return {}
+
 def get_events_from_pages(pages_by_id, app_access_token):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
@@ -176,7 +229,10 @@ def get_events_from_pages(pages_by_id, app_access_token):
     # so trick is: make sure event is searched up before start time passes, extract all
     # sub-events (which have own start and end time), store in db and don't delete until
     # THOSE start times are passed
+
+    # can pass in # days before now to include in search, too
     time_window = get_event_time_bounds()
+    
     # find events in certain time range, get place + attendance info + time + other info
     # use FB API's nested queries, get subfields of events by braces and comma-separated keys
     # when using format on string, put {{}} for literal curly braces, then inside put variable argument,
@@ -243,18 +299,20 @@ def get_events_from_pages(pages_by_id, app_access_token):
     """
     id_jsons is dict from each PAGE ID to all the events on that page
     So, id_jsons.values() takes all "page_id" values (dicts themselves) and turns into list
-    format of id_jsons:
+    FORMAT of id_jsons:
     {
         "page_id_1": {
             "events": {
-                "data": [ {
-                    "hoster": {
-                        "id": <page_id>,
-                        "name": <page_name>,
-                        ...
-                    }
-                },
-                ... ],
+                "data": [
+                    {
+                        "hoster": {
+                            "id": <page_id>,
+                            "name": <page_name>,
+                        }
+                        more events info ...
+                    },
+                    more events ...
+                ],
                 "paging": {
                     "cursors": {},
                     "next": <URL>,
@@ -269,13 +327,11 @@ def get_events_from_pages(pages_by_id, app_access_token):
     }
     """
     for page_info in id_jsons.values():
-        single_entity_info = {}
-        single_entity_info['id'] = page_info['id']
-        single_entity_info['name'] = page_info['name']
+        host_entity_info = {}
+        host_entity_info['id'] = page_info['id']
+        host_entity_info['name'] = page_info['name']
+        # case where no events to get from this page, at this time
         if 'events' not in page_info:
-            # no events = 0 count
-            single_entity_info['events_count'] = 0
-            all_entity_info.append(single_entity_info)
             continue
         events_list = page_info['events']
 
@@ -283,11 +339,10 @@ def get_events_from_pages(pages_by_id, app_access_token):
             print('Missing data field from event results of page {0}!'.format(pages_by_id[page_id]))
             continue
         # only want events with the specified accepted location within UCLA
-        # event is a dict of a bunch of attributes for each event
-        event_count = 0
+        # 'event' is a dict of a bunch of attributes for each event
         for event in events_list['data']:
             if 'place' not in event or 'location' not in event['place']:
-                # many places have location in name only, TODO: get these out
+                # many places have location in name only, TODO: get these out with ML
                 continue
             if entity_in_right_location(event['place']['location']):
                 # check for multi-day events, need API call again
@@ -319,7 +374,6 @@ def get_events_from_pages(pages_by_id, app_access_token):
                     sub_event_list.append(event)
 
                 for event_occurrence in sub_event_list:
-                    event_count += 1    # count any events associated to current page, in actual location
                     if event_occurrence['id'] not in total_events:
                         # clean the category attribute if needed
                         if 'category' in event_occurrence:
@@ -327,18 +381,19 @@ def get_events_from_pages(pages_by_id, app_access_token):
                                 event_occurrence['category'] = event_occurrence['category'][6:]
                             elif event_occurrence['category'].endswith('_EVENT'):
                                 event_occurrence['category'] = event_occurrence['category'][:-6]
+                        # save from which page / group this event was found
+                        event_occurrence['hoster'] = host_entity_info
                         total_events[event_occurrence['id']] = event_occurrence
-        # only count "useful" events: actually located around UCLA
-        single_entity_info['events_count'] = event_count
-        all_entity_info.append(single_entity_info)
 
     # with open('page_stats.json', 'w') as outfile:
     #     json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
-    return all_entity_info, total_events.values()
+    return total_events.values()
 
 # called from events.py AFTER get_facebook_events, app_access_token passed back in from events.py
 # event_ids_to_entities = dict, all event IDs relevant mapped to all their hosting page info dicts
-def update_current_events(event_ids_to_entities, app_access_token):
+def update_current_events(event_ids_to_entities):
+    app_access_token = get_app_token()
+
     sub_event_call_args = {
         'fields': ','.join(EVENT_FIELDS),
         'access_token': app_access_token
@@ -371,11 +426,13 @@ def get_facebook_events():
     pages_by_id = find_ucla_entities(app_access_token)
 
     # turn event ID dict to array of their values
-    all_pages, all_events = get_events_from_pages(pages_by_id, app_access_token)
+    all_events = get_events_from_pages(pages_by_id, app_access_token)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
-    total_event_object = {'events': all_events, 'pages': all_pages, 'metadata': {'events': len(all_events), 'pages': len(all_pages)}}
+    total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     return total_event_object
 
 if __name__ == '__main__':
-    pprint(get_facebook_events())
+    res = get_facebook_events()
+    pprint(res['events'][:10])
+    print("Total event count: {0}".format(res['metadata']['events']))
 
