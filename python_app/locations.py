@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
+import requests
 import pymongo
 import json
 import os
@@ -8,6 +9,9 @@ Locations = Blueprint('Locations', __name__)
 
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(Locations)
+
+# Google API Key
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 MLAB_USERNAME = os.getenv('MLAB_USERNAME')
@@ -115,9 +119,40 @@ def db_locations():
                 locations_collection.insert_one(new_loc)
     return "Finished updating db!"
 
-# Given address/name, return all possible matching places
-@Locations.route('/api/map_locations')
-def get_map_locations():
-    # https://maps.googleapis.com/maps/api/place/textsearch/json?query=Bruin+Bear+UCLA&location=34.070966,-118.445&radius=500&key=AIzaSyCCyTRUan4gwknFSc70tN5xCT_HnFPadIc
-    # https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=34.070966,-118.445&radius=500&keyword=Bruin+Bear+UCLA&key=AIzaSyCCyTRUan4gwknFSc70tN5xCT_HnFPadIc
-    return "NO"
+# Run Google Maps TextSearch on given query
+@Locations.route('/api/place_textSearch/<place_query>', methods=['GET'])
+def get_textsearch(place_query):
+    CENTER_LATITUDE = "34.070966"
+    CENTER_LONGITUDE = "-118.445"
+    RADIUS = "2000"
+    # UCLA School of Theater, Film and Television is within radius of 700 
+    # Hammer museum within 1300 radius
+    # Saffron and rose 1800
+
+    TextSearch_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
+
+    textSearch = TextSearch_URL + "query=" + place_query + "&location=" + CENTER_LATITUDE + "," + CENTER_LONGITUDE + "&radius=" + RADIUS + "&key=" + GOOGLE_API_KEY
+
+    resultsPage = requests.get(textSearch)
+    resultsJSON = json.loads(resultsPage.content)
+
+    return jsonify({'results': resultsJSON})
+
+# Run Google Maps NearbySearch on given query
+@Locations.route('/api/place_nearbySearch/<place_query>', methods=['GET'])
+def get_nearbysearch(place_query):
+    CENTER_LATITUDE = "34.070966"
+    CENTER_LONGITUDE = "-118.445"
+    RADIUS = "2000"
+    # UCLA School of Theater, Film and Television is within radius of 700 
+    # Hammer museum within 1300 radius
+    # Saffron and rose 1800
+
+    NearbySearch_URL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
+
+    nearbySearch = NearbySearch_URL + "location=" + CENTER_LATITUDE + "," + CENTER_LONGITUDE + "&radius=" + RADIUS + "&keyword=" + place_query + "&key=" + GOOGLE_API_KEY
+
+    resultsPage = requests.get(nearbySearch)
+    resultsJSON = json.loads(resultsPage.content)
+
+    return jsonify({'results': resultsJSON})
