@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests
+import re
 import pymongo
 import json
 import os
+
+data = json.load(open('data.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -128,7 +131,93 @@ def get_coordinates(place_query):
     # Do google api search
     # Check reasonableness of results
     # add as location to db
+    # TODO
     return 0
+
+# Fill out json data using google api results
+# Warning: pretty slow
+@Locations.route('/api/location_data', methods=['GET'])
+def get_location_data():
+  # return jsonify(data)
+
+  places = []
+  updated_places = []
+
+  # Go through every location
+  for location in data['locations']:
+    place = location
+    # No street or zip information, try to find it
+    if location['street'] == '' or location['zip'] == '':
+      if 'name' in location:
+        search_results = google_textSearch(location['name'])
+        if search_results:
+          # Assume first result is best result
+          place['street'] = search_results[0]['address']
+          place['zip'] = re.search(r'.*(\d{5}(\-\d{4})?)$', place['street'])
+          updated_places.append(place)
+      else:
+        place['street'] = "NO STREET"
+        place['zip'] = "NO ZIP"
+    # Check if latitude/longitude is filled out
+    if location['latitude'] == 420 or location['longitude'] == 420:
+      if 'name' in location:
+        search_results = google_textSearch(location['name'])
+        if search_results:
+          if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+            place['latitude'] = 404
+            place['longitude'] = 404
+          else:
+            place['latitude'] = search_results[0]['latitude']
+            place['longitude'] = search_results[0]['longitude']
+            updated_places.append(place)
+      elif place['street'] != "NO STREET" and place['street'] != '':
+        search_results = google_textSearch(place['street'])
+        if search_results:
+          if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+            place['latitude'] = 404
+            place['longitude'] = 404
+          else:
+            place['latitude'] = search_results[0]['latitude']
+            place['longitude'] = search_results[0]['longitude']
+            updated_places.append(place)
+      else:
+        place['latitude'] = 666
+        place['longitude'] = 666
+    places.append(place)
+
+  return jsonify({"locations": places, "changed locations": updated_places})
+
+# Make relevant google api calls and add locations to db
+@Locations.route('/api/google_locations', methods=['GET'])
+def add_google_locations():
+  # TODO
+  return 0
+
+def google_textSearch(place_query):
+    CENTER_LATITUDE = "34.070966"
+    CENTER_LONGITUDE = "-118.445"
+    RADIUS = "2000"
+    # UCLA School of Theater, Film and Television is within radius of 700 
+    # Hammer museum within 1300 radius
+    # Saffron and rose 1800
+
+    TextSearch_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
+
+    textSearch = TextSearch_URL + "query=" + place_query + "&location=" + CENTER_LATITUDE + "," + CENTER_LONGITUDE + "&radius=" + RADIUS + "&key=" + GOOGLE_API_KEY
+
+    resultsPage = requests.get(textSearch)
+    resultsJSON = json.loads(resultsPage.content)
+
+    output = []
+    for result in resultsJSON['results']:
+      output.append({
+          'name': result.get('name', "NO NAME"),
+          'address': result.get('formatted_address', "NO ADDRESS"),
+          'latitude': result['geometry']['location'].get('lat', "NO LATITUDE"),
+          'longitude': result['geometry']['location'].get('lng', "NO LONGITUDE")
+      })
+
+    return output
 
 # Run Google Maps TextSearch on given query
 @Locations.route('/api/place_textSearch/<place_query>', methods=['GET'])
@@ -180,7 +269,7 @@ def get_nearbysearch(place_query):
     for result in resultsJSON['results']:
       output.append({
           'name': result.get('name', "NO NAME"),
-          'address': result.get('formatted_address', "NO ADDRESS"),
+          'address': result.get('vicinity', "NO ADDRESS"),
           'latitude': result['geometry']['location'].get('lat', "NO LATITUDE"),
           'longitude': result['geometry']['location'].get('lng', "NO LONGITUDE")
       })
