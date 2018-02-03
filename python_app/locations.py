@@ -119,6 +119,17 @@ def db_locations():
                 locations_collection.insert_one(new_loc)
     return "Finished updating db!"
 
+# Given a location string try to return coordinates/relevant location info
+@Locations.route('/api/coordinates/<place_query>', methods=['GET'])
+def get_coordinates(place_query):
+    # Check database for matches (case insensitive) in names or alternative names
+    # Strip number?
+
+    # Do google api search
+    # Check reasonableness of results
+    # add as location to db
+    return 0
+
 # Run Google Maps TextSearch on given query
 @Locations.route('/api/place_textSearch/<place_query>', methods=['GET'])
 def get_textsearch(place_query):
@@ -136,7 +147,17 @@ def get_textsearch(place_query):
     resultsPage = requests.get(textSearch)
     resultsJSON = json.loads(resultsPage.content)
 
-    return jsonify({'results': resultsJSON})
+    output = []
+    for result in resultsJSON['results']:
+      output.append({
+          'name': result.get('name', "NO NAME"),
+          'address': result.get('formatted_address', "NO ADDRESS"),
+          'latitude': result['geometry']['location'].get('lat', "NO LATITUDE"),
+          'longitude': result['geometry']['location'].get('lng', "NO LONGITUDE")
+      })
+
+    return jsonify({'results': output})
+    # return jsonify({'results': resultsJSON})
 
 # Run Google Maps NearbySearch on given query
 @Locations.route('/api/place_nearbySearch/<place_query>', methods=['GET'])
@@ -155,4 +176,14 @@ def get_nearbysearch(place_query):
     resultsPage = requests.get(nearbySearch)
     resultsJSON = json.loads(resultsPage.content)
 
-    return jsonify({'results': resultsJSON})
+    output = []
+    for result in resultsJSON['results']:
+      output.append({
+          'name': result.get('name', "NO NAME"),
+          'address': result.get('formatted_address', "NO ADDRESS"),
+          'latitude': result['geometry']['location'].get('lat', "NO LATITUDE"),
+          'longitude': result['geometry']['location'].get('lng', "NO LONGITUDE")
+      })
+
+    return jsonify({'results': output})
+    # return jsonify({'results': resultsJSON})
