@@ -77,7 +77,7 @@ def get_events_for_search(search_term):
                 'category': event.get('category', '<NONE>'),
             }})
     else:
-        print "No event(s) matched '{}'".format(search_term)
+        print("No event(s) matched '{0}'".format(search_term))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of singular event by event name
@@ -120,7 +120,7 @@ def get_event_categories_by_date(date):
         for category in uniqueList:
             output.append({"category": category})
     else:
-        print 'Cannot find any events with categories!'
+        print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
 # Returns JSON of events by event category & date
@@ -145,7 +145,7 @@ def get_events_by_category_and_date():
         for event in events_cursor:
             output.append(process_event_info(event))
     else:
-        print 'Cannot find any events with matching category and date!'
+        print('Cannot find any events with matching category and date!')
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 # Returns JSON of events by event category
@@ -168,7 +168,7 @@ def get_event_categories():
         for category in uniqueList:
             output.append({"category": category})
     else:
-        print 'Cannot find any events with categories!'
+        print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
 # Returns JSON of currently existing event categories
@@ -192,7 +192,7 @@ def construct_date_regex(raw_date):
         time_obj = dateutil.parser.parse(raw_date)
     except ValueError:
         # Got invalid date string
-        print 'Invalid date string, cannot be parsed!'
+        print('Invalid date string, cannot be parsed!')
         return None
 
     # Get the date string by YYYY-MM-DD format
@@ -219,7 +219,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
         else:
             # careful: output is still empty here; make sure output list never set ANYWHERE else
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
-            print 'No single event with attribute {0}: value {1}'.format(find_key, find_value)
+            print('No single event with attribute {0}: value {1}'.format(find_key, find_value))
     else:
         events_cursor = events_collection.find(search_pair)
         if events_cursor.count() > 0:
@@ -233,7 +233,7 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
-            print 'No events found with search pair {0}: {1}.'.format(find_key, find_value)
+            print('No events found with search pair {0}: {1}.'.format(find_key, find_value))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
@@ -261,6 +261,7 @@ def process_event_info(event):
                 'interested': event['interested_count'],
                 'maybe': event['maybe_count']
             },
+            # TODO: whenever category is checked, run Jorge's online ML algorithm
             'category': event.get('category', '<NONE>'),
             'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
             'is_cancelled': event.get('is_canceled', False),
@@ -286,9 +287,43 @@ def processed_time(old_time_str):
 
 # TODO: new endpoint to manually add Facebook page to DB
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
-# then use Flask's request.args.get('key', ''), http://flask.pocoo.org/docs/0.12/quickstart/#the-request-object
 # Call event_caller's add_facebook_page() to find the official info from Graph API,
 # returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
+@Events.route('/api/add-page', methods=['GET'])
+def add_event_to_database(type):
+    page_type = request.args.get('type', default='group', type=str)
+    page_id = request.args.get('id', default='', type=str)
+    page_exact_name = request.args.get('name', default='', type=str)
+    if not page_id and not page_exact_name:
+        return 'Add a page using URL parameters id or exact name, with optional type specified (default=group, page, place).'
+
+    return 'Nothing happens yet.'
+
+# Now refresh pages we search separately, can be done way less frequently than event search
+@Events.route('/api/refresh-page-database')
+def refresh_page_database():
+    # separately run from refreshing events, also check for new pages under set of search terms
+
+    # update just like accumulated events list
+    # remember: find() just returns a cursor, not whole data structure
+    saved_pages = pages_collection.find()
+    # returns a dict of IDs to names
+    raw_page_data = event_caller.find_ucla_entities()
+
+
+    # raw_page_data = {"test_id": "test_name"}
+
+    # in contrast to raw_page_data, pages_collection is list of {"id": <id>, "name": <name>}
+    for page_id, page_name in raw_page_data.iteritems():
+        # See if event already existed
+        update_page = pages_collection.find_one({'id': page_id})
+
+        # If it existed then delete it, new event gets inserted in both cases
+        if update_page:
+            pages_collection.delete_one({'id': page_id})
+        pages_collection.insert_one({'id': page_id, 'name': page_name})
+
+    return 'Refreshed page database!'
 
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
@@ -296,52 +331,48 @@ def populate_ucla_events_database():
     print('Call to populate database with events.')
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
-    access_token = event_caller.get_app_token()
-
-    # load all current events from DB as list, process here, then push all back in
-    # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
-    # to tell if multi-day event, check "API_refresh" tag
-
-    # retrieve all data from database at once, do work here: faster than single transactions, probly
-    current_events = events_collection.find()
-    accumulated_events = total_events_collection.find()
 
     # TODO: get_facebook_events should search from existing collection of pages (in event_caller)
     # events with "API_refresh" need to call event_caller to make sure info is updated
     # THEN after events are updated to DB, update pages below (don't delete, only update or insert by ID)
-    raw_events_data = event_caller.get_facebook_events()
+
+    processed_db_events = event_caller.update_current_events(list(events_collection.find()))
+
+    new_events_data = event_caller.get_facebook_events()
     # debugging events output
     # with open('new_out.json', 'w') as outfile:
     #     json.dump(current_events, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
-    # TODO: update just like below
-    # pages_collection.delete_many({})
-    # remember: insert_many takes in a LIST of JSON objects
-    # pages_collection.insert_many(raw_events_data['pages'])
+    # Also add all new events to total_events
 
-    # metadata block has total event count
-    # insert_many takes in array of dictionaries
-    # process and format events before inserting database
-    if raw_events_data['metadata']['events'] > 0:
-        events_collection.insert_many(raw_events_data['events'])
+    # .find() returns a CURSOR, like an iterator (NOT a list or dictionary)
+    # conclusion after running some small timed tests: for our purposes and with our data sizes,
+    # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
+    # normally use incremental Cursor, to save memory usage
+    for event in new_events_data['events']:
+        # pull event out, without unnecessary _id tag
+        existing_event = events_collection.find_one({'id': event['id'], {'_id': False}})
+        
+        # sidenote: when event inserted into DB,
+        # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
 
-        # Also add all new events to total_events
-        for event in events_collection.find():
-            # to prevent many events with repeated description appearing (multi-day) and messing up the ML,
-            # only include the 1st event of each multi-day event; this happens to not have "API_refresh" tag
-            if 'API_refresh' in event:
-                continue
+        # don't need to do anything if fields haven't changed
+        if event == existing_event:
+            continue
 
-            # See if event already existed
-            update_event = total_events_collection.find_one({'id': event['id']})
+        if existing_event:
+            events_collection.delete_one({'id': event['id']})
+        events_collection.insert_one(event)
 
-            # If it existed then replace it with potentially updated event
-            if update_event:
-                total_events_collection.delete_one({'id': event['id']})
-                total_events_collection.insert_one(event)
-            # Otherwise just insert the new event
-            else:
-                total_events_collection.insert_one(event)
-    else:
-        return 'No new events to save!'
-    return 'Populated events database!'
+        # below = UPDATE: pymongo only allows update of specifically listed elements,
+        # so delete old if exists, then insert new
+
+        # See if event already existed
+        update_event = total_events_collection.find_one({'id': event['id']})
+
+        # If it existed then delete it, new event gets inserted in both cases
+        if update_event:
+            total_events_collection.delete_one({'id': event['id']})
+        total_events_collection.insert_one(event)
+
+    return 'Updated with {0} retrieved events'.format(new_events_data['metadata']['events'])
