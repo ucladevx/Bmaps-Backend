@@ -1,6 +1,7 @@
 import requests
 import json
-import time, datetime
+import time, datetime, dateutil.parser, pytz
+from dateutil.tz import tzlocal
 from pprint import pprint
 import json
 
@@ -17,6 +18,15 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+
+MLAB_USERNAME = os.getenv('MLAB_USERNAME')
+MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
+uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
+
+import pymongo
+client = pymongo.MongoClient(uri)
+db = client['mappening_data'] 
+ml_collection = db.events_ml
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
@@ -61,17 +71,19 @@ def get_event_time_bounds(days_before=1):
     return (format_time(before_time), format_time(after_time))
 
 def get_app_token():
-    token_args = {
-        'client_id': FACEBOOK_APP_ID,
-        'client_secret': FACEBOOK_APP_SECRET,
-        'grant_type': 'client_credentials'
-    }
-    resp = s.get(ACCESS_TOKEN_URL, params=token_args)
-    if resp.status_code != 200:
-        print('Error in getting access code! Status code {}'.format(resp.status_code))
-        return ''
-    # don't use app access token for now, not allowed to search groups
+    # token_args = {
+    #     'client_id': FACEBOOK_APP_ID,
+    #     'client_secret': FACEBOOK_APP_SECRET,
+    #     'grant_type': 'client_credentials'
+    # }
+    # resp = s.get(ACCESS_TOKEN_URL, params=token_args)
+    # if resp.status_code != 200:
+    #     print('Error in getting access code! Status code {}'.format(resp.status_code))
+    #     return ''
     # return resp.json()['access_token']
+
+    # don't use app access token for now, not allowed to search groups
+    # but this needs to update every 60 days!
     return USER_ACCESS_TOKEN
 
 # if zip code, check in UCLA zip codes (first 5 digits)
@@ -108,7 +120,8 @@ def general_search_results(search_term, search_args):
     return current_entities
 
 # for searching all types: place, page, and group
-def find_ucla_entities(app_access_token):
+def find_ucla_entities():
+    app_access_token = get_app_token()
     ucla_entities = {}
     # args for pages
     page_search_args = {
@@ -171,6 +184,7 @@ def find_ucla_entities(app_access_token):
             curr_url = responses['paging']['next']
         page_num += 1
 
+    # a dictionary, to keep only unique pages
     return ucla_entities
 
 # TODO: add facebook page by exact name that appears in URL, or ID
@@ -216,22 +230,23 @@ def add_facebook_page(page_type='group', id='', name=''):
         return {}
     return {}
 
-def get_events_from_pages(pages_by_id, app_access_token):
+def get_events_from_pages(pages_by_id, days_before=1):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
+    app_access_token = get_app_token()
     total_events = {}
     # time_window is tuple of start and end time of searching, since() and until() parameters
     # start time VERY IMPORTANT: all events found by search are guaranteed to start after it,
     # including the START TIME of the FIRST EVENT of MULTI DAY EVENTS
     # e.g. if an event happens weekly starting from 1/1, and the window start time is 1/2,
-    # that event will not appear at all!
+    # those later weekly events will not appear in search at all!
 
     # so trick is: make sure event is searched up before start time passes, extract all
     # sub-events (which have own start and end time), store in db and don't delete until
     # THOSE start times are passed
 
-    # can pass in # days before now to include in search, too
-    time_window = get_event_time_bounds()
+    # can pass in # days before current time, as search parameter
+    time_window = get_event_time_bounds(days_before)
     
     # find events in certain time range, get place + attendance info + time + other info
     # use FB API's nested queries, get subfields of events by braces and comma-separated keys
@@ -389,10 +404,39 @@ def get_events_from_pages(pages_by_id, app_access_token):
     #     json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return total_events.values()
 
-# called from events.py AFTER get_facebook_events, app_access_token passed back in from events.py
-# event_ids_to_entities = dict, all event IDs relevant mapped to all their hosting page info dicts
-def update_current_events(event_ids_to_entities):
+# takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
+# to account for weird timezone things, construct 2 datetime objects
+# one from simply parsing the string, and another from current time
+# required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
+# return boolean, if given time string has passed in real time
+def is_time_in_past(time_str, minutes_offset=0):
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(raw_date).astimezone(pytz.UTC)
+    except ValueError:
+        # Got invalid date string
+        print('Invalid datetime string from event \'start_time\' key, cannot be parsed!')
+        return False
+    now = datetime.datetime.now(tzlocal()).astimezone(pytz.utc)
+
+    # if time from string is smaller than now, with optional offset (in case want to keep slightly older events)
+    return time_obj <= now - datetime.timedelta(minutes=minutes_offset)
+
+# update events currently in database before new ones put in
+# means re-search API_refresh ones and remove ones too old
+# events = list of complete event dicts
+def update_current_events(events):
     app_access_token = get_app_token()
+
+    # TODO: take out events with timestamps older than now
+
+    # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
+    # to tell if multi-day event, check "API_refresh" tag
+    refresh_id_list = []
+    for event in events:
+        print(event['start_time'])
+        if event.get('API_refresh'):
+            list.append(event['id'])
 
     sub_event_call_args = {
         'fields': ','.join(EVENT_FIELDS),
@@ -410,29 +454,31 @@ def update_current_events(event_ids_to_entities):
     # add back in the "hoster" attribute of each event (info about the page that posted the event)
     for event_key in sub_event_dict:
         sub_event_dict[event_key]["hoster"] = event_ids_to_entities[event_key]
-    # turn dict into list
-    return sub_event_list.values()
+    
+    return sub_event_dict
 
-def get_facebook_events():
-    app_access_token = get_app_token()
-    # app_access_token = USER_ACCESS_TOKEN
+def get_facebook_events(days_before=1):
     
     # search for UCLA-associated places and groups
-    # limit to as high as possible, go until no pages left
-    # type = places: give center coordinates (of Bruin Bear), distance 1000 (in meters), limit max 100
-    # type = pages: search with reserved terms, limit = 1000, check location as well
-    # 2 types of places: ones with events, ones without, cannot do anything about without events
-    # pre-filtering: only store places / pages with UCLA zip code, or LA CA, or no place at all (filter events later)
-    pages_by_id = find_ucla_entities(app_access_token)
+    pages_by_id = find_ucla_entities()
 
     # turn event ID dict to array of their values
-    all_events = get_events_from_pages(pages_by_id, app_access_token)
+    all_events = get_events_from_pages(pages_by_id, days_before)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
+    print("Total event count: {0}".format(res['metadata']['events']))
     return total_event_object
+
+# TODO: add to large database of any events, for ML
+def find_many_events():
+    raw_events = get_facebook_events(730)
+    ml_collection.delete_many({})
+    ml_collection.insert_many(raw_events['events'])
+    print('Found {0} events'.format(raw_events['metadata']['events']))
 
 if __name__ == '__main__':
     res = get_facebook_events()
     pprint(res['events'][:10])
-    print("Total event count: {0}".format(res['metadata']['events']))
+    
+    # find_many_events()
 
