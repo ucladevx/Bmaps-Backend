@@ -6,7 +6,7 @@ import pymongo
 import json
 import os
 
-data = json.load(open('data.json'))
+data = json.load(open('sampleData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
