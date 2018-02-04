@@ -24,7 +24,7 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-events_collection = db.generic_test
+events_collection = db.map_events
 pages_collection = db.saved_pages
 total_events_collection = db.total_events
 
