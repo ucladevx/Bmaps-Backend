@@ -10,14 +10,14 @@ import sys
 import os
 
 # for testing just this file
-# COMMENT IT OUT IF RUNNING DOCKER
+# -----------------------------------------------------------
 from dotenv import load_dotenv
 
 # Get environment vars for keeping sensitive info secure
 # Has to come before blueprints that use the env vars
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
-
+# -----------------------------------------------------------
 
 MLAB_USERNAME = os.getenv('MLAB_USERNAME')
 MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
@@ -25,8 +25,9 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 
 import pymongo
 client = pymongo.MongoClient(uri)
-db = client['mappening_data'] 
+db = client['mappening_data']
 ml_collection = db.events_ml
+pages_collection = db.saved_pages
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
@@ -234,7 +235,7 @@ def get_events_from_pages(pages_by_id, days_before=1):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
     app_access_token = get_app_token()
-    total_events = {}
+
     # time_window is tuple of start and end time of searching, since() and until() parameters
     # start time VERY IMPORTANT: all events found by search are guaranteed to start after it,
     # including the START TIME of the FIRST EVENT of MULTI DAY EVENTS
@@ -298,18 +299,11 @@ def get_events_from_pages(pages_by_id, days_before=1):
                 'Error getting events from FB pages, starting at {0}! Status code {1}'
                 .format(pages_by_id[page_id], resp.status_code)
             )
-            break
+            continue
         curr_jsons = resp.json()
         # pprint(curr_jsons)
         id_jsons.update(curr_jsons)
         id_list = []
-
-    # URL parameters for extra API calls of multi day events
-    sub_event_call_args = {
-        'fields': ','.join(EVENT_FIELDS),
-        'access_token': app_access_token
-    }
-    all_entity_info = []
 
     """
     id_jsons is dict from each PAGE ID to all the events on that page
@@ -324,6 +318,7 @@ def get_events_from_pages(pages_by_id, days_before=1):
                             "id": <page_id>,
                             "name": <page_name>,
                         }
+                        <optional> "duplicate_occurrence": True
                         more events info ...
                     },
                     more events ...
@@ -341,6 +336,7 @@ def get_events_from_pages(pages_by_id, days_before=1):
         ...
     }
     """
+    total_events = {}
     for page_info in id_jsons.values():
         host_entity_info = {}
         host_entity_info['id'] = page_info['id']
@@ -353,63 +349,86 @@ def get_events_from_pages(pages_by_id, days_before=1):
         if 'data' not in events_list:
             print('Missing data field from event results of page {0}!'.format(pages_by_id[page_id]))
             continue
-        # only want events with the specified accepted location within UCLA
+        
         # 'event' is a dict of a bunch of attributes for each event
         for event in events_list['data']:
-            if 'place' not in event or 'location' not in event['place']:
-                # many places have location in name only, TODO: get these out with ML
-                continue
-            if entity_in_right_location(event['place']['location']):
-                # check for multi-day events, need API call again
-                sub_event_list = []
-                if 'event_times' in event:
-                    # need to call URL with reduced arguments, since most info is same as main event
-                    # batch call with multiple IDs: slightly faster from less network traffic, Facebook's end
-                    sub_ids = []
-                    for sub_event_header in event['event_times']:
-                        sub_ids.append(sub_event_header['id'])
-                    sub_event_call_args['ids'] = ','.join(sub_ids)
-                    resp = s.get(BASE_EVENT_URL, params=sub_event_call_args)
-                    # print(resp.url)
-                    if resp.status_code != 200:
-                        print(
-                            'Error trying to retrieve sub-event data of event {0}: Status code {1}'
-                            .format(event['id'], resp.status_code)
-                        )
-                        # just skip this multi-day event if sub-events not successfully retrieved
-                        continue
-                    sub_event_list = resp.json().values()
-                    # add special "API_refresh" tag for event occurrences in the future that
-                    # won't be searchable, because the 1st event start time has passed already
-                    # don't need to refresh for the 1st event, since that matches the total event start time
-                    for e, sub_event in enumerate(sub_event_list):
-                        if sub_event['start_time'] != event['start_time']:
-                            sub_event['API_refresh'] = True
-                else:
-                    sub_event_list.append(event)
-
-                for event_occurrence in sub_event_list:
-                    if event_occurrence['id'] not in total_events:
-                        # clean the category attribute if needed
-                        if 'category' in event_occurrence:
-                            if event_occurrence['category'].startswith('EVENT_'):
-                                event_occurrence['category'] = event_occurrence['category'][6:]
-                            elif event_occurrence['category'].endswith('_EVENT'):
-                                event_occurrence['category'] = event_occurrence['category'][:-6]
-                        # save from which page / group this event was found
-                        event_occurrence['hoster'] = host_entity_info
-                        total_events[event_occurrence['id']] = event_occurrence
+            # don't specifically ignore repeat events, would update dict anyway (instead of duplicating)
+            total_events.update(process_event(event, host_entity_info))
 
     # with open('page_stats.json', 'w') as outfile:
-    #     json.dump(all_entity_info, outfile, indent=4, sort_keys=True, separators=(',', ': '))
+    #     json.dump(total_events, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return total_events.values()
+
+# takes in event dict ({many attributes: values}), returns dict of event dicts from event id to all info
+# passes in other data for manually added fields (NOT from FB, but for our own purposes)
+def process_event(event, host_info, add_duplicate_tag=False):
+    app_access_token = get_app_token()
+
+    # URL parameters for refreshing / updating events info, including subevents
+    sub_event_call_args = {
+        'fields': ','.join(EVENT_FIELDS),
+        'access_token': app_access_token
+    }
+
+    # only want events with the specified accepted location within UCLA
+    if 'place' not in event or 'location' not in event['place']:
+        # many places have location in name only
+        # TODO: get these out with ML
+        return {}
+    if not entity_in_right_location(event['place']['location']):
+        return {}
+
+    # for when updating old events and transferring manually added tags over
+    if add_duplicate_tag:
+        event['duplicate_occurrence'] = True
+
+    expanded_event_dict = {}
+    # check for multi-day events, need API call again
+    if 'event_times' in event:
+        # need to call API again for event fields
+        # batch call with multiple IDs: slightly faster from less network traffic, Facebook's end
+        sub_ids = []
+        for sub_event_header in event['event_times']:
+            sub_ids.append(sub_event_header['id'])
+        sub_event_call_args['ids'] = ','.join(sub_ids)
+
+        resp = s.get(BASE_EVENT_URL, params=sub_event_call_args)
+        # print(resp.url)
+        if resp.status_code != 200:
+            print(
+                'Error trying to retrieve sub-event data of event {0}: Status code {1}'
+                .format(event['id'], resp.status_code)
+            )
+            # just skip this multi-day event if sub-events not successfully retrieved
+            return {}
+        expanded_event_dict = resp.json()
+        # add special "duplicate_occurrence" tag for event occurrences in the future that
+        # won't be searchable, because the 1st event start time has passed already
+        # don't need to refresh for the 1st event, since that matches the total event start time
+        for sub_event in expanded_event_dict.values():
+            # using dict.values() and editing each item in list still changes original dictionary
+            if sub_event['start_time'] != event['start_time']:
+                sub_event['duplicate_occurrence'] = True
+    else:
+        expanded_event_dict.update({event['id']: event})
+
+    for event_occurrence in expanded_event_dict.values():
+        # clean the category attribute if needed
+        if 'category' in event_occurrence:
+            if event_occurrence['category'].startswith('EVENT_'):
+                event_occurrence['category'] = event_occurrence['category'][6:]
+            elif event_occurrence['category'].endswith('_EVENT'):
+                event_occurrence['category'] = event_occurrence['category'][:-6]
+        # save from which page / group this event was found
+        event_occurrence['hoster'] = host_info
+    return expanded_event_dict
 
 # takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
 # to account for weird timezone things, construct 2 datetime objects
 # one from simply parsing the string, and another from current time
 # required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
 # return boolean, if given time string has passed in real time
-def is_time_in_past(time_str, minutes_offset=0):
+def time_in_past(time_str, minutes_offset=0):
     try:
         # Use dateutil parser to get time zone
         time_obj = dateutil.parser.parse(raw_date).astimezone(pytz.UTC)
@@ -423,55 +442,36 @@ def is_time_in_past(time_str, minutes_offset=0):
     return time_obj <= now - datetime.timedelta(minutes=minutes_offset)
 
 # update events currently in database before new ones put in
-# means re-search API_refresh ones and remove ones too old
+# means remove ones too old and re-search the rest
 # events = list of complete event dicts
 def update_current_events(events):
-    app_access_token = get_app_token()
-
-    # TODO: take out events with timestamps older than now
-
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
-    # to tell if multi-day event, check "API_refresh" tag
-    refresh_id_list = []
+    # to tell if multi-day event, check "duplicate_occurrence" tag
+    kept_events = {}
     for event in events:
-        print(event['start_time'])
-        if event.get('API_refresh'):
-            list.append(event['id'])
-
-    sub_event_call_args = {
-        'fields': ','.join(EVENT_FIELDS),
-        'access_token': app_access_token
-    }
-    # take out the IDs (keys) of the events dict
-    sub_event_call_args['ids'] = ','.join(event_ids_to_entities.keys())
-    resp = s.get(BASE_EVENT_URL, params=sub_event_call_args)
-    # print(resp.url)
-    if resp.status_code != 200:
-        print('Error trying to update data of current multi-day events: Status code {0}'.format(resp.status_code))
-        # return empty list: couldn't get any updated info
-        return []
-    sub_event_dict = resp.json()
-    # add back in the "hoster" attribute of each event (info about the page that posted the event)
-    for event_key in sub_event_dict:
-        sub_event_dict[event_key]["hoster"] = event_ids_to_entities[event_key]
-    
-    return sub_event_dict
+        if not time_in_past(event['start_time']):
+            updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
+            kept_events.update(updated_event_dict)
+    # return a dict of kept event IDs to their info
+    return kept_events
 
 def get_facebook_events(days_before=1):
-    
-    # search for UCLA-associated places and groups
-    pages_by_id = find_ucla_entities()
+    # search for UCLA-associated places and groups, using existing list on DB
+    pages_by_id = {}
+    for page in pages_collection.find():
+        pages_by_id[page['id']] = page['name']
 
     # turn event ID dict to array of their values
     all_events = get_events_from_pages(pages_by_id, days_before)
     # need to wrap the array of event infos in a dictionary with 'events' key, keep format same as before
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
-    print("Total event count: {0}".format(res['metadata']['events']))
+    print("Total event count: {0}".format(len(all_events)))
     return total_event_object
 
-# TODO: add to large database of any events, for ML
 def find_many_events():
+    # find events up to 2 years ago
     raw_events = get_facebook_events(730)
+    # still the dumb but simple update method
     ml_collection.delete_many({})
     ml_collection.insert_many(raw_events['events'])
     print('Found {0} events'.format(raw_events['metadata']['events']))
