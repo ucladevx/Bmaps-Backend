@@ -28,10 +28,9 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-# TODO CHANGE BACK
+
 events_collection = db.map_events
-total_events_collection = db.test_events
-locations_collection = db.UCLA_locations
+total_events_collection = db.total_events
 
 """
 CHANGES
