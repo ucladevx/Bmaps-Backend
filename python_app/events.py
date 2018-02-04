@@ -49,20 +49,7 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 # Returns JSON of all events in format that Mapbox likes
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
-    # return find_events_in_database(print_results=True)
-    # TODO CHANGE BACK
-    output = []
-
-    events_cursor = total_events_collection.find()
-    if events_cursor.count() > 0:
-        for event in events_cursor:
-            output.append({
-                'name': event.get('name', "NO NAME"),
-                'place': event.get('place', "NO PLACE")
-            })
-    else:
-        print 'Cannot find any events!'
-    return jsonify({'events': output})
+    return find_events_in_database(print_results=True)
 
 # Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
@@ -172,7 +159,6 @@ def get_events_by_category_and_date():
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
     # Iterate through all events and get unique list of all categories
-    # TODO: sort by quantity?
     uniqueList = []
     output = []
     
