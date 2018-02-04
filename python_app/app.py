@@ -46,11 +46,13 @@ def index():
     return "Mappening is running!"
 
 def event_thread_func():
-    # schedule.every().day.at('18:14').do(populate_ucla_events_database)
     print('1st schedule')
-    # time INSIDE container, which is GMT both local and AWS, +7/8 hours from Los Angeles with DST
-    # so 12:00 GMT is 3/4 AM in LA
-    schedule.every().day.at('12:00').do(populate_ucla_events_database)
+    # time INSIDE container, which is GMT both local and AWS, +8 hours from Los Angeles without DST
+    # so 13:00 GMT --> 5 AM in LA, 21:00 GMT --> 1 PM, 03:00 GMT --> 7 PM, if DST: all LA hours +1
+    schedule.every().day.at('13:00').do(populate_ucla_events_database)
+    # update later than the hour, removing events starting at those hours, for late people
+    schedule.every().day.at('21:10').do(populate_ucla_events_database)
+    schedule.every().day.at('03:10').do(populate_ucla_events_database)
     while True:
         schedule.run_pending()
         # kind of like a check every interval of time, if any jobs should run
