@@ -14,7 +14,7 @@ Locations = Blueprint('Locations', __name__)
 cors = CORS(Locations)
 
 # Google API Key
-GOOGLE_API_KEY = os.getenv('BACKUP_BACKUP_BACKUP_GOOGLE_API_KEY')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
 MLAB_USERNAME = os.getenv('MLAB_USERNAME')
@@ -123,16 +123,62 @@ def db_locations():
     return "Finished updating db!"
 
 # Given a location string try to return coordinates/relevant location info
+# IMPORTANT: Should be given base query, like Boelter or BH, not BH 3400.
+# I would have removed the 3400 programmatically, but in cases like Parking Structure 8
+# OR Engineering 4, the number is important.
 @Locations.route('/api/coordinates/<place_query>', methods=['GET'])
 def get_coordinates(place_query):
-    # Check database for matches (case insensitive) in names or alternative names
-    # Strip number?
+    output = []
 
-    # Do google api search
-    # Check reasonableness of results
-    # add as location to db
-    # TODO
-    return 0
+    # Check database for matches (case insensitive) in names or alternative names
+    # Concatenate results from name and alternative_names fields
+    place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
+    places_cursor = locations_collection.find({'name': place_regex})
+    alt_places_cursor = locations_collection.find({'alternative_names': place_regex})
+
+    if places_cursor > 0:
+      for place in places_cursor:
+        output.append({
+          'name': place.get('name', "NO NAME"),
+          'street': place.get('street', "NO STREET"),
+          'zip': place.get('zip', "NO ZIP"),
+          'city': place.get('city', "NO CITY"),
+          'state': place.get('state', "NO STATE"),
+          'country': place.get('country', "NO COUNTRY"),
+          'latitude': place.get('latitude', "NO LATITUDE"),
+          'longitude': place.get('longitude', "NO LONGITUDE"),
+          'alternative_names': place['alternative_names']
+        })
+    if alt_places_cursor > 0:
+      for alt_place in alt_places_cursor:
+        if alt_place not in output:
+          output.append({
+            'name': alt_place.get('name', "NO NAME"),
+            'street': alt_place.get('street', "NO STREET"),
+            'zip': alt_place.get('zip', "NO ZIP"),
+            'city': alt_place.get('city', "NO CITY"),
+            'state': alt_place.get('state', "NO STATE"),
+            'country': alt_place.get('country', "NO COUNTRY"),
+            'latitude': alt_place.get('latitude', "NO LATITUDE"),
+            'longitude': alt_place.get('longitude', "NO LONGITUDE"),
+            'alternative_names': alt_place['alternative_names']
+          })
+
+    # No results in db, do google api search and return results
+    if not output:
+      search_results = google_textSearch(place_query)
+      if search_results:
+        return jsonify({"text search results": search_results})
+      else:
+        return jsonify({"no results": output})
+
+    return jsonify({"location db results": output})
+
+# Insert locations from a JSON file to the db
+@Locations.route('/api/insert_locations', methods=['GET'])
+def insert_locations():
+  locations_collection.insert_many(data['locations'])
+  return "Successfully inserted location documents to db"
 
 # Fill out json data using google api results
 # Warning: pretty slow, limit of 1000 requests
@@ -155,7 +201,10 @@ def get_location_data():
           # Assume first result is best result
           place['street'] = search_results[0]['address']
           re_result = re.search(r'(\d{5}(\-\d{4})?)', place['street'])
-          place['zip'] = re_result.group(0) # Sometimes get 5 digit address numbers
+          if re_result:
+            place['zip'] = re_result.group(0) # Sometimes get 5 digit address numbers
+          else:
+            place['zip'] = "NO ZIP"
           updated = True
       else:
         place['street'] = "NO STREET"
@@ -185,12 +234,13 @@ def get_location_data():
       else:
         place['latitude'] = 666
         place['longitude'] = 666
-    places.append(place)
+    # places.append(place)
     if updated:
       updated_places.append(place)
     updated = False
 
-  return jsonify({"locations": places, "changed locations": updated_places})
+  # return jsonify({"locations": places, "changed locations": updated_places})
+  return jsonify({"changed locations": updated_places})
 
 def google_textSearch(place_query):
     CENTER_LATITUDE = "34.070966"
