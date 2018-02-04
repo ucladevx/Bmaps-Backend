@@ -1,5 +1,4 @@
 # Interacting with events collection in mlab
-# TODO: hide app id/secret
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -310,7 +309,6 @@ def refresh_page_database():
     # returns a dict of IDs to names
     raw_page_data = event_caller.find_ucla_entities()
 
-
     # raw_page_data = {"test_id": "test_name"}
 
     # in contrast to raw_page_data, pages_collection is list of {"id": <id>, "name": <name>}
@@ -328,20 +326,27 @@ def refresh_page_database():
 # Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
-    print('Call to populate database with events.')
+    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
+    print('BEGIN POPULATING EVENTS DATABASE')
+    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n\n\n\n\n\n\n')
     # Location of Bruin Bear
     # current_events = get_facebook_events(34.070964, -118.444757)
 
+    clear_old_db = request.args.get('clear', default=False, type=bool)
+    if clear_old_db:
+        events_collection.delete_many({})
+
     # TODO: get_facebook_events should search from existing collection of pages (in event_caller)
-    # events with "API_refresh" need to call event_caller to make sure info is updated
+    # events with "duplicate_occurrence" need to call event_caller to make sure info is updated
     # THEN after events are updated to DB, update pages below (don't delete, only update or insert by ID)
 
+    # take out all current events from DB, put into list, check for updates
     processed_db_events = event_caller.update_current_events(list(events_collection.find()))
 
     new_events_data = event_caller.get_facebook_events()
     # debugging events output
-    # with open('new_out.json', 'w') as outfile:
-    #     json.dump(current_events, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+    # with open('events_out.json', 'w') as outfile:
+    #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     # Also add all new events to total_events
 
@@ -350,27 +355,22 @@ def populate_ucla_events_database():
     # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
     # normally use incremental Cursor, to save memory usage
     for event in new_events_data['events']:
-        # pull event out, without unnecessary _id tag
-        existing_event = events_collection.find_one({'id': event['id'], {'_id': False}})
+        existing_event = processed_db_events.get(event['id'])
         
         # sidenote: when event inserted into DB,
         # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
 
-        # don't need to do anything if fields haven't changed
-        if event == existing_event:
+        # don't need to do anything if event found previously, since updated in update_current_events()
+        if existing_event:
             continue
 
-        if existing_event:
-            events_collection.delete_one({'id': event['id']})
-        events_collection.insert_one(event)
-
-        # below = UPDATE: pymongo only allows update of specifically listed elements,
+        # below = UPDATE: pymongo only allows update of specifically listed attributes in a dictionary...
         # so delete old if exists, then insert new
 
         # See if event already existed
         update_event = total_events_collection.find_one({'id': event['id']})
 
-        # If it existed then delete it, new event gets inserted in both cases
+        # If it existed then delete it, new event gets inserted either way
         if update_event:
             total_events_collection.delete_one({'id': event['id']})
         total_events_collection.insert_one(event)
