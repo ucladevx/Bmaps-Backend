@@ -8,6 +8,8 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Flask (Port 5000): Web microframework for Python
 - mLab: Database-as-a-Service cloud-hosted MongoDB
 - Pymongo: Database Connector between MongoDB and Flask
+- Facebook Graph API + Login/OAuth for getting event information and user authentication
+- Google Maps/Places API Web Service for getting place information
 - AWS EC2/Elastic Container Service for deployment
 
 ## Setting Up the Environment
