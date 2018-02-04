@@ -114,6 +114,8 @@ def find_locations():
 
 # Add locations to mlab db
 # Gives some duplicate events in db
+# TODO: perhaps manually combine duplicate events and in future will be better
+# Duplicate events resolved if the different names used are put under alternate_names
 @Locations.route('/api/db_locations')
 def db_locations():
     # Update locations or insert new locations from events in db
@@ -259,6 +261,7 @@ def insert_locations():
 # Tries to fill out those missing fields using name field or street if supplied
 # Takes top result to fill out info, MAY BE INCORRECT
 # Warning: pretty slow, limit of 1000 requests? 100 requests?
+# TODO: improve speed/optimality
 @Locations.route('/api/location_data', methods=['GET'])
 def get_location_data():
   places = []
@@ -274,8 +277,7 @@ def get_location_data():
         # Use location name to try to find location info
         search_results = google_textSearch(location['name'])
         if search_results:
-          # Assume first result is best result
-          # TODO is there a way to sort results by relevance or are they already sorted
+          # Assume first result is best result/most relevant result
           # Set street to the address
           place['street'] = search_results[0]['address']
 
@@ -333,7 +335,7 @@ def get_location_data():
 
   # Return json info on updated locations and/or all locations from json data
   # return jsonify({"locations": places, "changed locations": updated_places})
-  return jsonify({"changed locations": updated_places})
+  return jsonify({"New/Modified Locations": updated_places})
 
 # Use the Google Places API Web Service to get info about places based on a string
 # Results ordered by perceived relevance (use UCLA in query?)
@@ -373,7 +375,7 @@ def google_textSearch(place_query):
 # Uses same function as before but for printing rather than use in event processing
 @Locations.route('/api/place_textSearch/<place_query>', methods=['GET'])
 def get_textsearch(place_query):
-    google_textSearch(place_query)
+    output = google_textSearch(place_query)
 
     return jsonify({'results': output})
     # return jsonify({'results': resultsJSON})
