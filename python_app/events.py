@@ -336,10 +336,6 @@ def populate_ucla_events_database():
     if clear_old_db:
         events_collection.delete_many({})
 
-    # TODO: get_facebook_events should search from existing collection of pages (in event_caller)
-    # events with "duplicate_occurrence" need to call event_caller to make sure info is updated
-    # THEN after events are updated to DB, update pages below (don't delete, only update or insert by ID)
-
     # take out all current events from DB, put into list, check for updates
     processed_db_events = event_caller.update_current_events(list(events_collection.find()))
 
