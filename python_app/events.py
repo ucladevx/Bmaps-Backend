@@ -24,7 +24,7 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-events_collection = db.map_events
+events_collection = db.generic_test
 pages_collection = db.saved_pages
 total_events_collection = db.total_events
 
@@ -343,6 +343,11 @@ def populate_ucla_events_database():
     # take out all current events from DB, put into list, check for updates
     processed_db_events = event_caller.update_current_events(list(events_collection.find()))
 
+    # actually update all in database, but without mass deletion (for safety)
+    for event_id, event_info in processed_db_events.iteritems():
+        events_collection.delete_one({'id': event_id})
+        events_collection.insert_one(event_info)
+
     new_events_data = event_caller.get_facebook_events()
     # debugging events output
     # with open('events_out.json', 'w') as outfile:
@@ -354,8 +359,10 @@ def populate_ucla_events_database():
     # conclusion after running some small timed tests: for our purposes and with our data sizes,
     # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
     # normally use incremental Cursor, to save memory usage
+    new_count = 0
     for event in new_events_data['events']:
-        existing_event = processed_db_events.get(event['id'])
+        curr_id = event['id']
+        existing_event = processed_db_events.get(curr_id)
         
         # sidenote: when event inserted into DB,
         # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
@@ -363,16 +370,46 @@ def populate_ucla_events_database():
         # don't need to do anything if event found previously, since updated in update_current_events()
         if existing_event:
             continue
+        events_collection.insert_one(event)
+        new_count += 1
 
         # below = UPDATE: pymongo only allows update of specifically listed attributes in a dictionary...
         # so delete old if exists, then insert new
 
         # See if event already existed
-        update_event = total_events_collection.find_one({'id': event['id']})
+        update_event = total_events_collection.find_one({'id': curr_id})
 
         # If it existed then delete it, new event gets inserted either way
         if update_event:
-            total_events_collection.delete_one({'id': event['id']})
+            total_events_collection.delete_one({'id': curr_id})
         total_events_collection.insert_one(event)
 
-    return 'Updated with {0} retrieved events'.format(new_events_data['metadata']['events'])
+    return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
+
+# simply save each unique document and delete any that have been found already
+def clean_collection(collection):
+    # a set, not a dict
+    unique_ids = set()
+    dups = []
+    # IMPORTANT: do not take down _id, jsonify can't handle type
+    for item in collection.find({}, {'_id': False}):
+        # assume all items must have a unique id key-value pair
+        curr_id = item['id']
+        if curr_id in unique_ids:
+            dups.append(item)
+            collection.delete_many({'id': curr_id})
+        else:
+            unique_ids.add(curr_id)
+    return dups
+
+# if needed, clean database of duplicate documents
+@Events.route('/api/remove-duplicates', methods=['GET'])
+def remove_db_duplicates():
+    total_dups = []
+    # difference between append and extend: extend flattens out lists to add elements, append adds 1 element
+    total_dups.extend(clean_collection(events_collection))
+    total_dups.extend(clean_collection(pages_collection))
+    total_dups.extend(clean_collection(total_events_collection))
+    return jsonify(total_dups)
+
+

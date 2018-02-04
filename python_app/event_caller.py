@@ -428,18 +428,19 @@ def process_event(event, host_info, add_duplicate_tag=False):
 # one from simply parsing the string, and another from current time
 # required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
 # return boolean, if given time string has passed in real time
-def time_in_past(time_str, minutes_offset=0):
+def time_in_past(time_str, hours_offset=0):
     try:
         # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(raw_date).astimezone(pytz.UTC)
+        time_obj = dateutil.parser.parse(time_str).astimezone(pytz.UTC)
     except ValueError:
         # Got invalid date string
         print('Invalid datetime string from event \'start_time\' key, cannot be parsed!')
         return False
     now = datetime.datetime.now(tzlocal()).astimezone(pytz.utc)
 
-    # if time from string is smaller than now, with optional offset (in case want to keep slightly older events)
-    return time_obj <= now - datetime.timedelta(minutes=minutes_offset)
+    # if time from string is smaller than now, with offset (to match time range of new events found)
+    # offset shifts the boundary back in time, for which events to update rather than delete
+    return time_obj <= now - datetime.timedelta(hours=hours_offset + 24)
 
 # update events currently in database before new ones put in
 # means remove ones too old and re-search the rest
