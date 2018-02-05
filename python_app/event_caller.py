@@ -44,8 +44,7 @@ SEARCH_URL = BASE_URL + 'search'
 # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
-SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta',
-                'campus events commission', 'foundations choreography', 'cssaucla']
+SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
 # Get events by adding page ID and events field
