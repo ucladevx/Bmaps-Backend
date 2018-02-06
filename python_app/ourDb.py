@@ -21,3 +21,4 @@ db = client['mappening_data']
 events_collection = db.map_events
 total_events_collection = db.total_events
 users_collection = db.map_users
+events_ml_collection = db.events_ml
