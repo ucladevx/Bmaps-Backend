@@ -47,7 +47,6 @@ def get_all_locations():
     return jsonify({'locations': output})
 
 # Go through all events in events db and extract unique locations from the events
-# TODO: add fields that are missing (coordinates)
 def find_locations():
     # Iterate through all events and get list of unique venues
     places = []
@@ -55,8 +54,12 @@ def find_locations():
 
     # Latitude and Longitude range from (-90, 90) and (-180, 180)
     INVALID_COORDINATE = 420
+
+    # Set parameters for Bruin Bear/Center of UCLA
+    CENTER_LATITUDE = "34.070966"
+    CENTER_LONGITUDE = "-118.445"
     
-    # TODO: change this to events_collection and integrate with new events caller
+    # TODO: Integrate with new events caller
     # Every time there are new events, check location info and update db if necessary
     events_cursor = events_collection.find({"place": {"$exists": True}})
     if events_cursor.count() > 0:
@@ -95,7 +98,37 @@ def find_locations():
                         if place['location']['name'] not in loc['location']['alternative_names']:
                           loc['location']['alternative_names'].append(place['location']['name'])
             else:
-              # No coordinates exist, just add place
+              # No coordinates exist, indicate that coordinates may be incorrect
+              place['coordinates'] = "GOOGLE"
+              # Try to get coordinates from google places
+              if 'name' in place['location']:
+                # Use location name to try to find location info
+                search_results = google_textSearch(place['location']['name'])
+                if search_results:
+                  # If there are results see if there is a latitude/longitude
+                  if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+                    place['location']['latitude'] = CENTER_LATITUDE
+                    place['location']['longitude'] = CENTER_LONGITUDE
+                  else:
+                    place['location']['latitude'] = search_results[0]['latitude']
+                    place['location']['longitude'] = search_results[0]['longitude']
+              # If there is no name, see if there is street info
+              elif 'street' in place['location'] and place['location']['street'] != "NO STREET" and place['location']['street'] != '':
+                # Use name to try to find location info
+                search_results = google_textSearch(place['location']['street'])
+                if search_results:
+                  if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+                    place['location']['latitude'] = CENTER_LATITUDE
+                    place['location']['longitude'] = CENTER_LONGITUDE
+                  else:
+                    place['location']['latitude'] = search_results[0]['latitude']
+                    place['location']['longitude'] = search_results[0]['longitude']
+                    updated = True
+              else:
+                # There was no name or street info, set to Bruin Bear location
+                place['location']['latitude'] = CENTER_LATITUDE
+                place['location']['longitude'] = CENTER_LONGITUDE
+
               places.append(place)
         # Reset place to an empty dict
         place = {}
@@ -105,7 +138,6 @@ def find_locations():
 
 # Add locations to mlab db
 # Gives some duplicate events in db
-# TODO: perhaps manually combine duplicate events and in future will be better
 # Duplicate events resolved if the different names used are put under alternate_names
 @Locations.route('/api/db_locations')
 def db_locations():
@@ -122,12 +154,20 @@ def db_locations():
     for new_loc in new_locations:
       print "~~~~~~~~~~~~~~~~~~~~~"
       print new_loc['location'].get('name', "NO NAME")
-      # Remove UCLA from name
+      # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
       re_name = re.sub(r'\bat UCLA\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
       re_name = re.sub(r'\b@ UCLA\s?', '', re_name, flags=re.IGNORECASE)
       re_name = re.sub(r'\bof UCLA\s?', '', re_name, flags=re.IGNORECASE)
       re_name = re.sub(r'\bUCLA\s?', '', re_name, flags=re.IGNORECASE)
-      # TODO: room, the, commas, multispaces, LA, numbers, westwood
+      re_name = re.sub(r'\bLos Angeles\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bLA\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bWestwood\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bRoom\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bThe\s?', '', re_name, flags=re.IGNORECASE)
+      # Remove Hyphens and commas and multiple spaces
+      re_name = re.sub(r'-\s?', '', re_name)
+      re_name = re.sub(r',\s?', '', re_name)
+      re_name = re.sub(r' +', ' ', re_name)
       # Remove Hyphens
       re_name = re.sub(r'-\s?', '', re_name)
       # Remove leading/trailing white space
@@ -162,6 +202,9 @@ def db_locations():
             if key == "name" and 'name' in old_loc['location'] and old_loc['location']['name'] != new_loc['location']['name']:
                 if new_loc['location']['name'] not in old_loc['location']['alternative_names']:
                     old_loc['location']['alternative_names'].append(new_loc['location']['name'])
+                    updated = True
+                if re_name not in old_loc['location']['alternative_names']:
+                    old_loc['location']['alternative_names'].append(re_name)
                     updated = True
         # Only replace document if it was updated
         if updated:
@@ -243,13 +286,20 @@ def get_coordinates(place_query):
     if places_cursor.count() <= 0 and alt_places_cursor.count() <= 0:
       # Removes Integers/Decimals and the following space
       num_place_query = re.sub(r'\b\d+(?:\.\d+)?\s?', '', place_query)
-      # Remove UCLA
+      # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
       num_place_query = re.sub(r'\bat UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\b@ UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\bof UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\bUCLA\s?', '', num_place_query, flags=re.IGNORECASE)
-      # Remove Hyphens
+      num_place_query = re.sub(r'\bLos Angeles\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bWestwood\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bRoom\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bThe\s?', '', num_place_query, flags=re.IGNORECASE)
+      # Remove Hyphens and commas and multiple spaces
       num_place_query = re.sub(r'-\s?', '', num_place_query)
+      num_place_query = re.sub(r',\s?', '', num_place_query)
+      num_place_query = re.sub(r' +', ' ', num_place_query)
       # Remove leading/trailing white space
       num_place_query = num_place_query.strip()
 
@@ -284,7 +334,6 @@ def insert_locations():
 # Tries to fill out those missing fields using name field or street if supplied
 # Takes top result to fill out info, MAY BE INCORRECT
 # Warning: pretty slow, limit of 1000 requests? 100 requests?
-# TODO: improve speed/optimality
 @Locations.route('/api/location_data', methods=['GET'])
 def get_location_data():
   places = []
