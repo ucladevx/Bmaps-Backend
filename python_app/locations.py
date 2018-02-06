@@ -168,8 +168,6 @@ def db_locations():
       re_name = re.sub(r'-\s?', '', re_name)
       re_name = re.sub(r',\s?', '', re_name)
       re_name = re.sub(r' +', ' ', re_name)
-      # Remove Hyphens
-      re_name = re.sub(r'-\s?', '', re_name)
       # Remove leading/trailing white space
       re_name = re_name.strip()
 
