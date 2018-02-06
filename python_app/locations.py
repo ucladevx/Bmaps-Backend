@@ -62,20 +62,20 @@ def find_locations():
       for event in events_cursor:
         # Add location info to place dict
         if 'location' in event['place']:
-          place = event['place']['location']
+          place['location'] = event['place']['location']
         if 'name' in event['place']:
-          place['name'] = event['place']['name']
+          place['location']['name'] = event['place']['name']
 
         # Check that place is not empty
         if any(place):
           # All places should have alternative names field
-          place['alternative_names'] = []
+          place['location']['alternative_names'] = []
           # Reject exact matches
           if place not in places:
             # Check whether coordinates exist
-            if 'latitude' in place and 'longitude' in place:
+            if 'latitude' in place['location'] and 'longitude' in place['location']:
               # Check whether coordinates match another event
-              if not any(loc.get('latitude', INVALID_COORDINATE) == place['latitude'] and loc.get('longitude', INVALID_COORDINATE) == place['longitude'] for loc in places):
+              if not any(loc.get('latitude', INVALID_COORDINATE) == place['location']['latitude'] and loc.get('longitude', INVALID_COORDINATE) == place['location']['longitude'] for loc in places):
                 # No matching coordinates, append to list
                 places.append(place)
               else:
@@ -83,16 +83,16 @@ def find_locations():
                 # Merge information of new event into old event
                 # Can probably improve this part
                 for loc in places:
-                  if loc.get('latitude', INVALID_COORDINATE) == place['latitude'] and loc.get('longitude', INVALID_COORDINATE) == place['longitude']:
+                  if loc['location'].get('latitude', INVALID_COORDINATE) == place['latitude'] and loc['location'].get('longitude', INVALID_COORDINATE) == place['longitude']:
                     # Go through all the keys
-                    for key in place:
+                    for key in place['location']:
                       # If new key then add it to location
-                      if key not in loc:
-                        loc[key] = place[key]
+                      if key not in loc['location']:
+                        loc['location'][key] = place['location'][key]
                       # If names do not match, coordinates do so add name as an alternate name
-                      if key == "name" and 'name' in loc and loc['name'] != place['name']:
-                        if place['name'] not in loc['alternative_names']:
-                          loc['alternative_names'].append(place['name'])
+                      if key == "name" and 'name' in loc['location'] and loc['location']['name'] != place['location']['name']:
+                        if place['location']['name'] not in loc['location']['alternative_names']:
+                          loc['location']['alternative_names'].append(place['location']['name'])
             else:
               # No coordinates exist, just add place
               places.append(place)
@@ -119,9 +119,9 @@ def db_locations():
     # For every location from events db
     for new_loc in new_locations:
       # Find location of same coordinates
-      coord_loc = locations_collection.find_one({'latitude': new_loc.get('latitude', INVALID_COORDINATE), 'longitude': new_loc.get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      name_loc = locations_collection.find_one({'name': new_loc.get('name', "NO NAME")}, {'_id': False})
-      alt_name_loc = locations_collection.find_one({'alternative_names': new_loc.get('name', "NO NAME")}, {'_id': False})
+      coord_loc = locations_collection.find_one({'latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
+      name_loc = locations_collection.find_one({'name': new_loc['location'].get('name', "NO NAME")}, {'_id': False})
+      alt_name_loc = locations_collection.find_one({'alternative_names': new_loc['location'].get('name', "NO NAME")}, {'_id': False})
       # If there exists a pre-existing location with matching coordinates/name
       if coord_loc or name_loc or alt_name_loc:
         old_loc = coord_loc
@@ -132,20 +132,20 @@ def db_locations():
 
         # Location already in db but missing info
         # Merge new info with db document
-        for key in new_loc:
+        for key in new_loc['location']:
             # Key is missing from location so add it
-            if key not in old_loc:
-                old_loc[key] = new_loc[key]
+            if key not in old_loc['location']:
+                old_loc['location'][key] = new_loc['location'][key]
                 updated = True
             # Names do not match, coordinates do so add name as alternate name
-            if key == "name" and 'name' in old_loc and old_loc['name'] != new_loc['name']:
-                if new_loc['name'] not in old_loc['alternative_names']:
-                    old_loc['alternative_names'].append(new_loc['name'])
+            if key == "name" and 'name' in old_loc['location'] and old_loc['location']['name'] != new_loc['location']['name']:
+                if new_loc['location']['name'] not in old_loc['location']['alternative_names']:
+                    old_loc['location']['alternative_names'].append(new_loc['location']['name'])
                     updated = True
         # Only replace document if it was updated
         if updated:
           # Replace document with updated info
-          locations_collection.replace_one({'latitude': new_loc['latitude'], 'longitude': new_loc['longitude']}, old_loc, True)
+          locations_collection.replace_one({'latitude': new_loc['location']['latitude'], 'longitude': new_loc['location']['longitude']}, old_loc, True)
           added_locations.append(old_loc)
           updated = False
       else:
@@ -165,36 +165,36 @@ def get_coordinate_results(places_cursor, alt_places_cursor):
     if places_cursor.count() > 0:
       for place in places_cursor:
         output.append({
-          'name': place.get('name', "NO NAME"),
-          'street': place.get('street', "NO STREET"),
-          'zip': place.get('zip', "NO ZIP"),
-          'city': place.get('city', "NO CITY"),
-          'state': place.get('state', "NO STATE"),
-          'country': place.get('country', "NO COUNTRY"),
-          'latitude': place.get('latitude', "NO LATITUDE"),
-          'longitude': place.get('longitude', "NO LONGITUDE"),
-          'alternative_names': place['alternative_names']
+          'name': place['location'].get('name', "NO NAME"),
+          'street': place['location'].get('street', "NO STREET"),
+          'zip': place['location'].get('zip', "NO ZIP"),
+          'city': place['location'].get('city', "NO CITY"),
+          'state': place['location'].get('state', "NO STATE"),
+          'country': place['location'].get('country', "NO COUNTRY"),
+          'latitude': place['location'].get('latitude', "NO LATITUDE"),
+          'longitude': place['location'].get('longitude', "NO LONGITUDE"),
+          'alternative_names': place['location']['alternative_names']
         })
-        output_places.append(place.get('name', "NO NAME"))
+        output_places.append(place['location'].get('name', "NO NAME"))
 
     # Places that match the alternate name are appended to output if not already
     # part of output
     if alt_places_cursor.count() > 0:
       for alt_place in alt_places_cursor:
         # Check if already added by maintaining list of places added by name
-        if alt_place.get('name', "NO NAME") not in output_places:
+        if alt_place['location'].get('name', "NO NAME") not in output_places:
           output.append({
-            'name': alt_place.get('name', "NO NAME"),
-            'street': alt_place.get('street', "NO STREET"),
-            'zip': alt_place.get('zip', "NO ZIP"),
-            'city': alt_place.get('city', "NO CITY"),
-            'state': alt_place.get('state', "NO STATE"),
-            'country': alt_place.get('country', "NO COUNTRY"),
-            'latitude': alt_place.get('latitude', "NO LATITUDE"),
-            'longitude': alt_place.get('longitude', "NO LONGITUDE"),
-            'alternative_names': alt_place['alternative_names']
+            'name': alt_place['location'].get('name', "NO NAME"),
+            'street': alt_place['location'].get('street', "NO STREET"),
+            'zip': alt_place['location'].get('zip', "NO ZIP"),
+            'city': alt_place['location'].get('city', "NO CITY"),
+            'state': alt_place['location'].get('state', "NO STATE"),
+            'country': alt_place['location'].get('country', "NO COUNTRY"),
+            'latitude': alt_place['location'].get('latitude', "NO LATITUDE"),
+            'longitude': alt_place['location'].get('longitude', "NO LONGITUDE"),
+            'alternative_names': alt_place['location']['alternative_names']
           })
-          output_places.append(alt_place.get('name', "NO NAME"))
+          output_places.append(alt_place['location'].get('name', "NO NAME"))
 
     # Returns list of relevant locations' info
     return output;
@@ -262,58 +262,58 @@ def get_location_data():
   for location in data['locations']:
     place = location
     # No street or zip information, try to find it
-    if 'street' not in location or 'zip' not in location or location['street'] == '' or location['zip'] == '':
-      if 'name' in location:
+    if 'street' not in location['location'] or 'zip' not in location['location'] or location['location']['street'] == '' or location['location']['zip'] == '':
+      if 'name' in location['location']:
         # Use location name to try to find location info
-        search_results = google_textSearch(location['name'])
+        search_results = google_textSearch(location['location']['name'])
         if search_results:
           # Assume first result is best result/most relevant result
           # Set street to the address
-          place['street'] = search_results[0]['address']
+          place['location']['street'] = search_results[0]['address']
 
           # Extract zip code from address
-          re_result = re.search(r'(\d{5}(\-\d{4})?)', place['street'])
+          re_result = re.search(r'(\d{5}(\-\d{4})?)', place['location']['street'])
           if re_result:
-            place['zip'] = re_result.group(0) # Sometimes get 5 digit address numbers
+            place['location']['zip'] = re_result.group(0) # Sometimes get 5 digit address numbers
           else:
-            place['zip'] = "NO ZIP"
+            place['location']['zip'] = "NO ZIP"
           updated = True
       else:
         # Without a name, street, or zip cannot find out much about location
         # Is it even a location at this point lmao
-        place['street'] = "NO STREET"
-        place['zip'] = "NO ZIP"
-        place['name'] = "NO NAME"
+        place['location']['street'] = "NO STREET"
+        place['location']['zip'] = "NO ZIP"
+        place['location']['name'] = "NO NAME"
     # Check if latitude/longitude is filled out (420 is default value)
-    if 'latitude' not in location or 'longitude' not in location or location['latitude'] == 420 or location['longitude'] == 420:
-      if 'name' in location:
+    if 'latitude' not in location['location'] or 'longitude' not in location['location'] or location['location']['latitude'] == 420 or location['location']['longitude'] == 420:
+      if 'name' in location['location']:
         # Use location name to try to find location info
-        search_results = google_textSearch(location['name'])
+        search_results = google_textSearch(location['location']['name'])
         if search_results:
           # If there are results see if there is a latitude/longitude
           if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
-            place['latitude'] = 404
-            place['longitude'] = 404
+            place['location']['latitude'] = 404
+            place['location']['longitude'] = 404
           else:
-            place['latitude'] = search_results[0]['latitude']
-            place['longitude'] = search_results[0]['longitude']
+            place['location']['latitude'] = search_results[0]['latitude']
+            place['location']['longitude'] = search_results[0]['longitude']
             updated = True
       # If there is no name, see if there is street info
-      elif 'street' in place and place['street'] != "NO STREET" and place['street'] != '':
+      elif 'street' in place['location'] and place['location']['street'] != "NO STREET" and place['location']['street'] != '':
         # Use name to try to find location info
-        search_results = google_textSearch(place['street'])
+        search_results = google_textSearch(place['location']['street'])
         if search_results:
           if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
-            place['latitude'] = 404
-            place['longitude'] = 404
+            place['location']['latitude'] = 404
+            place['location']['longitude'] = 404
           else:
-            place['latitude'] = search_results[0]['latitude']
-            place['longitude'] = search_results[0]['longitude']
+            place['location']['latitude'] = search_results[0]['latitude']
+            place['location']['longitude'] = search_results[0]['longitude']
             updated = True
       else:
         # There was no name or street info, set to another junk value
-        place['latitude'] = 666
-        place['longitude'] = 666
+        place['location']['latitude'] = 666
+        place['location']['longitude'] = 666
 
     # If we want to keep track of all places from json data uncomment this
     # places.append(place)
