@@ -47,6 +47,7 @@ def get_all_locations():
     return jsonify({'locations': output})
 
 # Go through all events in events db and extract unique locations from the events
+# TODO: add fields that are missing (coordinates)
 def find_locations():
     # Iterate through all events and get list of unique venues
     places = []
@@ -57,7 +58,7 @@ def find_locations():
     
     # TODO: change this to events_collection and integrate with new events caller
     # Every time there are new events, check location info and update db if necessary
-    events_cursor = total_events_collection.find({"place": {"$exists": True}})
+    events_cursor = events_collection.find({"place": {"$exists": True}})
     if events_cursor.count() > 0:
       for event in events_cursor:
         # Add location info to place dict
@@ -110,6 +111,7 @@ def find_locations():
 def db_locations():
     # Update locations or insert new locations from events in db
     new_locations = find_locations()
+    updated_locations = []
     added_locations = []
     updated = False
 
@@ -118,17 +120,36 @@ def db_locations():
     
     # For every location from events db
     for new_loc in new_locations:
-      # Find location of same coordinates
-      coord_loc = locations_collection.find_one({'latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      name_loc = locations_collection.find_one({'name': new_loc['location'].get('name', "NO NAME")}, {'_id': False})
-      alt_name_loc = locations_collection.find_one({'alternative_names': new_loc['location'].get('name', "NO NAME")}, {'_id': False})
+      print "~~~~~~~~~~~~~~~~~~~~~"
+      print new_loc['location'].get('name', "NO NAME")
+      # Remove UCLA from name
+      re_name = re.sub(r'\bat UCLA\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
+      re_name = re.sub(r'\b@ UCLA\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bof UCLA\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bUCLA\s?', '', re_name, flags=re.IGNORECASE)
+      # TODO: room, the, commas, multispaces, LA, numbers, westwood
+      # Remove Hyphens
+      re_name = re.sub(r'-\s?', '', re_name)
+      # Remove leading/trailing white space
+      re_name = re_name.strip()
+
+      print re_name
+
+      # Find location of same coordinates/name
+      coord_loc = locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
+      name_loc = locations_collection.find_one({'location.name': re_name}, {'_id': False})
+      alt_name_loc = locations_collection.find_one({'location.alternative_names': re_name}, {'_id': False})
+
       # If there exists a pre-existing location with matching coordinates/name
       if coord_loc or name_loc or alt_name_loc:
         old_loc = coord_loc
+        loc_type = 1
         if name_loc and not coord_loc:
           old_loc = name_loc
+          loc_type = 2
         elif alt_name_loc and not coord_loc and not name_loc:
           old_loc = alt_name_loc
+          loc_type = 3
 
         # Location already in db but missing info
         # Merge new info with db document
@@ -144,16 +165,21 @@ def db_locations():
                     updated = True
         # Only replace document if it was updated
         if updated:
-          # Replace document with updated info
-          locations_collection.replace_one({'latitude': new_loc['location']['latitude'], 'longitude': new_loc['location']['longitude']}, old_loc, True)
-          added_locations.append(old_loc)
           updated = False
+          updated_locations.append({'location': old_loc})
+          # Replace document with updated info
+          if loc_type == 1:
+            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+          elif loc_type == 2:
+            locations_collection.replace_one({'location.name': re_name}, old_loc)
+          else:
+            locations_collection.replace_one({'location.alternative_names': re_name}, old_loc)          
       else:
         # No pre-existing location so insert new location to db
-        locations_collection.insert_one(new_loc)
-        added_locations.append(new_loc)
+        added_locations.append({'location': new_loc})
+        locations_collection.insert_one(new_loc.copy())
 
-    return jsonify({"added locations": added_locations})
+    return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
 # Given pymongo cursors to places that match by name or alternate name return
 # combined output of places' location info
@@ -210,20 +236,27 @@ def get_coordinates(place_query):
     # Check database for matches (case insensitive) in names or alternative names
     # Concatenate results from name and alternative_names fields
     place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
-    places_cursor = locations_collection.find({'name': place_regex})
-    alt_places_cursor = locations_collection.find({'alternative_names': place_regex})
+    places_cursor = locations_collection.find({'location.name': place_regex})
+    alt_places_cursor = locations_collection.find({'location.alternative_names': place_regex})
 
     # If no matches found, try to search database after removing numbers from query
     if places_cursor.count() <= 0 and alt_places_cursor.count() <= 0:
       # Removes Integers/Decimals and the following space
       num_place_query = re.sub(r'\b\d+(?:\.\d+)?\s?', '', place_query)
+      # Remove UCLA
+      num_place_query = re.sub(r'\bat UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\b@ UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bof UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bUCLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      # Remove Hyphens
+      num_place_query = re.sub(r'-\s?', '', num_place_query)
       # Remove leading/trailing white space
       num_place_query = num_place_query.strip()
 
       # Get results from db with new regex search string
       num_place_regex = re.compile('.*' + num_place_query + '.*', re.IGNORECASE)
-      places_cursor = locations_collection.find({'name': num_place_regex})
-      alt_places_cursor = locations_collection.find({'alternative_names': num_place_regex})
+      places_cursor = locations_collection.find({'location.name': num_place_regex})
+      alt_places_cursor = locations_collection.find({'location.alternative_names': num_place_regex})
 
       # No results in db, do google api search and return results
       if places_cursor.count() <= 0 and alt_places_cursor.count() <= 0:
