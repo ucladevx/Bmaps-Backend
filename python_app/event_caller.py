@@ -4,6 +4,7 @@ import time, datetime, dateutil.parser, pytz
 from dateutil.tz import tzlocal
 from pprint import pprint
 import json
+from tqdm import tqdm   # a progress bar, pretty
 
 # for sys.exit()
 import sys
@@ -190,6 +191,24 @@ def find_ucla_entities():
     # a dictionary, to keep only unique pages
     return ucla_entities
 
+# json file expected to be a bunch of dicts, each for 1 page, with page_id and name
+# one time usage, basically
+def add_pages_from_json(filename):
+    page_list = []
+    with open(filename) as infile:
+        for line in tqdm(infile):
+            # takes each line as a dict and from each, takes out only 2 key-values, id and name
+            abridged_info = {k: json.loads(line).get(k, None) for k in ('page_id', 'name')}
+            # change key name to id
+            abridged_info['id'] = abridged_info.pop('page_id')
+            page_list.append(abridged_info)
+
+    for page in tqdm(page_list):
+        if pages_collection.find_one({'id': page['id']}):
+            pages_collection.delete_one({'id': page['id']})
+        pages_collection.insert_one(page)
+
+
 # TODO: add facebook page by exact name that appears in URL, or ID
 """
 RULES TO INSERT:
@@ -205,7 +224,7 @@ def add_facebook_page(page_type='group', id='', name=''):
     # convert integer IDs to strings
     # if no info given then just don't do anything
     if not page_id and not name:
-        return {}
+        return 'Give ID or exact name of group to insert a page.'
 
     app_access_token = get_app_token()
     
@@ -231,7 +250,7 @@ def add_facebook_page(page_type='group', id='', name=''):
     elif page_type == 'place':
         search_args['type'] = 'place'
         return {}
-    return {}
+    return 'Page inserted!'
 
 def get_events_from_pages(pages_by_id, days_before):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
@@ -279,7 +298,7 @@ def get_events_from_pages(pages_by_id, days_before):
     id_list = []
     id_jsons = {}
     # pages_by_id is dict of page IDs to names
-    for i, page_id in enumerate(pages_by_id):
+    for i, page_id in tqdm(enumerate(pages_by_id)):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
         # if i >= 51:
@@ -291,16 +310,19 @@ def get_events_from_pages(pages_by_id, days_before):
         if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
             continue
 
-        print('Checking page {0}'.format(i+1))
+        # print('Checking page {0}'.format(i+1))
         # pass in whole comma separated list of ids
         page_call_args['ids'] = ','.join(id_list)
         resp = s.get(BASE_EVENT_URL, params=page_call_args)
         # print(resp.url)
         if resp.status_code != 200:
+            error_json = resp.json()
             print(
-                'Error getting events from FB pages, starting at {0}! Status code {1}'
-                .format(pages_by_id[page_id], resp.status_code)
+                'Error getting events from FB pages, starting at {0}! Status code {1}: {2}'
+                .format(pages_by_id[page_id], resp.status_code, error_json['error'].get('message', 'Unknown error.'))
             )
+            # DON'T FORGET TO CLEAR THE ID LIST!
+            id_list = []
             continue
         curr_jsons = resp.json()
         # pprint(curr_jsons)
@@ -339,7 +361,7 @@ def get_events_from_pages(pages_by_id, days_before):
     }
     """
     total_events = {}
-    for page_info in id_jsons.values():
+    for page_info in tqdm(id_jsons.values()):
         host_entity_info = {}
         host_entity_info['id'] = page_info['id']
         host_entity_info['name'] = page_info['name']
@@ -451,7 +473,7 @@ def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "duplicate_occurrence" tag
     kept_events = {}
-    for event in events:
+    for event in tqdm(events):
         if not time_in_past(event['start_time'], days_before):
             updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
@@ -484,4 +506,7 @@ if __name__ == '__main__':
     pprint(res['events'][:10])
     
     # find_many_events()
+
+    # add_pages_from_json('holy_groups.json')
+    # add_pages_from_json('holy_pages.json')
 
