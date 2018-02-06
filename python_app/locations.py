@@ -35,20 +35,10 @@ locations_collection = db.UCLA_locations
 def get_all_locations():
     output = []
 
-    locations_cursor = locations_collection.find()
+    locations_cursor = locations_collection.find({}, {'_id': False})
     if locations_cursor.count() > 0:
-        for loc in locations_cursor:
-            output.append({
-                'name': loc.get('name', "NO NAME"),
-                'street': loc.get('street', "NO STREET"),
-                'zip': loc.get('zip', "NO ZIP"),
-                'city': loc.get('city', "NO CITY"),
-                'state': loc.get('state', "NO STATE"),
-                'country': loc.get('country', "NO COUNTRY"),
-                'latitude': loc.get('latitude', "NO LATITUDE"),
-                'longitude': loc.get('longitude', "NO LONGITUDE"),
-                'alternative_names': loc['alternative_names']
-            })
+      for loc in locations_cursor:
+        output.append({"location": loc})
     else:
         print 'Cannot find any locations!'
 
