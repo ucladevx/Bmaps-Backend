@@ -155,15 +155,15 @@ def db_locations():
       print "~~~~~~~~~~~~~~~~~~~~~"
       print new_loc['location'].get('name', "NO NAME")
       # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
-      re_name = re.sub(r'\bat UCLA\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
-      re_name = re.sub(r'\b@ UCLA\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bof UCLA\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bat\s+', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
+      re_name = re.sub(r'\b@\s+', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bof\s+', '', re_name, flags=re.IGNORECASE)
       re_name = re.sub(r'\bUCLA\s?', '', re_name, flags=re.IGNORECASE)
       re_name = re.sub(r'\bLos Angeles\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bLA\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bLA\s+', '', re_name, flags=re.IGNORECASE)
       re_name = re.sub(r'\bWestwood\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bRoom\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bThe\s?', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bRoom\s+', '', re_name, flags=re.IGNORECASE)
+      re_name = re.sub(r'\bThe\s+', '', re_name, flags=re.IGNORECASE)
       # Remove Hyphens and commas and multiple spaces
       re_name = re.sub(r'-\s?', '', re_name)
       re_name = re.sub(r',\s?', '', re_name)
@@ -285,15 +285,15 @@ def get_coordinates(place_query):
       # Removes Integers/Decimals and the following space
       num_place_query = re.sub(r'\b\d+(?:\.\d+)?\s?', '', place_query)
       # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
-      num_place_query = re.sub(r'\bat UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\b@ UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bof UCLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bat\s+', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\b@\s+', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bof\s+', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\bUCLA\s?', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\bLos Angeles\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bLA\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bLA\s+', '', num_place_query, flags=re.IGNORECASE)
       num_place_query = re.sub(r'\bWestwood\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bRoom\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bThe\s?', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bRoom\s+', '', num_place_query, flags=re.IGNORECASE)
+      num_place_query = re.sub(r'\bThe\s+', '', num_place_query, flags=re.IGNORECASE)
       # Remove Hyphens and commas and multiple spaces
       num_place_query = re.sub(r'-\s?', '', num_place_query)
       num_place_query = re.sub(r',\s?', '', num_place_query)
