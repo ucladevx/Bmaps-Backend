@@ -9,6 +9,7 @@ import time, datetime, dateutil.parser
 import event_caller
 import json
 import os
+from tqdm import tqdm
 
 Events = Blueprint('Events', __name__)
 
@@ -26,7 +27,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 events_collection = db.map_events
 pages_collection = db.saved_pages
-total_events_collection = db.total_events
+total_events_collection = db.events_ml
 
 """
 CHANGES
@@ -291,12 +292,12 @@ def processed_time(old_time_str):
 # Call event_caller's add_facebook_page() to find the official info from Graph API,
 # returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
 @Events.route('/api/add-page', methods=['GET'])
-def add_event_to_database(type):
+def add_page_to_database(type):
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
     if not page_id and not page_exact_name:
-        return 'Add a page using URL parameters id or exact name, with optional type specified (default=group, page, place).'
+        return 'Add a page using URL parameters id or exact name, with optional type specified: group (default), page, place.'
 
     return 'Nothing happens yet.'
 
@@ -345,7 +346,7 @@ def populate_ucla_events_database():
     processed_db_events = event_caller.update_current_events(list(events_collection.find()), earlier_day_bound)
 
     # actually update all in database, but without mass deletion (for safety)
-    for old_event in events_collection.find():
+    for old_event in tqdm(events_collection.find()):
         event_id = old_event['id']
         updated_event = processed_db_events.get(event_id)
         # if event should be kept and updated
@@ -396,7 +397,7 @@ def populate_ucla_events_database():
 
 @Events.route('/api/test-code-update')
 def test_code_update():
-    return 'Super bowl 52'
+    return 'house lease'
 
 # simply save each unique document and delete any that have been found already
 def clean_collection(collection):
