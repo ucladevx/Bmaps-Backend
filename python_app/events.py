@@ -340,9 +340,14 @@ def populate_ucla_events_database():
     processed_db_events = event_caller.update_current_events(list(events_collection.find()))
 
     # actually update all in database, but without mass deletion (for safety)
-    for event_id, event_info in processed_db_events.iteritems():
-        events_collection.delete_one({'id': event_id})
-        events_collection.insert_one(event_info)
+    for old_event in events_collection.find():
+        # if event should be kept and updated
+        if old_event['id'] in processed_db_events:
+            events_collection.delete_one({'id': event_id})
+            events_collection.insert_one(event_info)
+        # event's time has passed, according to update_current_events
+        else:
+            events_collection.delete_one({'id': event_id})
 
     new_events_data = event_caller.get_facebook_events()
     # debugging events output
@@ -381,6 +386,10 @@ def populate_ucla_events_database():
         total_events_collection.insert_one(event)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
+
+@Events.route('/api/test-code-update')
+def test_code_update():
+    return 'Super bowl 52'
 
 # simply save each unique document and delete any that have been found already
 def clean_collection(collection):
