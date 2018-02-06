@@ -55,13 +55,16 @@ EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_t
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
 
+# the time period before now, IN DAYS, for finding and updating events instead of removing them 
+BASE_EVENT_START_BOUND = 0
+
 s = requests.Session()
 
 def format_time(time):
     # %z gets time zone difference in +/-HHMM from UTC
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
-def get_event_time_bounds(days_before=1):
+def get_event_time_bounds(days_before):
     # back_jump = 60        # for repeating events that started a long time ago
     back_jump = days_before # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
     forward_jump = 60       # and 60 days into the future
@@ -230,7 +233,7 @@ def add_facebook_page(page_type='group', id='', name=''):
         return {}
     return {}
 
-def get_events_from_pages(pages_by_id, days_before=1):
+def get_events_from_pages(pages_by_id, days_before):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
     app_access_token = get_app_token()
@@ -427,7 +430,7 @@ def process_event(event, host_info, add_duplicate_tag=False):
 # one from simply parsing the string, and another from current time
 # required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
 # return boolean, if given time string has passed in real time
-def time_in_past(time_str, hours_offset=0):
+def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
     try:
         # Use dateutil parser to get time zone
         time_obj = dateutil.parser.parse(time_str).astimezone(pytz.UTC)
@@ -439,23 +442,23 @@ def time_in_past(time_str, hours_offset=0):
 
     # if time from string is smaller than now, with offset (to match time range of new events found)
     # offset shifts the boundary back in time, for which events to update rather than delete
-    return time_obj <= now - datetime.timedelta(hours=hours_offset + 24)
+    return time_obj <= now - datetime.timedelta(days=days_before)
 
 # update events currently in database before new ones put in
 # means remove ones too old and re-search the rest
 # events = list of complete event dicts
-def update_current_events(events):
+def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "duplicate_occurrence" tag
     kept_events = {}
     for event in events:
-        if not time_in_past(event['start_time']):
+        if not time_in_past(event['start_time'], days_before):
             updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
     # return a dict of kept event IDs to their info
     return kept_events
 
-def get_facebook_events(days_before=1):
+def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     # search for UCLA-associated places and groups, using existing list on DB
     pages_by_id = {}
     for page in pages_collection.find():
