@@ -7,3 +7,5 @@ requests
 python-dateutil
 schedule
 python-dotenv
+nltk
+tqdm
