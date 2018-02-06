@@ -251,6 +251,7 @@ def process_event_info(event):
         'properties': {
             'event_name': event.get('name', '<NONE>'), 
             'description': event.get('description', '<NONE>'),
+            'hoster': event.get('hoster', '<MISSING HOST>'),
             'start_time': processed_time(event.get('start_time', '<NONE>')),
             'end_time': processed_time(event.get('end_time', '<NONE>')),
             'venue': event['place'],
@@ -267,7 +268,8 @@ def process_event_info(event):
             'ticketing': {
                 'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
-            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO'
+            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
+            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO'
         }
     }
     return formatted_info
@@ -334,22 +336,27 @@ def populate_ucla_events_database():
 
     clear_old_db = request.args.get('clear', default=False, type=bool)
     if clear_old_db:
+        print(clear_old_db, type(clear_old_db))
         events_collection.delete_many({})
 
+    earlier_day_bound = request.args.get('days', default=0, type=int)
+
     # take out all current events from DB, put into list, check for updates
-    processed_db_events = event_caller.update_current_events(list(events_collection.find()))
+    processed_db_events = event_caller.update_current_events(list(events_collection.find()), earlier_day_bound)
 
     # actually update all in database, but without mass deletion (for safety)
     for old_event in events_collection.find():
+        event_id = old_event['id']
+        updated_event = processed_db_events.get(event_id)
         # if event should be kept and updated
-        if old_event['id'] in processed_db_events:
+        if updated_event:
             events_collection.delete_one({'id': event_id})
-            events_collection.insert_one(event_info)
+            events_collection.insert_one(updated_event)
         # event's time has passed, according to update_current_events
         else:
             events_collection.delete_one({'id': event_id})
 
-    new_events_data = event_caller.get_facebook_events()
+    new_events_data = event_caller.get_facebook_events(earlier_day_bound)
     # debugging events output
     # with open('events_out.json', 'w') as outfile:
     #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
