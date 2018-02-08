@@ -5,8 +5,10 @@ import re
 import pymongo
 import json
 import os
+from operator import itemgetter
+import process
 
-data = json.load(open('sampleData.json'))
+data = json.load(open('locationsData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -74,6 +76,8 @@ def find_locations():
         if any(place):
           # All places should have alternative names field
           place['location']['alternative_names'] = []
+          if 'name' in event['place']:
+            place['location']['alternative_names'].append(place['location']['name'])
           # Reject exact matches
           if place not in places:
             # Check whether coordinates exist
@@ -320,9 +324,107 @@ def get_coordinates(place_query):
 
     return jsonify({"Database Results": output})
 
+# Given a location string try to return coordinates/relevant location info
+# e.g. BH 3400 => Boelter Hall vs. Engr 4 => Engineering IV vs. Engineering VI
+@Locations.route('/api/text_search/<place_query>', methods=['GET'])
+def get_mongo_textSearch(place_query):
+    output = []
+    output_places = []
+
+    # Check database for matches (case insensitive) in names or alternative names
+    # Concatenate results from name and alternative_names fields
+    # place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
+
+    # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
+    # Dorm Dormitory Building Bldg Ofc Office 
+    # place_regex = re.sub(r'\bUCLA\s?', '', place_query, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bLos Angeles\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bLA\s+', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bWestwood\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bRoom\s+', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bDormitory\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bDorm\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bBuilding\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bBldg\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bOfc\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bOffice\s?', '', place_regex, flags=re.IGNORECASE)
+    # place_regex = re.sub(r'\bHall\s?', '', place_regex, flags=re.IGNORECASE)
+    # UCLA Los Angeles LA Westwood Room Dormitory Dorm Building Bldg Ofc Office Hall
+
+    # alt_places_cursor = locations_collection.find( { "$text": { "$search": place_query } } )
+    print place_query
+    # print place_regex
+    # place_regex_phrase = "\"" + place_regex + "\""
+
+    processed_place = process.processText(place_query)
+    print processed_place
+
+    places_cursor = locations_collection.find( 
+      { '$text': { '$search': processed_place, '$language': 'english', '$caseSensitive': False } },
+      { 'score': { '$meta': 'textScore' } }
+    ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)
+
+    # places_phrase_cursor = locations_collection.find( 
+    #   { '$text': { '$search': place_regex_phrase, '$language': 'english', '$caseSensitive': False } },
+    #   { 'score': { '$meta': 'textScore' } }
+    # ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)
+
+    # cursor.sort([('score', {'$meta': 'textScore'})])
+
+    # https://docs.mongodb.com/manual/reference/operator/query/text/
+
+    # db.articles.find(
+    #    { $text: { $search: "coffee" } },
+    #    { score: { $meta: "textScore" } }
+    # ).sort( { score: { $meta: "textScore" } } )
+
+    # db.articles.find(
+    #    { $text: { $search: "coffee" } },
+    #    { score: { $meta: "textScore" } }
+    # ).sort( { score: { $meta: "textScore" } } ).limit(2)
+
+    # Places that match the alternate name are appended to output if not already
+    # part of output
+    if places_cursor.count() > 0:
+      for place in places_cursor:
+        # Check if already added by maintaining list of places added by name
+        if place['location'].get('name', "NO NAME") not in output_places:
+          output.append({
+            'score': place['score'],
+            'name': place['location'].get('name', "NO NAME"),
+            # 'street': place['location'].get('street', "NO STREET"),
+            # 'zip': place['location'].get('zip', "NO ZIP"),
+            # 'city': place['location'].get('city', "NO CITY"),
+            # 'state': place['location'].get('state', "NO STATE"),
+            # 'country': place['location'].get('country', "NO COUNTRY"),
+            # 'latitude': place['location'].get('latitude', "NO LATITUDE"),
+            # 'longitude': place['location'].get('longitude', "NO LONGITUDE"),
+            'alternative_names': place['location']['alternative_names']
+          })
+          output_places.append(place['location'].get('name', "NO NAME"))
+
+    # if places_phrase_cursor.count() > 0:
+    #   for place in places_phrase_cursor:
+    #     if place['location'].get('name', "NO NAME") not in output_places:
+    #       output.append({
+    #         'score': place['score'],
+    #         'name': place['location'].get('name', "NO NAME"),
+    #         'alternative_names': place['location']['alternative_names']
+    #       })
+    #       output_places.append(place['location'].get('name', "NO NAME"))
+    #     else:
+    #       for p in output:
+    #         if place['location']['name'] == p['name']:
+    #           print p['score']
+    #           p['score'] = p['score'] + place['score']
+    #           print p['score']
+
+    # sorted_output = sorted(output, key=itemgetter('score'), reverse=True)
+    return jsonify({"Database Results": output})
+
 # Insert locations from a JSON file to the db
 # See sample format in ./sampleData.json
-@Locations.route('/api/insert_locations', methods=['GET'])
+@Locations.route('/api/insert_locations', methods=['POST'])
 def insert_locations():
   locations_collection.insert_many(data['locations'])
   return "Successfully inserted location documents to db!"
