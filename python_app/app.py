@@ -63,7 +63,7 @@ if __name__ == "__main__":
     event_update_thread = Thread(target = event_thread_func)
     event_update_thread.start()
 
-    code_update_date = "2/5/18"
+    code_update_date = "2/8/18"
     print("Updated on: {0}".format(code_update_date))
 
     # if debug is true, will run 2 instances at once (so two copies of all threads)
