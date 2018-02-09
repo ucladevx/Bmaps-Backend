@@ -326,22 +326,31 @@ def refresh_page_database():
 
     return 'Refreshed page database!'
 
-# Get all UCLA-related Facebook events and add to database
+# this endpoint call is separate from actual code logic,
+# because the request context (for URL args) is only set through endpoint,
+# not for regular function calls (like scheduled 3 times a day)
 @Events.route('/api/populate-ucla-events-database')
-def populate_ucla_events_database():
-    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
-    print('BEGIN POPULATING EVENTS DATABASE')
-    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n\n\n\n\n\n\n')
-    # Location of Bruin Bear
-    # current_events = get_facebook_events(34.070964, -118.444757)
-
-    clear_old_db = request.args.get('clear', default=False, type=bool)
-    if clear_old_db:
-        print(clear_old_db, type(clear_old_db))
+def call_populate_events_database():
+    # boolean doesn't work here: if clear parameter has any value, it is a string
+    # all non-empty strings are true, so just take it as a string
+    clear_old_db = request.args.get('clear', default='False', type=str)
+    print(clear_old_db, type(clear_old_db))
+    # could do .lower(), but only works for ASCII in Python 2...
+    if clear_old_db == 'True' or clear_old_db == 'true':
         events_collection.delete_many({})
 
     earlier_day_bound = request.args.get('days', default=0, type=int)
+    print(earlier_day_bound)
+    return populate_ucla_events_database(earlier_day_bound)
 
+    
+# Get all UCLA-related Facebook events and add to database
+def populate_ucla_events_database(earlier_day_bound=0):
+    print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
+    print('BEGIN POPULATING EVENTS DATABASE')
+    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
+    # Location of Bruin Bear
+    # current_events = get_facebook_events(34.070964, -118.444757)
     # take out all current events from DB, put into list, check for updates
     processed_db_events = event_caller.update_current_events(list(events_collection.find()), earlier_day_bound)
 
@@ -369,7 +378,7 @@ def populate_ucla_events_database():
     # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
     # normally use incremental Cursor, to save memory usage
     new_count = 0
-    for event in new_events_data['events']:
+    for event in tqdm(new_events_data['events']):
         curr_id = event['id']
         existing_event = processed_db_events.get(curr_id)
         
@@ -394,6 +403,7 @@ def populate_ucla_events_database():
         total_events_collection.insert_one(event)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
+
 
 @Events.route('/api/test-code-update')
 def test_code_update():

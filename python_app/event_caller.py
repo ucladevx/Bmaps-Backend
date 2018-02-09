@@ -475,7 +475,7 @@ def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     kept_events = {}
     for event in tqdm(events):
         if not time_in_past(event['start_time'], days_before):
-            updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
+            updated_event_dict = process_event(event, event.get('hoster'), event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
     # return a dict of kept event IDs to their info
     return kept_events
