@@ -1,0 +1,125 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to Mappening’s documentation! &#8212; Mappening 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-mappening-s-documentation">
+<h1>Welcome to Mappening’s documentation!<a class="headerlink" href="#welcome-to-mappening-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Here we are supposed to talk about the function of the project
+and usefulness of API.</p>
+<p><a class="reference external" href="https://github.com/ucladevx/Mappening-Backend">Mappening Backend Repository</a></p>
+<p><a class="reference external" href="http://www.whatsmappening.io/">Mappening Product</a></p>
+<div class="section" id="classes-documented">
+<h2>Classes Documented<a class="headerlink" href="#classes-documented" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>events (to link to its functions)</li>
+<li>event_caller (to link to its functions)</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-python_app.events"></span><dl class="data">
+<dt id="python_app.events.total_events_collection">
+<code class="descclassname">python_app.events.</code><code class="descname">total_events_collection</code><em class="property"> = Collection(Database(MongoClient(host=['ds044709.mlab.com:44709'], document_class=dict, tz_aware=False, connect=True), u'mappening_data'), u'total_events')</em><a class="headerlink" href="#python_app.events.total_events_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>CHANGES
+when search for category, just put actual name (‘EVENT’ not needed)
+everything calls find_events_in_database, giving search terms and options if needed
+HEADS UP: make sure special Unicode characters handled!</p>
+<p>in processing data from database (process_event_info):
+‘venue’ is now ‘place’ and has less info: name, id, and location
+‘attendance’ –&gt; ‘stats’ contains attending, noreply, interested, and maybe (removed declined)
+‘end_time’ may not be set
+‘is_canceled’ may return False boolean value
+defaults set by using dict.get(key, default value), returns None (null) if no default value given</p>
+</dd></dl>
+
+<span class="target" id="module-python_app.event_caller"></span></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Mappening DevX.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

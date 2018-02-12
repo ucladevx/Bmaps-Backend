@@ -8,7 +8,7 @@ Welcome to Mappening's documentation!
 Here we are supposed to talk about the function of the project
 and usefulness of API.
 
-`Mappening Backend Repository <https://github.com/ucladevx/Mappening-Backend>`_ 
+`Mappening Backend Repository <https://github.com/ucladevx/Mappening-Backend>`_
 
 `Mappening Product <http://www.whatsmappening.io/>`_
 
@@ -28,10 +28,8 @@ Indices and tables
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: src.events
+.. automodule:: python_app.events
      :members:
 
-.. automodule:: src.event_caller
+.. automodule:: python_app.event_caller
      :members:
-
-
