@@ -7,3 +7,4 @@ requests
 python-dateutil
 schedule
 python-dotenv
+pytz
