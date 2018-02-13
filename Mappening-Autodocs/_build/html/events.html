@@ -1,0 +1,212 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Events &#8212; Mappening 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to Mappening’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-python_app.events">
+<span id="events"></span><h1>Events<a class="headerlink" href="#module-python_app.events" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="python_app.events.add_event_to_database">
+<code class="descclassname">python_app.events.</code><code class="descname">add_event_to_database</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.add_event_to_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call event_caller’s add_facebook_page() to find the official info from Graph API,
+returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.clean_collection">
+<code class="descclassname">python_app.events.</code><code class="descname">clean_collection</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.clean_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>simply save each unique document and delete any that have been found already</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.find_events_in_database">
+<code class="descclassname">python_app.events.</code><code class="descname">find_events_in_database</code><span class="sig-paren">(</span><em>find_key=''</em>, <em>find_value=''</em>, <em>one_result_expected=False</em>, <em>print_results=False</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.find_events_in_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_all_events">
+<code class="descclassname">python_app.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_all_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of all events in format that Mapbox likes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_event_by_id">
+<code class="descclassname">python_app.events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of singular event by event id</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_event_by_name">
+<code class="descclassname">python_app.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of singular event by event name
+/&lt;&gt; defaults to strings without any slashes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_event_categories">
+<code class="descclassname">python_app.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of events by event category
+Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
+Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
+Party, Religion, Shopping, Sports, Theater, Wellness
+Conference, Lecture, Neighborhood, Networking</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_event_categories_by_date">
+<code class="descclassname">python_app.events.</code><code class="descname">get_event_categories_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_event_categories_by_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of events by event category &amp; date</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_by_category">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of currently existing event categories
+Event category examples: food, THEATER
+use regexes to search in ‘category’, since both EVENT_TYPE and TYPE_EVENT string formats exist now</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_by_category_and_date">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_by_category_and_date</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_by_category_and_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of events by event category &amp; date</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_by_date">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of events by event date
+Returns all events starting on the passed in date</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_by_food">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_by_food</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_by_food" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of events with free food</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_for_search">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_for_search</code><span class="sig-paren">(</span><em>search_term</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_for_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of matching event names today</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.get_events_today_for_search">
+<code class="descclassname">python_app.events.</code><code class="descname">get_events_today_for_search</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.get_events_today_for_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns JSON of matching event names</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.populate_ucla_events_database">
+<code class="descclassname">python_app.events.</code><code class="descname">populate_ucla_events_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.populate_ucla_events_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all UCLA-related Facebook events and add to database</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.process_event_info">
+<code class="descclassname">python_app.events.</code><code class="descname">process_event_info</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.process_event_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes date information then returns</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.processed_time">
+<code class="descclassname">python_app.events.</code><code class="descname">processed_time</code><span class="sig-paren">(</span><em>old_time_str</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.processed_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process time</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.refresh_page_database">
+<code class="descclassname">python_app.events.</code><code class="descname">refresh_page_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.refresh_page_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Now refresh pages we search separately, can be done way less frequently than event search</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.events.remove_db_duplicates">
+<code class="descclassname">python_app.events.</code><code class="descname">remove_db_duplicates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.events.remove_db_duplicates" title="Permalink to this definition">¶</a></dt>
+<dd><p>if needed, clean database of duplicate documents</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Mappening’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Mappening DevX.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/events.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

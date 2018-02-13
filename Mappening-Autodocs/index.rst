@@ -12,10 +12,14 @@ and usefulness of API.
 
 `Mappening Product <http://www.whatsmappening.io/>`_
 
+
 Classes Documented
 ------------------
-	* events (to link to its functions)
-	* event_caller (to link to its functions)
+.. toctree::
+   :maxdepth: 2
+
+   events
+   event_caller
 
 Indices and tables
 ==================
@@ -23,13 +27,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-.. automodule:: python_app.events
-     :members:
-
-.. automodule:: python_app.event_caller
-     :members:

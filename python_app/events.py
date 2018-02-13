@@ -28,28 +28,18 @@ events_collection = db.map_events
 pages_collection = db.saved_pages
 total_events_collection = db.total_events
 
-"""
-CHANGES
-when search for category, just put actual name ('EVENT' not needed)
-everything calls find_events_in_database, giving search terms and options if needed
-HEADS UP: make sure special Unicode characters handled!
-
-in processing data from database (process_event_info):
-'venue' is now 'place' and has less info: name, id, and location
-'attendance' --> 'stats' contains attending, noreply, interested, and maybe (removed declined)
-'end_time' may not be set
-'is_canceled' may return False boolean value
-defaults set by using dict.get(key, default value), returns None (null) if no default value given
-"""
-
-# Returns JSON of all events in format that Mapbox likes
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
+    """ 
+    Returns JSON of all events in format that Mapbox likes 
+    """
     return find_events_in_database(print_results=True)
 
-# Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
 def get_events_today_for_search(search_term):
+    """ 
+    Returns JSON of matching event names
+    """
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
     events_cursor = events_collection.find({'name': search_regex}) # put today in the search terms
@@ -80,9 +70,12 @@ def get_events_today_for_search(search_term):
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 
-# Returns JSON of matching event names today
+
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
+    """
+    Returns JSON of matching event names today
+    """
     date_regex_obj = construct_date_regex(date)
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
@@ -113,29 +106,38 @@ def get_events_for_search(search_term, date):
         print("No event(s) matched '{0}'".format(search_term))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-# Returns JSON of singular event by event name
-# /<> defaults to strings without any slashes
+
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
+    """
+    Returns JSON of singular event by event name
+    /<> defaults to strings without any slashes
+    """
     return find_events_in_database('name', event_name, True)
 
-# Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
+    """
+    Returns JSON of singular event by event id
+    """
     return find_events_in_database('id', event_id, True)
 
-# Returns JSON of events by event date
-# Returns all events starting on the passed in date
 @Events.route('/api/event-date/<date>', methods=['GET'])
 def get_events_by_date(date):
+    """
+    Returns JSON of events by event date
+    Returns all events starting on the passed in date
+    """
     date_regex_obj = construct_date_regex(date)
     if not date_regex_obj:
         return jsonify({'error': 'Invalid date string to be parsed.'})
     return find_events_in_database('start_time', date_regex_obj)
 
-# Returns JSON of events by event category & date
 @Events.route('/api/event-categories-by-date/<date>', methods=['GET'])
 def get_event_categories_by_date(date):
+    """
+    Returns JSON of events by event category & date
+    """
     # Get cursor to all events on a certain day and get unique categories list
     # Iterate through all events and get unique list of all categories
     uniqueList = []
@@ -156,9 +158,11 @@ def get_event_categories_by_date(date):
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
-# Returns JSON of events by event category & date
 @Events.route('/api/events-by-category-and-date', methods=['GET'])
 def get_events_by_category_and_date():
+    """
+    Returns JSON of events by event category & date
+    """
     date = request.args['date']
     event_category = request.args['category']
 
@@ -181,13 +185,16 @@ def get_events_by_category_and_date():
         print('Cannot find any events with matching category and date!')
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-# Returns JSON of events by event category
-# Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
-# Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
-# Party, Religion, Shopping, Sports, Theater, Wellness
-# Conference, Lecture, Neighborhood, Networking
+
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
+    """
+    Returns JSON of events by event category
+    Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
+    Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
+    Party, Religion, Shopping, Sports, Theater, Wellness
+    Conference, Lecture, Neighborhood, Networking
+    """
     # Iterate through all events and get unique list of all categories
     # TODO: sort by quantity?
     uniqueList = []
@@ -204,18 +211,24 @@ def get_event_categories():
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
-# Returns JSON of currently existing event categories
-# Event category examples: food, THEATER
-# use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
+
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
+    """
+     Returns JSON of currently existing event categories
+     Event category examples: food, THEATER
+     use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
+    """
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
     return find_events_in_database('category', cat_regex_obj)
 
-# Returns JSON of events with free food
+
 @Events.route('/api/event-food', methods=['GET'])
 def get_events_by_food():
+    """
+    Returns JSON of events with free food
+    """
     return get_event_by_category('food')
 
 def construct_date_regex(raw_date):
@@ -235,8 +248,10 @@ def construct_date_regex(raw_date):
     date_regex_obj = re.compile(date_regex_str)
     return date_regex_obj
 
-# find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
+    """
+    find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
+    """
     output = []
     # for getting all events, no search query needed (empty dict)
     search_pair = {}
@@ -270,6 +285,9 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
+    """
+    Processes date information then returns
+    """
     formatted_info = {
         # will ALWAYS have an ID
         'id': event['id'],
@@ -307,6 +325,9 @@ def process_event_info(event):
     return formatted_info
 
 def processed_time(old_time_str):
+    """
+    Process time
+    """
     # if not valid time string, return default value from dict.get()
     try:
         # use dateutil parser to get time zone
@@ -320,10 +341,13 @@ def processed_time(old_time_str):
 
 # TODO: new endpoint to manually add Facebook page to DB
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
-# Call event_caller's add_facebook_page() to find the official info from Graph API,
-# returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
 @Events.route('/api/add-page', methods=['GET'])
 def add_event_to_database(type):
+    """
+    Call event_caller's add_facebook_page() to find the official info from Graph API,
+    returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
+
+    """
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
@@ -332,9 +356,11 @@ def add_event_to_database(type):
 
     return 'Nothing happens yet.'
 
-# Now refresh pages we search separately, can be done way less frequently than event search
 @Events.route('/api/refresh-page-database')
 def refresh_page_database():
+    """
+    Now refresh pages we search separately, can be done way less frequently than event search
+    """
     # separately run from refreshing events, also check for new pages under set of search terms
 
     # update just like accumulated events list
@@ -357,9 +383,11 @@ def refresh_page_database():
 
     return 'Refreshed page database!'
 
-# Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
+    """
+    Get all UCLA-related Facebook events and add to database
+    """
     print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n\n\n\n\n\n\n')
@@ -416,8 +444,10 @@ def populate_ucla_events_database():
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
 
-# simply save each unique document and delete any that have been found already
 def clean_collection(collection):
+    """
+    simply save each unique document and delete any that have been found already
+    """
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -432,9 +462,11 @@ def clean_collection(collection):
             unique_ids.add(curr_id)
     return dups
 
-# if needed, clean database of duplicate documents
 @Events.route('/api/remove-duplicates', methods=['GET'])
 def remove_db_duplicates():
+    """
+    if needed, clean database of duplicate documents
+    """
     total_dups = []
     # difference between append and extend: extend flattens out lists to add elements, append adds 1 element
     total_dups.extend(clean_collection(events_collection))
