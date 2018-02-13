@@ -23,6 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Events" href="events.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -46,12 +47,12 @@ and usefulness of API.</p>
 <p><a class="reference external" href="http://www.whatsmappening.io/">Mappening Product</a></p>
 <div class="section" id="classes-documented">
 <h2>Classes Documented<a class="headerlink" href="#classes-documented" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><ul class="simple">
-<li>events (to link to its functions)</li>
-<li>event_caller (to link to its functions)</li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_caller.html">Event Caller</a></li>
 </ul>
-</div></blockquote>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -61,24 +62,7 @@ and usefulness of API.</p>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
-<div class="toctree-wrapper compound">
 </div>
-<span class="target" id="module-python_app.events"></span><dl class="data">
-<dt id="python_app.events.total_events_collection">
-<code class="descclassname">python_app.events.</code><code class="descname">total_events_collection</code><em class="property"> = Collection(Database(MongoClient(host=['ds044709.mlab.com:44709'], document_class=dict, tz_aware=False, connect=True), u'mappening_data'), u'total_events')</em><a class="headerlink" href="#python_app.events.total_events_collection" title="Permalink to this definition">¶</a></dt>
-<dd><p>CHANGES
-when search for category, just put actual name (‘EVENT’ not needed)
-everything calls find_events_in_database, giving search terms and options if needed
-HEADS UP: make sure special Unicode characters handled!</p>
-<p>in processing data from database (process_event_info):
-‘venue’ is now ‘place’ and has less info: name, id, and location
-‘attendance’ –&gt; ‘stats’ contains attending, noreply, interested, and maybe (removed declined)
-‘end_time’ may not be set
-‘is_canceled’ may return False boolean value
-defaults set by using dict.get(key, default value), returns None (null) if no default value given</p>
-</dd></dl>
-
-<span class="target" id="module-python_app.event_caller"></span></div>
 
 
           </div>
@@ -89,6 +73,7 @@ defaults set by using dict.get(key, default value), returns None (null) if no de
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="events.html" title="next chapter">Events</a></li>
   </ul></li>
 </ul>
 </div>

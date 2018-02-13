@@ -1,0 +1,162 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Event Caller &#8212; Mappening 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-python_app.event_caller">
+<span id="event-caller"></span><h1>Event Caller<a class="headerlink" href="#module-python_app.event_caller" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="python_app.event_caller.add_facebook_page">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">add_facebook_page</code><span class="sig-paren">(</span><em>page_type='group'</em>, <em>id=''</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.add_facebook_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>RULES TO INSERT:
+In General: to GUARANTEE the ID, Inspect Element
+–&gt; under &lt;head&gt; tag, find &lt;meta property=… content=”fb://group OR page/?id=&lt;id&gt;”&gt;
+** may need some scrolling
+Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/&lt;page_id&gt;
+Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
+Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.entity_in_right_location">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">entity_in_right_location</code><span class="sig-paren">(</span><em>loc_data</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.entity_in_right_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>if zip code, check in UCLA zip codes (first 5 digits)
+if no zip code, check that in Los Angeles, CA</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.find_many_events">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">find_many_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.find_many_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>find events up to 2 years ago</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.find_ucla_entities">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">find_ucla_entities</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.find_ucla_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>for searching all types: place, page, and group</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.general_search_results">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">general_search_results</code><span class="sig-paren">(</span><em>search_term</em>, <em>search_args</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.general_search_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate general search results</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.get_events_from_pages">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">get_events_from_pages</code><span class="sig-paren">(</span><em>pages_by_id</em>, <em>days_before=1</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.get_events_from_pages" title="Permalink to this definition">¶</a></dt>
+<dd><p>pages_by_id = {‘676162139187001’: ‘UCLACAC’}
+dict of event ids mapped to their info, for fast duplicate checking</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.get_facebook_events">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">get_facebook_events</code><span class="sig-paren">(</span><em>days_before=1</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.get_facebook_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>search for UCLA-associated places and groups, using existing list on DB</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.process_event">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">process_event</code><span class="sig-paren">(</span><em>event</em>, <em>host_info</em>, <em>add_duplicate_tag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.process_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>takes in event dict ({many attributes: values}), returns dict of event dicts from event id to all info
+passes in other data for manually added fields (NOT from FB, but for our own purposes)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.time_in_past">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">time_in_past</code><span class="sig-paren">(</span><em>time_str</em>, <em>hours_offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.time_in_past" title="Permalink to this definition">¶</a></dt>
+<dd><p>takes in an FB formatted timestamp: Y-m-d’T’H:M:S&lt;tz&gt;
+to account for weird timezone things, construct 2 datetime objects
+one from simply parsing the string, and another from current time
+required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
+return boolean, if given time string has passed in real time</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="python_app.event_caller.update_current_events">
+<code class="descclassname">python_app.event_caller.</code><code class="descname">update_current_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="headerlink" href="#python_app.event_caller.update_current_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>update events currently in database before new ones put in
+means remove ones too old and re-search the rest
+events = list of complete event dicts</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Mappening DevX.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/event_caller.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
