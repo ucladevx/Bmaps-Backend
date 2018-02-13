@@ -19,13 +19,17 @@ Process = Blueprint('Process', __name__)
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(Process)
 
-# @Process.route('/api/process', methods=['GET'])
+# @Process.route('/api/process/<text>', methods=['GET'])
 def processText(text):
     tokenizer = MosesTokenizer() #tokenizers are basically an advanced split
 
     # text = "testing this. UCLA ackerman for Boelter 3400 why engr 4 at UCLA. Rstaurat of Los Angeles LA, Room 4760 @ the place - UCLA"
+    print "Original text: " + text
+
     processed_text = tokenizer.tokenize(text)
     processed_text = preprocess(processed_text)
+
+    print "Processed text: " + " ".join(processed_text)
     return " ".join(processed_text) #jsonify(processed_text)
 
 # [
@@ -44,6 +48,6 @@ def matchNotX(strg, search=re.compile(r'[^!#$%&()*+,-./:;<=>?@\\^_}|{~0123456789
 def preprocess(text):
     """Remove all useless words and punct, make lowercase"""
     # Dorm Dormitory Building Bldg Ofc Office 
-    stoplist = set('for a of the and to in . / los ucla angeles la westwood room dormitory dorm building bldg ofc office hall the @ at - ,'.split())
+    stoplist = set('for a of the and to in . / center field plaza residential los ucla angeles la westwood room dormitory dorm building bldg ofc office hall the @ at - ,'.split())
     stoplist = set(nltk.corpus.stopwords.words('english')) | stoplist | set(string.punctuation)
     return [word.strip(string.punctuation).lower() for word in text if word not in stoplist and matchNotX(word)]    
