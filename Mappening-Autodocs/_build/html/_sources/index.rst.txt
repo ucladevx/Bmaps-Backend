@@ -13,8 +13,8 @@ and usefulness of API.
 `Mappening Product <http://www.whatsmappening.io/>`_
 
 
-Classes Documented
-------------------
+Files Documented
+----------------
 .. toctree::
    :maxdepth: 2
 
