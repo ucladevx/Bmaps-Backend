@@ -1,4 +1,5 @@
 # TODO get locations without coords from jason
+# TODO MAJOR CLEANUP but I'm lazy
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -10,7 +11,7 @@ import os
 from operator import itemgetter
 import process
 
-data = json.load(open('tokenizeData.json'))
+data = json.load(open('sampleData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -32,6 +33,7 @@ db = client['mappening_data']
 
 events_collection = db.map_events
 ml_events_collection = db.events_ml
+total_events_collection = db.total_events
 locations_collection = db.test_locations
 
 # Returns JSON of all past locations/venues
@@ -65,7 +67,8 @@ def find_locations():
     
     # TODO: Integrate with new events caller
     # Every time there are new events, check location info and update db if necessary
-    events_cursor = ml_events_collection.find({"place": {"$exists": True}})
+    # events_cursor = ml_events_collection.find({"place": {"$exists": True}})
+    events_cursor = total_events_collection.find({"place": {"$exists": True}})
     if events_cursor.count() > 0:
       for event in events_cursor:
         # Add location info to place dict
@@ -199,17 +202,17 @@ def db_locations():
           updated = False
           updated_locations.append(old_loc)
           # Replace document with updated info
-          # if is_coord:
-          #   locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
-          # else:
-          #   locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
+          if is_coord:
+            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+          else:
+            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
       else:
         # No pre-existing location so insert new location to db
         # Also add stripped version of name to location info
         if place_name != new_loc['location']['name'].lower():
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
-        # locations_collection.insert_one(new_loc.copy())
+        locations_collection.insert_one(new_loc.copy())
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
