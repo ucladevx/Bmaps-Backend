@@ -11,7 +11,7 @@ import os
 from operator import itemgetter
 import process
 
-data = json.load(open('sampleData.json'))
+data = json.load(open('tokenizeData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -202,10 +202,11 @@ def db_locations():
           updated = False
           updated_locations.append(old_loc)
           # Replace document with updated info
-          if is_coord:
-            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+          if is_name:
+            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)  
           else:
-            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
+            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+                    
       else:
         # No pre-existing location so insert new location to db
         # Also add stripped version of name to location info
