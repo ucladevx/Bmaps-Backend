@@ -34,7 +34,7 @@ db = client['mappening_data']
 events_collection = db.map_events
 ml_events_collection = db.events_ml
 total_events_collection = db.total_events
-locations_collection = db.test_locations
+locations_collection = db.UCLA_locations
 
 # Returns JSON of all past locations/venues
 @Locations.route('/api/locations', methods=['GET'])
