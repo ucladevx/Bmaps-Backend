@@ -31,7 +31,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 
 events_collection = db.map_events
-total_events_collection = db.total_events
+ml_events_collection = db.events_ml
 locations_collection = db.test_locations
 
 # Returns JSON of all past locations/venues
@@ -65,7 +65,7 @@ def find_locations():
     
     # TODO: Integrate with new events caller
     # Every time there are new events, check location info and update db if necessary
-    events_cursor = events_collection.find({"place": {"$exists": True}})
+    events_cursor = ml_events_collection.find({"place": {"$exists": True}})
     if events_cursor.count() > 0:
       for event in events_cursor:
         # Add location info to place dict
@@ -197,16 +197,19 @@ def db_locations():
         # Only replace document if it was updated
         if updated:
           updated = False
-          updated_locations.append({'location': old_loc})
+          updated_locations.append(old_loc)
           # Replace document with updated info
-          if is_coord:
-            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
-          else:
-            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
+          # if is_coord:
+          #   locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+          # else:
+          #   locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
       else:
         # No pre-existing location so insert new location to db
-        added_locations.append({'location': new_loc})
-        locations_collection.insert_one(new_loc.copy())
+        # Also add stripped version of name to location info
+        if place_name != new_loc['location']['name'].lower():
+          new_loc['location']['alternative_names'].append(place_name)
+        added_locations.append(new_loc)
+        # locations_collection.insert_one(new_loc.copy())
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
