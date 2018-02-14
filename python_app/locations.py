@@ -1,3 +1,5 @@
+# TODO get locations without coords from jason
+
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests
@@ -8,7 +10,7 @@ import os
 from operator import itemgetter
 import process
 
-data = json.load(open('sampleData.json'))
+data = json.load(open('tokenizeData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -30,7 +32,7 @@ db = client['mappening_data']
 
 events_collection = db.map_events
 total_events_collection = db.total_events
-locations_collection = db.UCLA_locations
+locations_collection = db.test_locations
 
 # Returns JSON of all past locations/venues
 @Locations.route('/api/locations', methods=['GET'])
@@ -99,8 +101,9 @@ def find_locations():
                         loc['location'][key] = place['location'][key]
                       # If names do not match, coordinates do so add name as an alternate name
                       if key == "name" and 'name' in loc['location'] and loc['location']['name'] != place['location']['name']:
-                        if place['location']['name'] not in loc['location']['alternative_names']:
-                          loc['location']['alternative_names'].append(place['location']['name'])
+                        if place['location']['name'].lower() not in (name.lower() for name in loc['location']['alternative_names']):
+                          if place['location']['name']:
+                            loc['location']['alternative_names'].append(place['location']['name'])
             else:
               # No coordinates exist, indicate that coordinates may be incorrect
               place['coordinates'] = "GOOGLE"
@@ -156,71 +159,50 @@ def db_locations():
     
     # For every location from events db
     for new_loc in new_locations:
-      print "~~~~~~~~~~~~~~~~~~~~~"
-      print new_loc['location'].get('name', "NO NAME")
-      # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
-      # TODO USE PROCESS.PY
-      re_name = re.sub(r'\bat\s+', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
-      re_name = re.sub(r'\b@\s+', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bof\s+', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bUCLA\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bLos Angeles\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bLA\s+', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bWestwood\s?', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bRoom\s+', '', re_name, flags=re.IGNORECASE)
-      re_name = re.sub(r'\bThe\s+', '', re_name, flags=re.IGNORECASE)
-      # Remove Hyphens and commas and multiple spaces
-      re_name = re.sub(r'-\s?', '', re_name)
-      re_name = re.sub(r',\s?', '', re_name)
-      re_name = re.sub(r' +', ' ', re_name)
-      # Remove leading/trailing white space
-      re_name = re_name.strip()
-
-      print re_name
+      # Tokenize and remove unnecessary/common words 
+      place_name = process.processText(new_loc['location'].get('name', "NO NAME"))
+      processed_place = re.compile(place_name, re.IGNORECASE)
 
       # Find location of same coordinates/name
       coord_loc = locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      name_loc = locations_collection.find_one({'location.name': re_name}, {'_id': False})
-      alt_name_loc = locations_collection.find_one({'location.alternative_names': re_name}, {'_id': False})
+      alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
 
       # If there exists a pre-existing location with matching coordinates/name
-      if coord_loc or name_loc or alt_name_loc:
-        old_loc = coord_loc
-        loc_type = 1
-        if name_loc and not coord_loc:
-          old_loc = name_loc
-          loc_type = 2
-        elif alt_name_loc and not coord_loc and not name_loc:
-          old_loc = alt_name_loc
-          loc_type = 3
+      if coord_loc or alt_name_loc:
+        old_loc = alt_name_loc
+        is_name = True
+        if coord_loc and not alt_name_loc:
+          old_loc = coord_loc
+          is_name = False
 
         # Location already in db but missing info
         # Merge new info with db document
         for key in new_loc['location']:
-            # Key is missing from location so add it
-            if key not in old_loc['location']:
-                old_loc['location'][key] = new_loc['location'][key]
+          # Key is missing from location so add it
+          if key not in old_loc['location']:
+            old_loc['location'][key] = new_loc['location'][key]
+            updated = True
+          # Names do not match, coordinates do so add name as alternate name
+          if key == "name" and 'name' in old_loc['location'] and old_loc['location']['name'] != new_loc['location']['name']:
+            if new_loc['location']['name'].lower() not in (name.lower() for name in old_loc['location']['alternative_names']):
+              if new_loc['location']['name']:
+                old_loc['location']['alternative_names'].append(new_loc['location']['name'])
                 updated = True
-            # Names do not match, coordinates do so add name as alternate name
-            if key == "name" and 'name' in old_loc['location'] and old_loc['location']['name'] != new_loc['location']['name']:
-                if new_loc['location']['name'] not in old_loc['location']['alternative_names']:
-                    old_loc['location']['alternative_names'].append(new_loc['location']['name'])
-                    updated = True
-                # Also add stripped down name
-                if re_name not in old_loc['location']['alternative_names']:
-                    old_loc['location']['alternative_names'].append(re_name)
-                    updated = True
+            # Also add stripped down name
+            if place_name not in (name.lower() for name in old_loc['location']['alternative_names']):
+              if place_name:
+                old_loc['location']['alternative_names'].append(place_name)
+                updated = True
+
         # Only replace document if it was updated
         if updated:
           updated = False
           updated_locations.append({'location': old_loc})
           # Replace document with updated info
-          if loc_type == 1:
+          if is_coord:
             locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
-          elif loc_type == 2:
-            locations_collection.replace_one({'location.name': re_name}, old_loc)
           else:
-            locations_collection.replace_one({'location.alternative_names': re_name}, old_loc)          
+            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)          
       else:
         # No pre-existing location so insert new location to db
         added_locations.append({'location': new_loc})
@@ -228,108 +210,9 @@ def db_locations():
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
-# Given pymongo cursors to places that match by name or alternate name return
-# combined output of places' location info
-def get_coordinate_results(places_cursor, alt_places_cursor):
-    output = []
-    output_places = []
-
-    # Places that match the name are appended to output
-    if places_cursor.count() > 0:
-      for place in places_cursor:
-        output.append({
-          'name': place['location'].get('name', "NO NAME"),
-          'street': place['location'].get('street', "NO STREET"),
-          'zip': place['location'].get('zip', "NO ZIP"),
-          'city': place['location'].get('city', "NO CITY"),
-          'state': place['location'].get('state', "NO STATE"),
-          'country': place['location'].get('country', "NO COUNTRY"),
-          'latitude': place['location'].get('latitude', "NO LATITUDE"),
-          'longitude': place['location'].get('longitude', "NO LONGITUDE"),
-          'alternative_names': place['location']['alternative_names']
-        })
-        output_places.append(place['location'].get('name', "NO NAME"))
-
-    # Places that match the alternate name are appended to output if not already
-    # part of output
-    if alt_places_cursor.count() > 0:
-      for alt_place in alt_places_cursor:
-        # Check if already added by maintaining list of places added by name
-        if alt_place['location'].get('name', "NO NAME") not in output_places:
-          output.append({
-            'name': alt_place['location'].get('name', "NO NAME"),
-            'street': alt_place['location'].get('street', "NO STREET"),
-            'zip': alt_place['location'].get('zip', "NO ZIP"),
-            'city': alt_place['location'].get('city', "NO CITY"),
-            'state': alt_place['location'].get('state', "NO STATE"),
-            'country': alt_place['location'].get('country', "NO COUNTRY"),
-            'latitude': alt_place['location'].get('latitude', "NO LATITUDE"),
-            'longitude': alt_place['location'].get('longitude', "NO LONGITUDE"),
-            'alternative_names': alt_place['location']['alternative_names']
-          })
-          output_places.append(alt_place['location'].get('name', "NO NAME"))
-
-    # Returns list of relevant locations' info
-    return output;
-
 # Given a location string try to return coordinates/relevant location info
-# Number is important to some locations, so first tries entire query string,
-# and then the query string stripped of numbers
 # e.g. BH 3400 => Boelter Hall vs. Engr 4 => Engineering IV vs. Engineering VI
 @Locations.route('/api/coordinates/<place_query>', methods=['GET'])
-def get_coordinates(place_query):
-    output = []
-
-    # Check database for matches (case insensitive) in names or alternative names
-    # Concatenate results from name and alternative_names fields
-    place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
-    places_cursor = locations_collection.find({'location.name': place_regex})
-    alt_places_cursor = locations_collection.find({'location.alternative_names': place_regex})
-
-    # If no matches found, try to search database after removing numbers from query
-    if places_cursor.count() <= 0 and alt_places_cursor.count() <= 0:
-      # Removes Integers/Decimals and the following space
-      num_place_query = re.sub(r'\b\d+(?:\.\d+)?\s?', '', place_query)
-      # Remove UCLA/LA/Westwood/Random words I've seen that we don't need
-      # TODO USE PROCESS.PY
-      num_place_query = re.sub(r'\bat\s+', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\b@\s+', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bof\s+', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bUCLA\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bLos Angeles\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bLA\s+', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bWestwood\s?', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bRoom\s+', '', num_place_query, flags=re.IGNORECASE)
-      num_place_query = re.sub(r'\bThe\s+', '', num_place_query, flags=re.IGNORECASE)
-      # Remove Hyphens and commas and multiple spaces
-      num_place_query = re.sub(r'-\s?', '', num_place_query)
-      num_place_query = re.sub(r',\s?', '', num_place_query)
-      num_place_query = re.sub(r' +', ' ', num_place_query)
-      # Remove leading/trailing white space
-      num_place_query = num_place_query.strip()
-
-      # Get results from db with new regex search string
-      num_place_regex = re.compile('.*' + num_place_query + '.*', re.IGNORECASE)
-      places_cursor = locations_collection.find({'location.name': num_place_regex})
-      alt_places_cursor = locations_collection.find({'location.alternative_names': num_place_regex})
-
-      # No results in db, do google api search and return results
-      if places_cursor.count() <= 0 and alt_places_cursor.count() <= 0:
-        search_results = google_textSearch(place_query)
-        if search_results:
-          return jsonify({"Google Text Search Results": search_results})
-        else:
-          # No results from google api either
-          return jsonify({"No Results": output})
-
-    # Otherwise, cursors were nonempty so we can get results (either with or without numbers in query)
-    output = get_coordinate_results(places_cursor, alt_places_cursor)
-
-    return jsonify({"Database Results": output})
-
-# Given a location string try to return coordinates/relevant location info
-# e.g. BH 3400 => Boelter Hall vs. Engr 4 => Engineering IV vs. Engineering VI
-@Locations.route('/api/text_search/<place_query>', methods=['GET'])
 def get_mongo_textSearch(place_query):
     output = []
     output_places = []
@@ -375,10 +258,35 @@ def get_mongo_textSearch(place_query):
 
 # Insert locations from a JSON file to the db
 # See sample format in ./sampleData.json
+# curl -d -X POST http://localhost:5000/api/insert_locations
+# TODO make other things that should be POST post lmao
 @Locations.route('/api/insert_locations', methods=['POST'])
 def insert_locations():
   locations_collection.insert_many(data['locations'])
   return "Successfully inserted location documents to db!"
+
+
+# Add tokenized version of all alternate names to alternate names list
+@Locations.route('/api/tokenize_names', methods=['GET'])
+def get_tokenized_names():
+  places = []
+  updated = False
+
+  # Go through every location in json
+  for location in data['locations']:
+    place = location
+    if 'alternative_names' in place['location']:
+      for alt_name in place['location']['alternative_names']:
+        processed_name = process.processText(alt_name)
+        if processed_name not in (name.lower() for name in place['location']['alternative_names']):
+          if processed_name:
+            place['location']['alternative_names'].append(processed_name)
+            updated = True
+      if updated:
+        places.append(place)
+        updated = False
+
+  return jsonify({"locations": places})
 
 # Fill out json data using google api results
 # Supplied json missing street/zip/latitude/longitude
@@ -394,6 +302,18 @@ def get_location_data():
   # Go through every location in json
   for location in data['locations']:
     place = location
+    # Add stripped down name to alternative_names
+    if 'name' in location['location']:
+      processed_place = process.processText(location['location']['name'])
+      if 'alternative_names' in location['location']:
+        if location['location']['name'].lower() not in (name.lower() for name in location['location']['alternative_names']):
+          if location['location']['name']:
+            place['location']['alternative_names'].append(location['location']['name'])
+            updated = True
+        if processed_place not in (name.lower() for name in location['location']['alternative_names']):
+          if processed_place:
+            place['location']['alternative_names'].append(processed_place)
+            updated = True
     # No street or zip information, try to find it
     if 'street' not in location['location'] or 'zip' not in location['location'] or location['location']['street'] == '' or location['location']['zip'] == '':
       if 'name' in location['location']:
