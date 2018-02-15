@@ -291,15 +291,22 @@ def processed_time(old_time_str):
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
 # Call event_caller's add_facebook_page() to find the official info from Graph API,
 # returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
-@Events.route('/api/add-page', methods=['GET'])
+@Events.route('/api/add-page')
 def add_page_to_database(type):
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
     if not page_id and not page_exact_name:
         return 'Add a page using URL parameters id or exact name, with optional type specified: group (default), page, place.'
+    
+    page_result = event_caller.add_facebook_page(page_type, page_id, page_exact_name)
+    if 'error' in page_result:
+        return page_result['error']
 
-    return 'Nothing happens yet.'
+    found_same_page = pages_collection.find_one({'id': page_result['id']})
+
+    # TODO
+    return page_result
 
 # Now refresh pages we search separately, can be done way less frequently than event search
 @Events.route('/api/refresh-page-database')
@@ -329,7 +336,7 @@ def refresh_page_database():
 # this endpoint call is separate from actual code logic,
 # because the request context (for URL args) is only set through endpoint,
 # not for regular function calls (like scheduled 3 times a day)
-@Events.route('/api/populate-ucla-events-database')
+@Events.route('/api/update-ucla-events')
 def call_populate_events_database():
     # boolean doesn't work here: if clear parameter has any value, it is a string
     # all non-empty strings are true, so just take it as a string
@@ -341,11 +348,11 @@ def call_populate_events_database():
 
     earlier_day_bound = request.args.get('days', default=0, type=int)
     print(earlier_day_bound)
-    return populate_ucla_events_database(earlier_day_bound)
+    return update_ucla_events_database(earlier_day_bound)
 
     
 # Get all UCLA-related Facebook events and add to database
-def populate_ucla_events_database(earlier_day_bound=0):
+def update_ucla_events_database(earlier_day_bound=0):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
@@ -407,7 +414,7 @@ def populate_ucla_events_database(earlier_day_bound=0):
 
 @Events.route('/api/test-code-update')
 def test_code_update():
-    return 'house lease'
+    return 'LNY'
 
 # simply save each unique document and delete any that have been found already
 def clean_collection(collection):
