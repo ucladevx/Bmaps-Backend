@@ -19,7 +19,6 @@ Files Documented
    :maxdepth: 2
 
    events
-   event_caller
 
 Indices and tables
 ==================
