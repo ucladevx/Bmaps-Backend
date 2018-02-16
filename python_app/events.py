@@ -270,7 +270,8 @@ def process_event_info(event):
                 'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
             'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
-            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO'
+            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
+            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
         }
     }
     return formatted_info
