@@ -72,25 +72,6 @@
   <div class="section" id="module-events">
 <span id="events"></span><h1>Events<a class="headerlink" href="#module-events" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="events.add_event_to_database">
-<code class="descclassname">events.</code><code class="descname">add_event_to_database</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#events.add_event_to_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>Call event_caller’s add_facebook_page() to find the official info from Graph API,
-returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.clean_collection">
-<code class="descclassname">events.</code><code class="descname">clean_collection</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#events.clean_collection" title="Permalink to this definition">¶</a></dt>
-<dd><p>simply save each unique document and delete any that have been found already</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.find_events_in_database">
-<code class="descclassname">events.</code><code class="descname">find_events_in_database</code><span class="sig-paren">(</span><em>find_key=''</em>, <em>find_value=''</em>, <em>one_result_expected=False</em>, <em>print_results=False</em><span class="sig-paren">)</span><a class="headerlink" href="#events.find_events_in_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="events.get_all_events">
 <code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns JSON of all events in format that Mapbox likes</p>
@@ -159,12 +140,6 @@ Returns all events starting on the passed in date</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="events.get_events_by_food">
-<code class="descclassname">events.</code><code class="descname">get_events_by_food</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_food" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of events with free food</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="events.get_events_for_search">
 <code class="descclassname">events.</code><code class="descname">get_events_for_search</code><span class="sig-paren">(</span><em>search_term</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_for_search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns JSON of matching event names today</p>
@@ -218,36 +193,6 @@ important feature</p>
 <p class="last">arg2 must be non-zero.</p>
 </div>
 </div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.populate_ucla_events_database">
-<code class="descclassname">events.</code><code class="descname">populate_ucla_events_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.populate_ucla_events_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all UCLA-related Facebook events and add to database</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.process_event_info">
-<code class="descclassname">events.</code><code class="descname">process_event_info</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#events.process_event_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Processes date information then returns</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.processed_time">
-<code class="descclassname">events.</code><code class="descname">processed_time</code><span class="sig-paren">(</span><em>old_time_str</em><span class="sig-paren">)</span><a class="headerlink" href="#events.processed_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process time</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.refresh_page_database">
-<code class="descclassname">events.</code><code class="descname">refresh_page_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.refresh_page_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>Now refresh pages we search separately, can be done way less frequently than event search</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.remove_db_duplicates">
-<code class="descclassname">events.</code><code class="descname">remove_db_duplicates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.remove_db_duplicates" title="Permalink to this definition">¶</a></dt>
-<dd><p>if needed, clean database of duplicate documents</p>
 </dd></dl>
 
 </div>
