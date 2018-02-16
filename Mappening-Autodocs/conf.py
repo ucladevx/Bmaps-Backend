@@ -49,8 +49,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Mappening'
-copyright = u'2018, Mappening DevX'
-author = u'Mappening DevX'
+copyright = u'2018, DevX'
+author = u'DevX'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
