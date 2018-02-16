@@ -75,7 +75,16 @@
 <dl class="function">
 <dt id="events.get_all_events">
 <code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of all events in format that Mapbox likes</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">/api/events:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all events in format that Mapbox likes</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -85,11 +94,14 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-id/&lt;event_id&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> – value to match with event id’s to find specific event</td>
 </tr>
 </tbody>
 </table>
-<p>Returns JSON of singular event by event id</p>
 </dd></dl>
 
 <dl class="function">
@@ -99,22 +111,39 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-name/&lt;event_name&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> – string to match with event names</td>
 </tr>
 </tbody>
 </table>
-<p>Returns JSON of singular event by event name
-/&lt;&gt; defaults to strings without any slashes</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_event_categories">
 <code class="descclassname">events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of events by event category
-Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events.</td>
+</tr>
+</tbody>
+</table>
+<p>Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
 Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
 Party, Religion, Shopping, Sports, Theater, Wellness
 Conference, Lecture, Neighborhood, Networking</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -124,11 +153,14 @@ Conference, Lecture, Neighborhood, Networking</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Get cursor to all events on a certain day and get unique categories list for that day</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories-by-date/&lt;date&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
 </tr>
 </tbody>
 </table>
-<p>Returns JSON of events by event category &amp; date</p>
 </dd></dl>
 
 <dl class="function">
@@ -138,6 +170,10 @@ Conference, Lecture, Neighborhood, Networking</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of currently existing event categories</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-category/&lt;event_category&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_category</strong> – string to match with event categories</td>
 </tr>
 </tbody>
@@ -147,7 +183,16 @@ Conference, Lecture, Neighborhood, Networking</p>
 <dl class="function">
 <dt id="events.get_events_by_category_and_date">
 <code class="descclassname">events.</code><code class="descname">get_events_by_category_and_date</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category_and_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of events by event category &amp; date</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events by event category starting on passed in date</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/events-by-category-and-date</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -157,12 +202,14 @@ Conference, Lecture, Neighborhood, Networking</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all events starting on passed in date</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-date/&lt;date&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
 </tr>
 </tbody>
 </table>
-<p>Returns JSON of events by event date
-Returns all events starting on the passed in date</p>
 </dd></dl>
 
 <dl class="function">
@@ -172,6 +219,12 @@ Returns all events starting on the passed in date</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns JSON of events on date that match search term in format that Mapbox likes</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/api/search/&lt;search_term&gt;/&lt;date&gt;</p>
+</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>search_term</strong> – a string to use to find events that contain that word</li>
 <li><strong>date</strong> – search in a certain date with raw date format or the following format -&gt; 22 January 2018</li>
@@ -180,7 +233,6 @@ Returns all events starting on the passed in date</p>
 </tr>
 </tbody>
 </table>
-<p>Returns JSON of matching event names today</p>
 </dd></dl>
 
 <dl class="function">
@@ -190,6 +242,10 @@ Returns all events starting on the passed in date</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events today that match search term in format that Mapbox likes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/search/&lt;search_term&gt;</td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> – a string to use to find events that contain that word</td>
 </tr>
 </tbody>
