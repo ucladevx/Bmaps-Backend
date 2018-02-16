@@ -71,34 +71,39 @@
             
   <div class="section" id="module-events">
 <span id="events"></span><h1>Events<a class="headerlink" href="#module-events" title="Permalink to this headline">¶</a></h1>
+<p>Interacting with events collection in mlab</p>
 <dl class="function">
 <dt id="events.get_all_events">
 <code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns JSON of all events in format that Mapbox likes</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>arg1</strong> – description</li>
-<li><strong>arg2</strong> – description</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_event_by_id">
 <code class="descclassname">events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of singular event by event id</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> – value to match with event id’s to find specific event</td>
+</tr>
+</tbody>
+</table>
+<p>Returns JSON of singular event by event id</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_event_by_name">
 <code class="descclassname">events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of singular event by event name
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> – string to match with event names</td>
+</tr>
+</tbody>
+</table>
+<p>Returns JSON of singular event by event name
 /&lt;&gt; defaults to strings without any slashes</p>
 </dd></dl>
 
@@ -115,15 +120,28 @@ Conference, Lecture, Neighborhood, Networking</p>
 <dl class="function">
 <dt id="events.get_event_categories_by_date">
 <code class="descclassname">events.</code><code class="descname">get_event_categories_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories_by_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of events by event category &amp; date</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+<p>Returns JSON of events by event category &amp; date</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_events_by_category">
 <code class="descclassname">events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of currently existing event categories
-Event category examples: food, THEATER
-use regexes to search in ‘category’, since both EVENT_TYPE and TYPE_EVENT string formats exist now</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_category</strong> – string to match with event categories</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -135,64 +153,47 @@ use regexes to search in ‘category’, since both EVENT_TYPE and TYPE_EVENT st
 <dl class="function">
 <dt id="events.get_events_by_date">
 <code class="descclassname">events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of events by event date
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+<p>Returns JSON of events by event date
 Returns all events starting on the passed in date</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_events_for_search">
 <code class="descclassname">events.</code><code class="descname">get_events_for_search</code><span class="sig-paren">(</span><em>search_term</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_for_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of matching event names today</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>search_term</strong> – a string to use to find events that contain that word</li>
+<li><strong>date</strong> – search in a certain date with raw date format or the following format -&gt; 22 January 2018</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns JSON of matching event names today</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="events.get_events_today_for_search">
 <code class="descclassname">events.</code><code class="descname">get_events_today_for_search</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_today_for_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns JSON of matching event names
-:param arg1: the first value</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">param arg2:</th><td class="field-body">the first value</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param arg3:</th><td class="field-body">the first value</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type arg1:</th><td class="field-body">int, float,…</td>
-</tr>
-<tr class="field-even field"><th class="field-name">type arg2:</th><td class="field-body">int, float,…</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type arg3:</th><td class="field-body">int, float,…</td>
-</tr>
-<tr class="field-even field"><th class="field-name">returns:</th><td class="field-body">arg1/arg2 +arg3</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">int, float</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> – a string to use to find events that contain that word</td>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">template</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">MainClass1</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">function1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="go">2</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">can be useful to emphasize
-important feature</p>
-</div>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><code class="xref py py-class docutils literal"><span class="pre">MainClass2</span></code></p>
-</div>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">arg2 must be non-zero.</p>
-</div>
-</div></blockquote>
 </dd></dl>
 
 </div>
