@@ -1,3 +1,93 @@
+"""
+Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA.
+An * event * object is a GeoJSON which means it has the following keys:
+* geometry: with a type of "Point" and coordinates for latitude and longitude
+* id: a unique id for this event
+* properties: this contains all the event information and will be explored below
+            'event_name': event.get('name', '<NONE>'),
+            'description': event.get('description', '<NONE>'),
+            'start_time': processed_time(event.get('start_time', '<NONE>')),
+            'end_time': processed_time(event.get('end_time', '<NONE>')),
+            'venue': event['place'],
+            'stats': {
+                'attending': event['attending_count'],
+                'noreply': event['noreply_count'],
+                'interested': event['interested_count'],
+                'maybe': event['maybe_count']
+            },
+            # TODO: whenever category is checked, run Jorge's online ML algorithm
+            'category': event.get('category', '<NONE>'),
+            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
+            'is_cancelled': event.get('is_canceled', False),
+            'ticketing': {
+                'ticket_uri': event.get('ticket_uri', '<NONE>')
+            },
+** Mandatory Event Properties **
+These properties are guarenteed to be in every event. If the actual event has no value, the value will be '<NONE>'. Make sure to check for none in your code to avoid errors.
+* category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have <NONE>
+* cover_picture: A url to a photo for the event
+* event_name: String of event's name
+* description: String description
+* start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* is_cancelled: Boolean indicating event is cancelled
+* ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or '<NONE>'
+* venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
+
+** Potential Event Properties **
+* stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
+* free_food: If event has free food, currently just a strong "NO"
+
+Here is a sample event:
+{
+  "geometry": {
+    "coordinates": [
+      -118.451994,
+      34.071474
+    ],
+    "type": "Point"
+  },
+  "id": "1766863560001661",
+  "properties": {
+    "category": "<NONE>",
+    "cover_picture": "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&oe=5B136061",
+    "description": "Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. \n\nAs a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we'll be providing select hardware for hacking as well!\n\nLEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/\n\nSponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu",
+    "duplicate_occurrence": "NO",
+    "end_time": "Sat, 17 Feb 2018 23:30:00 GMT-0800",
+    "event_name": "ACM Hack | Hack on the Hill IV",
+    "free_food": "NO",
+    "hoster": {
+      "id": "369769286554402",
+      "name": "UCLA Class of 2020"
+    },
+    "is_cancelled": false,
+    "start_time": "Sat, 17 Feb 2018 08:30:00 GMT-0800",
+    "stats": {
+      "attending": 97,
+      "interested": 199,
+      "maybe": 199,
+      "noreply": 107
+    },
+    "ticketing": {
+      "ticket_uri": "https://hoth.splashthat.com/"
+    },
+    "venue": {
+      "id": "955967887795957",
+      "location": {
+        "city": "Los Angeles",
+        "country": "United States",
+        "latitude": 34.071474,
+        "longitude": -118.451994,
+        "state": "CA",
+        "street": "330 De Neve Dr Ste L-16",
+        "zip": "90024"
+      },
+      "name": "Carnesale Commons"
+    }
+  },
+  "type": "Feature"
+}
+"""
 # Interacting with events collection in mlab
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -30,8 +120,9 @@ total_events_collection = db.total_events
 
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
-    """ 
-    Returns JSON of all events in format that Mapbox likes 
+    """
+    Returns a GeoJSON of all events within a a few miles of UCLA.
+
 
     :param arg1: description
     :param arg2: description
@@ -40,7 +131,7 @@ def get_all_events():
 
 @Events.route('/api/search/<search_term>', methods=['GET'])
 def get_events_today_for_search(search_term):
-    """ 
+    """
     Returns JSON of matching event names
     :param arg1: the first value
         :param arg2: the first value
@@ -98,7 +189,7 @@ def get_events_today_for_search(search_term):
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
     """
-    
+
     Returns JSON of matching event names today
     """
     date_regex_obj = construct_date_regex(date)
@@ -381,11 +472,10 @@ def add_event_to_database(type):
 
     return 'Nothing happens yet.'
 
+#     Now refresh pages we search separately, can be done way less frequently than event search
+
 @Events.route('/api/refresh-page-database')
 def refresh_page_database():
-    """
-    Now refresh pages we search separately, can be done way less frequently than event search
-    """
     # separately run from refreshing events, also check for new pages under set of search terms
 
     # update just like accumulated events list
@@ -408,11 +498,9 @@ def refresh_page_database():
 
     return 'Refreshed page database!'
 
+#    Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
-    """
-    Get all UCLA-related Facebook events and add to database
-    """
     print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n\n\n\n\n\n\n')
@@ -446,7 +534,7 @@ def populate_ucla_events_database():
     for event in new_events_data['events']:
         curr_id = event['id']
         existing_event = processed_db_events.get(curr_id)
-        
+
         # sidenote: when event inserted into DB,
         # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
 
@@ -469,10 +557,8 @@ def populate_ucla_events_database():
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
 
+#    simply save each unique document and delete any that have been found already
 def clean_collection(collection):
-    """
-    simply save each unique document and delete any that have been found already
-    """
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -487,16 +573,12 @@ def clean_collection(collection):
             unique_ids.add(curr_id)
     return dups
 
+#    if needed, clean database of duplicate documents
 @Events.route('/api/remove-duplicates', methods=['GET'])
 def remove_db_duplicates():
-    """
-    if needed, clean database of duplicate documents
-    """
     total_dups = []
     # difference between append and extend: extend flattens out lists to add elements, append adds 1 element
     total_dups.extend(clean_collection(events_collection))
     total_dups.extend(clean_collection(pages_collection))
     total_dups.extend(clean_collection(total_events_collection))
     return jsonify(total_dups)
-
-
