@@ -342,9 +342,6 @@ def get_events_by_category(event_category):
 
 @Events.route('/api/event-food', methods=['GET'])
 def get_events_by_food():
-    """
-    Returns JSON of events with free food
-    """
     return get_event_by_category('food')
 
 def construct_date_regex(raw_date):
@@ -365,9 +362,6 @@ def construct_date_regex(raw_date):
     return date_regex_obj
 
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
-    """
-    find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
-    """
     output = []
     # for getting all events, no search query needed (empty dict)
     search_pair = {}
@@ -401,9 +395,6 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
-    """
-    Processes date information then returns
-    """
     formatted_info = {
         # will ALWAYS have an ID
         'id': event['id'],
@@ -441,9 +432,6 @@ def process_event_info(event):
     return formatted_info
 
 def processed_time(old_time_str):
-    """
-    Process time
-    """
     # if not valid time string, return default value from dict.get()
     try:
         # use dateutil parser to get time zone
@@ -459,11 +447,6 @@ def processed_time(old_time_str):
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
 @Events.route('/api/add-page', methods=['GET'])
 def add_event_to_database(type):
-    """
-    Call event_caller's add_facebook_page() to find the official info from Graph API,
-    returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
-
-    """
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
