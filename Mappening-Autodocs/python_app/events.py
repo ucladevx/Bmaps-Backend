@@ -35,6 +35,7 @@ def get_all_events():
 
     :param arg1: description
     :param arg2: description
+
     """
     return find_events_in_database(print_results=True)
 
@@ -42,27 +43,6 @@ def get_all_events():
 def get_events_today_for_search(search_term):
     """ 
     Returns JSON of matching event names
-    :param arg1: the first value
-        :param arg2: the first value
-        :param arg3: the first value
-        :type arg1: int, float,...
-        :type arg2: int, float,...
-        :type arg3: int, float,...
-        :returns: arg1/arg2 +arg3
-        :rtype: int, float
-
-        :Example:
-
-        >>> import template
-        >>> a = template.MainClass1()
-        >>> a.function1(1,1,1)
-        2
-
-        .. note:: can be useful to emphasize
-            important feature
-        .. seealso:: :class:`MainClass2`
-        .. warning:: arg2 must be non-zero.
-        .. todo:: check that arg2 is non zero.
     """
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
@@ -98,7 +78,6 @@ def get_events_today_for_search(search_term):
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
     """
-    
     Returns JSON of matching event names today
     """
     date_regex_obj = construct_date_regex(date)
