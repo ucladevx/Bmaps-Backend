@@ -1,5 +1,6 @@
-# Interacting with events collection in mlab
-
+"""
+ Interacting with events collection in mlab
+"""
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import pymongo
@@ -31,38 +32,22 @@ total_events_collection = db.total_events
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
     """ 
-    Returns JSON of all events in format that Mapbox likes 
+    :Description: Returns JSON of all events in format that Mapbox likes 
 
-    :param arg1: description
-    :param arg2: description
+    :Route: /api/events
+    
     """
     return find_events_in_database(print_results=True)
 
 @Events.route('/api/search/<search_term>', methods=['GET'])
 def get_events_today_for_search(search_term):
     """ 
-    Returns JSON of matching event names
-    :param arg1: the first value
-        :param arg2: the first value
-        :param arg3: the first value
-        :type arg1: int, float,...
-        :type arg2: int, float,...
-        :type arg3: int, float,...
-        :returns: arg1/arg2 +arg3
-        :rtype: int, float
+    :Description: Returns JSON of events today that match search term in format that Mapbox likes 
 
-        :Example:
+    :Route: /api/search/<search_term>
 
-        >>> import template
-        >>> a = template.MainClass1()
-        >>> a.function1(1,1,1)
-        2
+    :param search_term: a string to use to find events that contain that word
 
-        .. note:: can be useful to emphasize
-            important feature
-        .. seealso:: :class:`MainClass2`
-        .. warning:: arg2 must be non-zero.
-        .. todo:: check that arg2 is non zero.
     """
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
@@ -98,8 +83,14 @@ def get_events_today_for_search(search_term):
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
     """
+    :Description: Returns JSON of events on date that match search term in format that Mapbox likes 
+
+    :Route: /api/search/<search_term>/<date>
+
+    :param search_term: a string to use to find events that contain that word
+    :param date: search in a certain date with raw date format or the following format -> 22 January 2018
     
-    Returns JSON of matching event names today
+
     """
     date_regex_obj = construct_date_regex(date)
     output = []
@@ -135,23 +126,34 @@ def get_events_for_search(search_term, date):
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
     """
-    Returns JSON of singular event by event name
-    /<> defaults to strings without any slashes
+    :Description: Returns JSON of singular event by event name
+
+    :Route: /api/event-name/<event_name>
+
+    :param event_name: string to match with event names
     """
     return find_events_in_database('name', event_name, True)
 
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
     """
-    Returns JSON of singular event by event id
+    :Description: Returns JSON of singular event by event id
+
+    :Route: /api/event-id/<event_id>
+
+    :param event_id: value to match with event id's to find specific event
+
     """
     return find_events_in_database('id', event_id, True)
 
 @Events.route('/api/event-date/<date>', methods=['GET'])
 def get_events_by_date(date):
     """
-    Returns JSON of events by event date
-    Returns all events starting on the passed in date
+    :Description: Returns JSON of all events starting on passed in date
+    
+    :Route: /api/event-date/<date>
+    
+    :param date: can search by date in multiple formats (ex. 22 January 2018)
     """
     date_regex_obj = construct_date_regex(date)
     if not date_regex_obj:
@@ -161,7 +163,11 @@ def get_events_by_date(date):
 @Events.route('/api/event-categories-by-date/<date>', methods=['GET'])
 def get_event_categories_by_date(date):
     """
-    Returns JSON of events by event category & date
+    :Description: Get cursor to all events on a certain day and get unique categories list for that day
+    
+    :Route: /api/event-categories-by-date/<date>
+    
+    :param date: can search by date in multiple formats (ex. 22 January 2018)
     """
     # Get cursor to all events on a certain day and get unique categories list
     # Iterate through all events and get unique list of all categories
@@ -186,7 +192,9 @@ def get_event_categories_by_date(date):
 @Events.route('/api/events-by-category-and-date', methods=['GET'])
 def get_events_by_category_and_date():
     """
-    Returns JSON of events by event category & date
+    :Description: Returns JSON of events by event category starting on passed in date
+
+    :Route: /api/events-by-category-and-date
     """
     date = request.args['date']
     event_category = request.args['category']
@@ -214,11 +222,13 @@ def get_events_by_category_and_date():
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
     """
-    Returns JSON of events by event category
+    :Description: Returns JSON of all event categories used in all events. 
     Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
     Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
     Party, Religion, Shopping, Sports, Theater, Wellness
     Conference, Lecture, Neighborhood, Networking
+
+    :Route: /api/event-categories
     """
     # Iterate through all events and get unique list of all categories
     # TODO: sort by quantity?
@@ -240,7 +250,12 @@ def get_event_categories():
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
     """
-     Returns JSON of currently existing event categories
+    :Description: Returns JSON of currently existing event categories
+    :Route: /api/event-category/<event_category>
+    :param event_category: string to match with event categories
+    """
+    """
+
      Event category examples: food, THEATER
      use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
     """
