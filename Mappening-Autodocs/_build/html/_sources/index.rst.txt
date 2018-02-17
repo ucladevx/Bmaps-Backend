@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Mappening's documentation!
+Welcome to DevX's documentation!
 =====================================
-Here we are supposed to talk about the function of the project
-and usefulness of API.
+*Here we are supposed to talk about the function of the project
+and usefulness of API.*
 
 `Mappening Backend Repository <https://github.com/ucladevx/Mappening-Backend>`_
 
