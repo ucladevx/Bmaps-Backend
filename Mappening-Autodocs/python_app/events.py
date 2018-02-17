@@ -1,10 +1,14 @@
+import numpy as np
+x = np.random.rand(12)
+
 """
+YOYOYO
 Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA.
-An * event * object is a GeoJSON which means it has the following keys:
+An *event* object is a GeoJSON which means it has the following keys:
 * geometry: with a type of "Point" and coordinates for latitude and longitude
 * id: a unique id for this event
 * properties: this contains all the event information and will be explored below
-** Mandatory Event Properties **
+**Mandatory Event Properties**
 These properties are guarenteed to be in every event. If the actual event has no value, the value will be '<NONE>'. Make sure to check for none in your code to avoid errors.
 * category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have <NONE>
 * cover_picture: A url to a photo for the event
@@ -15,15 +19,15 @@ These properties are guarenteed to be in every event. If the actual event has no
 * is_cancelled: Boolean indicating event is cancelled
 * ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or '<NONE>'
 * venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
-** Potential Event Properties **
+**Potential Event Properties**
 * stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
 * free_food: If event has free food, currently just a strong "NO"
 Here is a sample event::
+
 {
   "geometry": {
     "coordinates": [
-      -118.451994,
-      34.071474
+      -118.451994, 34.071474
     ],
     "type": "Point"
   },

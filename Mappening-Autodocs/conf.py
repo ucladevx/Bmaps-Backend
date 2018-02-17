@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Mappening'
+project = u'DevX'
 copyright = u'2018, DevX'
 author = u'DevX'
 
