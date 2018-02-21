@@ -1,15 +1,14 @@
-import numpy as np
-x = np.random.rand(12)
-
 """
-YOYOYO
 Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA.
-An *event* object is a GeoJSON which means it has the following keys:
+An * event * object is a GeoJSON which means it has the following keys:
+
 * geometry: with a type of "Point" and coordinates for latitude and longitude
 * id: a unique id for this event
 * properties: this contains all the event information and will be explored below
-**Mandatory Event Properties**
+
+** Mandatory Event Properties **
 These properties are guarenteed to be in every event. If the actual event has no value, the value will be '<NONE>'. Make sure to check for none in your code to avoid errors.
+
 * category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have <NONE>
 * cover_picture: A url to a photo for the event
 * event_name: String of event's name
@@ -19,15 +18,17 @@ These properties are guarenteed to be in every event. If the actual event has no
 * is_cancelled: Boolean indicating event is cancelled
 * ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or '<NONE>'
 * venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
-**Potential Event Properties**
+
+** Potential Event Properties **
 * stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
 * free_food: If event has free food, currently just a strong "NO"
-Here is a sample event::
 
+Here is a sample event::
 {
   "geometry": {
     "coordinates": [
-      -118.451994, 34.071474
+      -118.451994,
+      34.071474
     ],
     "type": "Point"
   },
@@ -107,6 +108,7 @@ def get_all_events():
     """ 
     :Description: Returns a GeoJSON of all events within a a few miles of UCLA 
     :Route: /api/events
+
     """
     return find_events_in_database(print_results=True)
 
@@ -114,7 +116,9 @@ def get_all_events():
 def get_events_today_for_search(search_term):
     """ 
     :Description: Returns JSON of events today that match search term in format that Mapbox likes 
+
     :Route: /api/search/<search_term>
+
     :param search_term: a string to use to find events that contain that word
     """
     output = []
@@ -152,7 +156,9 @@ def get_events_today_for_search(search_term):
 def get_events_for_search(search_term, date):
     """
     :Description: Returns JSON of events on date that match search term in format that Mapbox likes 
+
     :Route: /api/search/<search_term>/<date>
+
     :param search_term: a string to use to find events that contain that word
     :param date: search in a certain date with raw date format or the following format -> 22 January 2018
     """
@@ -191,7 +197,9 @@ def get_events_for_search(search_term, date):
 def get_event_by_name(event_name):
     """
     :Description: Returns JSON of singular event by event name
+
     :Route: /api/event-name/<event_name>
+
     :param event_name: string to match with event names
     """
     return find_events_in_database('name', event_name, True)
@@ -200,8 +208,11 @@ def get_event_by_name(event_name):
 def get_event_by_id(event_id):
     """
     :Description: Returns JSON of singular event by event id
+
     :Route: /api/event-id/<event_id>
+
     :param event_id: value to match with event id's to find specific event
+
     """
     return find_events_in_database('id', event_id, True)
 
@@ -252,6 +263,7 @@ def get_event_categories_by_date(date):
 def get_events_by_category_and_date():
     """
     :Description: Returns JSON of events by event category starting on passed in date
+
     :Route: /api/events-by-category-and-date
     """
     date = request.args['date']
@@ -285,6 +297,7 @@ def get_event_categories():
     Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
     Party, Religion, Shopping, Sports, Theater, Wellness
     Conference, Lecture, Neighborhood, Networking
+
     :Route: /api/event-categories
     """
     # Iterate through all events and get unique list of all categories
@@ -312,6 +325,7 @@ def get_events_by_category(event_category):
     :param event_category: string to match with event categories
     """
     """
+
      Event category examples: food, THEATER
      use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
     """
