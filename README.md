@@ -31,7 +31,6 @@ A single platform for events across campus. Mappening helps raise awareness of e
   - Navigate to `http://127.0.0.1:8000/`
   - `CTRL-C` to stop autobuilding
 - Latest documentation is in the `_build` folder
-- Manual html changes in `_build_manual` folder
 - Minified js/css files in `_static`
 - Manual Changes with [reST](http://www.sphinx-doc.org/en/stable/rest.html):
   - Manually changed "Classes" to "APIs" in `index.html`
