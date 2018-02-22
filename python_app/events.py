@@ -1,3 +1,91 @@
+"""
+Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url `api.ucladevx.com/events <http://api.ucladevx.com/events>`_ and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.
+
+-----------------
+Event Object
+-----------------
+An *event* object is a GeoJSON which means it has the following keys:
+
+* geometry: with a type of "Point" and coordinates for latitude and longitude
+* id: a unique id for this event
+* properties: this contains all the event information and will be explored below
+
+**Mandatory Event Properties**
+
+These properties must have a valid value for every event.
+
+* category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have <NONE>
+* event_name: String of event's name
+* stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
+* start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* is_cancelled: Boolean indicating event is cancelled
+
+**Potential Event Properties**
+
+If the actual event has no value, the value will be <NONE>. Make sure to check for none in your code to avoid errors.
+
+* description: String description
+* venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
+* cover_picture: A url to a photo for the event
+* ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or <NONE>
+* end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* free_food: If event has free food, currently just a strong NO
+
+**Sample Event**::
+
+    {
+      "geometry": {
+        "coordinates": [
+          -118.451994,
+          34.071474
+        ],
+        "type": "Point"
+      },
+      "id": "1766863560001661",
+      "properties": {
+        "category": "<NONE>",
+        "cover_picture": "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&oe=5B136061",
+        "description": "Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. As a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we'll be providing select hardware for hacking as well! LEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/ Sponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu",
+        "duplicate_occurrence": "NO",
+        "end_time": "Sat, 17 Feb 2018 23:30:00 GMT-0800",
+        "event_name": "ACM Hack | Hack on the Hill IV",
+        "free_food": "NO",
+        "hoster": {
+          "id": "369769286554402",
+          "name": "UCLA Class of 2020"
+        },
+        "is_cancelled": false,
+        "start_time": "Sat, 17 Feb 2018 08:30:00 GMT-0800",
+        "stats": {
+          "attending": 97,
+          "interested": 199,
+          "maybe": 199,
+          "noreply": 107
+        },
+        "ticketing": {
+          "ticket_uri": "https://hoth.splashthat.com/"
+        },
+        "venue": {
+          "id": "955967887795957",
+          "location": {
+            "city": "Los Angeles",
+            "country": "United States",
+            "latitude": 34.071474,
+            "longitude": -118.451994,
+            "state": "CA",
+            "street": "330 De Neve Dr Ste L-16",
+            "zip": "90024"
+          },
+          "name": "Carnesale Commons"
+        }
+      },
+      "type": "Feature"
+    }
+
+-----------------
+API DOCS
+-----------------
+"""
 # Interacting with events collection in mlab
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -23,36 +111,33 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
-db = client['mappening_data'] 
+db = client['mappening_data']
 events_collection = db.map_events
 pages_collection = db.saved_pages
 total_events_collection = db.total_events
 
-"""
-CHANGES
-when search for category, just put actual name ('EVENT' not needed)
-everything calls find_events_in_database, giving search terms and options if needed
-HEADS UP: make sure special Unicode characters handled!
-
-in processing data from database (process_event_info):
-'venue' is now 'place' and has less info: name, id, and location
-'attendance' --> 'stats' contains attending, noreply, interested, and maybe (removed declined)
-'end_time' may not be set
-'is_canceled' may return False boolean value
-defaults set by using dict.get(key, default value), returns None (null) if no default value given
-"""
-
-# Returns JSON of all events in format that Mapbox likes
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
+    """ 
+    :Route: /api/events
+
+    :Description: Returns a GeoJSON of all events within a a few miles of UCLA 
+
+    """
     return find_events_in_database(print_results=True)
 
-# Returns JSON of matching event names
 @Events.route('/api/search/<search_term>', methods=['GET'])
-def get_events_for_search(search_term):
+def get_events_today_for_search(search_term):
+    """ 
+    :Route: /api/search/<search_term>
+
+    :Description: Returns JSON of events today that match search term in format that Mapbox likes 
+
+    :param search_term: a string to use to find events that contain that word
+    """
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
-    events_cursor = events_collection.find({'name': search_regex})
+    events_cursor = events_collection.find({'name': search_regex}) # put today in the search terms
     if events_cursor.count() > 0:
         for event in events_cursor:
           output.append({
@@ -67,7 +152,49 @@ def get_events_for_search(search_term):
                 'type': 'Point'
             },
             'properties': {
-                'event_name': event.get('name', '<NONE>'), 
+                'event_name': event.get('name', '<NONE>'),
+                'description': event.get('description', '<NONE>'),
+                'start_time': processed_time(event.get('start_time', '<NONE>')),
+                'end_time': processed_time(event.get('end_time', '<NONE>')),
+                'venue': event['place'],
+                'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
+                'category': event.get('category', '<NONE>'),
+            }})
+    else:
+        print "No event(s) matched '{}'".format(search_term)
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
+
+
+
+@Events.route('/api/search/<search_term>/<date>', methods=['GET'])
+def get_events_for_search(search_term, date):
+    """
+    :Route: /api/search/<search_term>/<date>
+
+    :Description: Returns JSON of events on date that match search term in format that Mapbox likes 
+
+    :param search_term: a string to use to find events that contain that word
+    :param date: search in a certain date with raw date format or the following format -> 22 January 2018
+    """
+    date_regex_obj = construct_date_regex(date)
+    output = []
+    search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
+    events_cursor = events_collection.find({'name': search_regex, 'start_time': date_regex_obj}) # put today in the search terms
+    if events_cursor.count() > 0:
+        for event in events_cursor:
+          output.append({
+            'id': event['id'],
+            'type': 'Feature',
+            'geometry': {
+                # Default to Bruin Bear coordinates
+                'coordinates': [
+                    event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                    event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+                ],
+                'type': 'Point'
+            },
+            'properties': {
+                'event_name': event.get('name', '<NONE>'),
                 'description': event.get('description', '<NONE>'),
                 'start_time': processed_time(event.get('start_time', '<NONE>')),
                 'end_time': processed_time(event.get('end_time', '<NONE>')),
@@ -79,29 +206,53 @@ def get_events_for_search(search_term):
         print("No event(s) matched '{0}'".format(search_term))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-# Returns JSON of singular event by event name
-# /<> defaults to strings without any slashes
+
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
+    """
+    :Route: /api/event-name/<event_name>
+
+    :Description: Returns JSON of singular event by event name
+
+    :param event_name: string to match with event names
+    """
     return find_events_in_database('name', event_name, True)
 
-# Returns JSON of singular event by event id
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
+    """
+    :Route: /api/event-id/<event_id>
+
+    :Description: Returns JSON of singular event by event id
+
+    :param event_id: value to match with event id's to find specific event
+
+    """
     return find_events_in_database('id', event_id, True)
 
-# Returns JSON of events by event date
-# Returns all events starting on the passed in date
 @Events.route('/api/event-date/<date>', methods=['GET'])
 def get_events_by_date(date):
+    """
+    :Route: /api/event-date/<date>
+    
+    :Description: Returns JSON of all events starting on passed in date
+    
+    :param date: can search by date in multiple formats (ex. 22 January 2018)
+    """
     date_regex_obj = construct_date_regex(date)
     if not date_regex_obj:
         return jsonify({'error': 'Invalid date string to be parsed.'})
     return find_events_in_database('start_time', date_regex_obj)
 
-# Returns JSON of events by event category & date
 @Events.route('/api/event-categories-by-date/<date>', methods=['GET'])
 def get_event_categories_by_date(date):
+    """
+    :Route: /api/event-categories-by-date/<date>
+    
+    :Description: Get cursor to all events on a certain day and get unique categories list for that day
+    
+    :param date: can search by date in multiple formats (ex. 22 January 2018)
+    """
     # Get cursor to all events on a certain day and get unique categories list
     # Iterate through all events and get unique list of all categories
     uniqueList = []
@@ -110,7 +261,7 @@ def get_event_categories_by_date(date):
     date_regex_obj = construct_date_regex(date)
     if not date_regex_obj:
         return jsonify({'error': 'Invalid date string to be parsed.'})
-    
+
     events_cursor = events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -122,9 +273,14 @@ def get_event_categories_by_date(date):
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
-# Returns JSON of events by event category & date
 @Events.route('/api/events-by-category-and-date', methods=['GET'])
 def get_events_by_category_and_date():
+    """
+    :Route: /api/events-by-category-and-date
+    
+    :Description: Returns JSON of events by event category starting on passed in date
+
+    """
     date = request.args['date']
     event_category = request.args['category']
 
@@ -138,7 +294,7 @@ def get_events_by_category_and_date():
     # Handle event category
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
-    
+
     events_cursor = events_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -147,18 +303,20 @@ def get_events_by_category_and_date():
         print('Cannot find any events with matching category and date!')
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-# Returns JSON of events by event category
-# Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
-# Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, 
-# Party, Religion, Shopping, Sports, Theater, Wellness
-# Conference, Lecture, Neighborhood, Networking
+
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
+    """
+    :Route: /api/event-categories
+    
+    :Description: Returns JSON of all event categories used in all events. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
+
+    """
     # Iterate through all events and get unique list of all categories
     # TODO: sort by quantity?
     uniqueList = []
     output = []
-    
+
     events_cursor = events_collection.find({"category": {"$exists": True}})
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -170,16 +328,26 @@ def get_event_categories():
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
 
-# Returns JSON of currently existing event categories
-# Event category examples: food, THEATER
-# use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
+
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
+    """
+    :Route: /api/event-category/<event_category>
+        
+    :Description: Returns JSON of currently existing event categories
+    
+    :param event_category: string to match with event categories
+    """
+    """
+
+     Event category examples: food, THEATER
+     use regexes to search in 'category', since both EVENT_TYPE and TYPE_EVENT string formats exist now
+    """
     regex_str = '^{0}|{0}$'.format(event_category.upper())
     cat_regex_obj = re.compile(regex_str)
     return find_events_in_database('category', cat_regex_obj)
 
-# Returns JSON of events with free food
+
 @Events.route('/api/event-food', methods=['GET'])
 def get_events_by_food():
     return get_event_by_category('food')
@@ -201,7 +369,6 @@ def construct_date_regex(raw_date):
     date_regex_obj = re.compile(date_regex_str)
     return date_regex_obj
 
-# find_key / value = search strings, can pass in REGEX objects for find_value (using re.compile)
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
     output = []
     # for getting all events, no search query needed (empty dict)
@@ -249,7 +416,7 @@ def process_event_info(event):
             'type': 'Point'
         },
         'properties': {
-            'event_name': event.get('name', '<NONE>'), 
+            'event_name': event.get('name', '<NONE>'),
             'description': event.get('description', '<NONE>'),
             'start_time': processed_time(event.get('start_time', '<NONE>')),
             'end_time': processed_time(event.get('end_time', '<NONE>')),
@@ -286,8 +453,6 @@ def processed_time(old_time_str):
 
 # TODO: new endpoint to manually add Facebook page to DB
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
-# Call event_caller's add_facebook_page() to find the official info from Graph API,
-# returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
 @Events.route('/api/add-page', methods=['GET'])
 def add_event_to_database(type):
     page_type = request.args.get('type', default='group', type=str)
@@ -298,7 +463,8 @@ def add_event_to_database(type):
 
     return 'Nothing happens yet.'
 
-# Now refresh pages we search separately, can be done way less frequently than event search
+#     Now refresh pages we search separately, can be done way less frequently than event search
+
 @Events.route('/api/refresh-page-database')
 def refresh_page_database():
     # separately run from refreshing events, also check for new pages under set of search terms
@@ -323,7 +489,7 @@ def refresh_page_database():
 
     return 'Refreshed page database!'
 
-# Get all UCLA-related Facebook events and add to database
+#    Get all UCLA-related Facebook events and add to database
 @Events.route('/api/populate-ucla-events-database')
 def populate_ucla_events_database():
     print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
@@ -359,7 +525,7 @@ def populate_ucla_events_database():
     for event in new_events_data['events']:
         curr_id = event['id']
         existing_event = processed_db_events.get(curr_id)
-        
+
         # sidenote: when event inserted into DB,
         # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
 
@@ -382,7 +548,7 @@ def populate_ucla_events_database():
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
 
-# simply save each unique document and delete any that have been found already
+#    simply save each unique document and delete any that have been found already
 def clean_collection(collection):
     # a set, not a dict
     unique_ids = set()
@@ -398,7 +564,7 @@ def clean_collection(collection):
             unique_ids.add(curr_id)
     return dups
 
-# if needed, clean database of duplicate documents
+#    if needed, clean database of duplicate documents
 @Events.route('/api/remove-duplicates', methods=['GET'])
 def remove_db_duplicates():
     total_dups = []
@@ -407,5 +573,3 @@ def remove_db_duplicates():
     total_dups.extend(clean_collection(pages_collection))
     total_dups.extend(clean_collection(total_events_collection))
     return jsonify(total_dups)
-
-
