@@ -37,6 +37,7 @@ SOURCEDIR     = .
 BUILDDIR      = _build
 
 # Installs pip, sphinx, and checks success
+# TODO: reorg Makefile and add checks to see if pip/package already exists before trying to install
 sphinx-setup:
 	curl -O http://python-distribute.org/distribute_setup.py
 	python distribute_setup.py
