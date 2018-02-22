@@ -25,3 +25,33 @@ dev: build
 # Stop running containers
 stop:
 	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
+
+
+# Minimal makefile for Sphinx documentation
+
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = Mappening
+SOURCEDIR     = .
+BUILDDIR      = _build
+
+# Installs pip, sphinx, and checks success
+sphinx-setup:
+	curl -O http://python-distribute.org/distribute_setup.py
+	python distribute_setup.py
+	curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+	python get-pip.py
+	rm distribute_setup.py get-pip.py
+	sudo pip install Sphinx
+	which sphinx-quickstart
+
+# Help for sphinx usage
+sphinx-help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  e.g. `make html`
+# $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
