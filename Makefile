@@ -43,6 +43,11 @@ sphinx-setup:
 	curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 	python get-pip.py
 	rm distribute_setup.py get-pip.py
+
+	pip uninstall dotenv
+	pip uninstall python-dotenv
+	pip install python-dotenv
+
 	sudo pip install Sphinx
 	which sphinx-quickstart
 
