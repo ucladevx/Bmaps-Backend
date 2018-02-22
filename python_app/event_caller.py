@@ -4,6 +4,7 @@ import time, datetime, dateutil.parser, pytz
 from dateutil.tz import tzlocal
 from pprint import pprint
 import json
+from tqdm import tqdm   # a progress bar, pretty
 
 # for sys.exit()
 import sys
@@ -44,8 +45,7 @@ SEARCH_URL = BASE_URL + 'search'
 # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
 CENTER_LONGITUDE = -118.445
-SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta',
-                'campus events commission', 'foundations choreography', 'cssaucla']
+SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
 # Get events by adding page ID and events field
@@ -56,13 +56,16 @@ EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_t
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
 
+# the time period before now, IN DAYS, for finding and updating events instead of removing them 
+BASE_EVENT_START_BOUND = 0
+
 s = requests.Session()
 
 def format_time(time):
     # %z gets time zone difference in +/-HHMM from UTC
     return time.strftime('%Y-%m-%d %H:%M:%S %z')
 
-def get_event_time_bounds(days_before=1):
+def get_event_time_bounds(days_before):
     # back_jump = 60        # for repeating events that started a long time ago
     back_jump = days_before # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
     forward_jump = 60       # and 60 days into the future
@@ -196,6 +199,24 @@ def find_ucla_entities():
     # a dictionary, to keep only unique pages
     return ucla_entities
 
+# json file expected to be a bunch of dicts, each for 1 page, with page_id and name
+# one time usage, basically
+def add_pages_from_json(filename):
+    page_list = []
+    with open(filename) as infile:
+        for line in tqdm(infile):
+            # takes each line as a dict and from each, takes out only 2 key-values, id and name
+            abridged_info = {k: json.loads(line).get(k, None) for k in ('page_id', 'name')}
+            # change key name to id
+            abridged_info['id'] = abridged_info.pop('page_id')
+            page_list.append(abridged_info)
+
+    for page in tqdm(page_list):
+        if pages_collection.find_one({'id': page['id']}):
+            pages_collection.delete_one({'id': page['id']})
+        pages_collection.insert_one(page)
+
+
 # TODO: add facebook page by exact name that appears in URL, or ID
 
 def add_facebook_page(page_type='group', id='', name=''):
@@ -212,7 +233,7 @@ def add_facebook_page(page_type='group', id='', name=''):
     # convert integer IDs to strings
     # if no info given then just don't do anything
     if not page_id and not name:
-        return {}
+        return 'Give ID or exact name of group to insert a page.'
 
     app_access_token = get_app_token()
     
@@ -238,13 +259,13 @@ def add_facebook_page(page_type='group', id='', name=''):
     elif page_type == 'place':
         search_args['type'] = 'place'
         return {}
-    return {}
+    return 'Page inserted!'
 
-def get_events_from_pages(pages_by_id, days_before=1):
-    """
-    pages_by_id = {'676162139187001': 'UCLACAC'}
-    dict of event ids mapped to their info, for fast duplicate checking
-    """
+
+def get_events_from_pages(pages_by_id, days_before):
+    # pages_by_id = {'676162139187001': 'UCLACAC'}
+    # dict of event ids mapped to their info, for fast duplicate checking
+
     app_access_token = get_app_token()
 
     """
@@ -292,7 +313,7 @@ def get_events_from_pages(pages_by_id, days_before=1):
     id_list = []
     id_jsons = {}
     # pages_by_id is dict of page IDs to names
-    for i, page_id in enumerate(pages_by_id):
+    for i, page_id in tqdm(enumerate(pages_by_id)):
         # don't call events too many times, even batched ID requests all count individually
         # rate limiting applies AUTOMATICALLY (maybe? unclear if rate issue or access token issue)
         # if i >= 51:
@@ -304,16 +325,19 @@ def get_events_from_pages(pages_by_id, days_before=1):
         if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
             continue
 
-        print('Checking page {0}'.format(i+1))
+        # print('Checking page {0}'.format(i+1))
         # pass in whole comma separated list of ids
         page_call_args['ids'] = ','.join(id_list)
         resp = s.get(BASE_EVENT_URL, params=page_call_args)
         # print(resp.url)
         if resp.status_code != 200:
+            error_json = resp.json()
             print(
-                'Error getting events from FB pages, starting at {0}! Status code {1}'
-                .format(pages_by_id[page_id], resp.status_code)
+                'Error getting events from FB pages, starting at {0}! Status code {1}: {2}'
+                .format(pages_by_id[page_id], resp.status_code, error_json['error'].get('message', 'Unknown error.'))
             )
+            # DON'T FORGET TO CLEAR THE ID LIST!
+            id_list = []
             continue
         curr_jsons = resp.json()
         # pprint(curr_jsons)
@@ -352,7 +376,7 @@ def get_events_from_pages(pages_by_id, days_before=1):
     }
     """
     total_events = {}
-    for page_info in id_jsons.values():
+    for page_info in tqdm(id_jsons.values()):
         host_entity_info = {}
         host_entity_info['id'] = page_info['id']
         host_entity_info['name'] = page_info['name']
@@ -440,8 +464,7 @@ def process_event(event, host_info, add_duplicate_tag=False):
         event_occurrence['hoster'] = host_info
     return expanded_event_dict
 
-
-def time_in_past(time_str, hours_offset=0):
+def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
     """
     takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
     to account for weird timezone things, construct 2 datetime objects
@@ -460,10 +483,9 @@ def time_in_past(time_str, hours_offset=0):
 
     # if time from string is smaller than now, with offset (to match time range of new events found)
     # offset shifts the boundary back in time, for which events to update rather than delete
-    return time_obj <= now - datetime.timedelta(hours=hours_offset + 24)
+    return time_obj <= now - datetime.timedelta(days=days_before)
 
-
-def update_current_events(events):
+def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     """
     update events currently in database before new ones put in
     means remove ones too old and re-search the rest
@@ -472,14 +494,14 @@ def update_current_events(events):
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "duplicate_occurrence" tag
     kept_events = {}
-    for event in events:
-        if not time_in_past(event['start_time']):
+    for event in tqdm(events):
+        if not time_in_past(event['start_time'], days_before):
             updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
     # return a dict of kept event IDs to their info
     return kept_events
 
-def get_facebook_events(days_before=1):
+def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     """
     search for UCLA-associated places and groups, using existing list on DB
     """
@@ -509,4 +531,7 @@ if __name__ == '__main__':
     pprint(res['events'][:10])
     
     # find_many_events()
+
+    # add_pages_from_json('holy_groups.json')
+    # add_pages_from_json('holy_pages.json')
 

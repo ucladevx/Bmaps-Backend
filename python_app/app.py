@@ -46,7 +46,7 @@ def index():
     return "Mappening is running!"
 
 def event_thread_func():
-    print('1st schedule')
+    print('Schedule 3 times a day')
     # time INSIDE container, which is GMT both local and AWS, +8 hours from Los Angeles without DST
     # so 13:00 GMT --> 5 AM in LA, 21:00 GMT --> 1 PM, 03:00 GMT --> 7 PM, if DST: all LA hours +1
     schedule.every().day.at('13:00').do(populate_ucla_events_database)
@@ -62,6 +62,9 @@ if __name__ == "__main__":
     # another thread to run the periodic events update, daily
     event_update_thread = Thread(target = event_thread_func)
     event_update_thread.start()
+
+    code_update_date = "2/5/18"
+    print("Updated on: {0}".format(code_update_date))
 
     # if debug is true, will run 2 instances at once (so two copies of all threads)
     app.run(host='0.0.0.0', debug=False)
