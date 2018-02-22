@@ -91,9 +91,12 @@ def get_app_token():
     # but this needs to update every 60 days!
     return USER_ACCESS_TOKEN
 
-# if zip code, check in UCLA zip codes (first 5 digits)
-# if no zip code, check that in Los Angeles, CA
+
 def entity_in_right_location(loc_data):
+    """
+    if zip code, check in UCLA zip codes (first 5 digits)
+    if no zip code, check that in Los Angeles, CA
+    """
     if 'zip' in loc_data:
         zip_string = loc_data['zip'][:5]
         if zip_string in UCLA_ZIP_STRINGS:
@@ -104,6 +107,9 @@ def entity_in_right_location(loc_data):
     return False
 
 def general_search_results(search_term, search_args):
+    """
+    Generate general search results
+    """
     current_entities = {}
     search_args['q'] = search_term
     resp = s.get(SEARCH_URL, params=search_args)
@@ -124,8 +130,10 @@ def general_search_results(search_term, search_args):
             current_entities[entity['id']] = entity['name']
     return current_entities
 
-# for searching all types: place, page, and group
 def find_ucla_entities():
+    """
+    for searching all types: place, page, and group
+    """
     app_access_token = get_app_token()
     ucla_entities = {}
     # args for pages
@@ -211,17 +219,18 @@ def add_pages_from_json(filename):
 
 
 # TODO: add facebook page by exact name that appears in URL, or ID
-"""
-RULES TO INSERT:
-In General: to GUARANTEE the ID, Inspect Element
+
+def add_facebook_page(page_type='group', id='', name=''):
+    """
+    RULES TO INSERT:
+    In General: to GUARANTEE the ID, Inspect Element
     --> under <head> tag, find <meta property=... content="fb://group OR page/?id=<id>">
     ** may need some scrolling
-Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
-Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
-Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
-"""
-def add_facebook_page(page_type='group', raw_id='', name=''):
-    page_id = str(raw_id)
+    Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
+    Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
+    Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
+    """
+    page_id = str(id)
     # convert integer IDs to strings
     # if no info given then just don't do anything
     if not page_id and not name:
@@ -253,28 +262,34 @@ def add_facebook_page(page_type='group', raw_id='', name=''):
         return {}
     return {}
 
+
 def get_events_from_pages(pages_by_id, days_before):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
+
     app_access_token = get_app_token()
 
-    # time_window is tuple of start and end time of searching, since() and until() parameters
-    # start time VERY IMPORTANT: all events found by search are guaranteed to start after it,
-    # including the START TIME of the FIRST EVENT of MULTI DAY EVENTS
-    # e.g. if an event happens weekly starting from 1/1, and the window start time is 1/2,
-    # those later weekly events will not appear in search at all!
+    """
+    time_window is tuple of start and end time of searching, since() and until() parameters
+    start time VERY IMPORTANT: all events found by search are guaranteed to start after it,
+    including the START TIME of the FIRST EVENT of MULTI DAY EVENTS
+    e.g. if an event happens weekly starting from 1/1, and the window start time is 1/2,
+    those later weekly events will not appear in search at all!
 
-    # so trick is: make sure event is searched up before start time passes, extract all
-    # sub-events (which have own start and end time), store in db and don't delete until
-    # THOSE start times are passed
+    so trick is: make sure event is searched up before start time passes, extract all
+    sub-events (which have own start and end time), store in db and don't delete until
+    THOSE start times are passed
 
-    # can pass in # days before current time, as search parameter
+    can pass in # days before current time, as search parameter
+    """
     time_window = get_event_time_bounds(days_before)
     
-    # find events in certain time range, get place + attendance info + time + other info
-    # use FB API's nested queries, get subfields of events by braces and comma-separated keys
-    # when using format on string, put {{}} for literal curly braces, then inside put variable argument,
-    # OR here: use nested keys as 'function calls', like fields()
+    """
+    find events in certain time range, get place + attendance info + time + other info
+    use FB API's nested queries, get subfields of events by braces and comma-separated keys
+    when using format on string, put {{}} for literal curly braces, then inside put variable argument,
+    OR here: use nested keys as 'function calls', like fields()
+    """
 
     # event_args = all under the fields parameter in page_call_args
     # can't ask FB to sort events by time, unfortunately
@@ -384,9 +399,11 @@ def get_events_from_pages(pages_by_id, days_before):
     #     json.dump(total_events, outfile, indent=4, sort_keys=True, separators=(',', ': '))
     return total_events.values()
 
-# takes in event dict ({many attributes: values}), returns dict of event dicts from event id to all info
-# passes in other data for manually added fields (NOT from FB, but for our own purposes)
 def process_event(event, host_info, add_duplicate_tag=False):
+    """
+    takes in event dict ({many attributes: values}), returns dict of event dicts from event id to all info
+    passes in other data for manually added fields (NOT from FB, but for our own purposes)
+    """
     app_access_token = get_app_token()
 
     # URL parameters for refreshing / updating events info, including subevents
@@ -454,12 +471,14 @@ def process_event(event, host_info, add_duplicate_tag=False):
         event_occurrence['time_updated'] = current_time.strftime('%Y-%m-%d %H:%M:%S.%f')
     return expanded_event_dict
 
-# takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
-# to account for weird timezone things, construct 2 datetime objects
-# one from simply parsing the string, and another from current time
-# required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
-# return boolean, if given time string has passed in real time
 def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
+    """
+    takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
+    to account for weird timezone things, construct 2 datetime objects
+    one from simply parsing the string, and another from current time
+    required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
+    return boolean, if given time string has passed in real time
+    """
     try:
         # Use dateutil parser to get time zone
         time_obj = dateutil.parser.parse(time_str).astimezone(pytz.UTC)
@@ -474,10 +493,12 @@ def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
     # offset shifts the boundary back in time, for which events to update rather than delete
     return time_obj <= now - datetime.timedelta(days=days_before)
 
-# update events currently in database before new ones put in
-# means remove ones too old and re-search the rest
-# events = list of complete event dicts
 def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
+    """
+    update events currently in database before new ones put in
+    means remove ones too old and re-search the rest
+    events = list of complete event dicts
+    """
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "duplicate_occurrence" tag
     kept_events = {}
@@ -489,7 +510,9 @@ def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     return kept_events
 
 def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
-    # search for UCLA-associated places and groups, using existing list on DB
+    """
+    search for UCLA-associated places and groups, using existing list on DB
+    """
     pages_by_id = {}
     for page in pages_collection.find():
         pages_by_id[page['id']] = page['name']
@@ -502,7 +525,9 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     return total_event_object
 
 def find_many_events():
-    # find events up to 2 years ago
+    """
+    find events up to 2 years ago
+    """
     raw_events = get_facebook_events(730)
     # still the dumb but simple update method
     ml_collection.delete_many({})
