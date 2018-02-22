@@ -97,6 +97,7 @@ import time, datetime, dateutil.parser
 import event_caller
 import json
 import os
+from tqdm import tqdm
 
 Events = Blueprint('Events', __name__)
 
@@ -114,7 +115,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data']
 events_collection = db.map_events
 pages_collection = db.saved_pages
-total_events_collection = db.total_events
+total_events_collection = db.events_ml
 
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
@@ -418,6 +419,7 @@ def process_event_info(event):
         'properties': {
             'event_name': event.get('name', '<NONE>'),
             'description': event.get('description', '<NONE>'),
+            'hoster': event.get('hoster', '<MISSING HOST>'),
             'start_time': processed_time(event.get('start_time', '<NONE>')),
             'end_time': processed_time(event.get('end_time', '<NONE>')),
             'venue': event['place'],
@@ -434,7 +436,8 @@ def process_event_info(event):
             'ticketing': {
                 'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
-            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO'
+            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
+            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO'
         }
     }
     return formatted_info
@@ -454,12 +457,12 @@ def processed_time(old_time_str):
 # TODO: new endpoint to manually add Facebook page to DB
 # use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
 @Events.route('/api/add-page', methods=['GET'])
-def add_event_to_database(type):
+def add_page_to_database(type):
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
     if not page_id and not page_exact_name:
-        return 'Add a page using URL parameters id or exact name, with optional type specified (default=group, page, place).'
+        return 'Add a page using URL parameters id or exact name, with optional type specified: group (default), page, place.'
 
     return 'Nothing happens yet.'
 
@@ -500,17 +503,27 @@ def populate_ucla_events_database():
 
     clear_old_db = request.args.get('clear', default=False, type=bool)
     if clear_old_db:
+        print(clear_old_db, type(clear_old_db))
         events_collection.delete_many({})
 
+    earlier_day_bound = request.args.get('days', default=0, type=int)
+
     # take out all current events from DB, put into list, check for updates
-    processed_db_events = event_caller.update_current_events(list(events_collection.find()))
+    processed_db_events = event_caller.update_current_events(list(events_collection.find()), earlier_day_bound)
 
     # actually update all in database, but without mass deletion (for safety)
-    for event_id, event_info in processed_db_events.iteritems():
-        events_collection.delete_one({'id': event_id})
-        events_collection.insert_one(event_info)
+    for old_event in tqdm(events_collection.find()):
+        event_id = old_event['id']
+        updated_event = processed_db_events.get(event_id)
+        # if event should be kept and updated
+        if updated_event:
+            events_collection.delete_one({'id': event_id})
+            events_collection.insert_one(updated_event)
+        # event's time has passed, according to update_current_events
+        else:
+            events_collection.delete_one({'id': event_id})
 
-    new_events_data = event_caller.get_facebook_events()
+    new_events_data = event_caller.get_facebook_events(earlier_day_bound)
     # debugging events output
     # with open('events_out.json', 'w') as outfile:
     #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
@@ -548,8 +561,15 @@ def populate_ucla_events_database():
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
 
-#    simply save each unique document and delete any that have been found already
+@Events.route('/api/test-code-update')
+def test_code_update():
+    return 'house lease'
+  
 def clean_collection(collection):
+    """
+    simply save each unique document and delete any that have been found already
+    """
+  
     # a set, not a dict
     unique_ids = set()
     dups = []
