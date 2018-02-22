@@ -29,6 +29,7 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data']
 ml_collection = db.events_ml
 pages_collection = db.saved_pages
+unknown_loc_collection = db.unknown_locations
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
@@ -259,7 +260,7 @@ def add_facebook_page(page_type='group', id='', name=''):
     elif page_type == 'place':
         search_args['type'] = 'place'
         return {}
-    return 'Page inserted!'
+    return {}
 
 
 def get_events_from_pages(pages_by_id, days_before):
@@ -453,6 +454,7 @@ def process_event(event, host_info, add_duplicate_tag=False):
     else:
         expanded_event_dict.update({event['id']: event})
 
+    # final cleaning of all event instances, including repeated occurrences
     for event_occurrence in expanded_event_dict.values():
         # clean the category attribute if needed
         if 'category' in event_occurrence:
@@ -462,6 +464,11 @@ def process_event(event, host_info, add_duplicate_tag=False):
                 event_occurrence['category'] = event_occurrence['category'][:-6]
         # save from which page / group this event was found
         event_occurrence['hoster'] = host_info
+
+        # for debugging: save when each event was updated, in LA time
+        current_time = datetime.datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
+        # get up to microseconds with %f, probably not needed but just in case
+        event_occurrence['time_updated'] = current_time.strftime('%Y-%m-%d %H:%M:%S.%f')
     return expanded_event_dict
 
 def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
@@ -479,7 +486,8 @@ def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
         # Got invalid date string
         print('Invalid datetime string from event \'start_time\' key, cannot be parsed!')
         return False
-    now = datetime.datetime.now(tzlocal()).astimezone(pytz.utc)
+    # need to explicitly set time zone (tzlocal() here), or else astimezone() will not work
+    now = datetime.datetime.now(tzlocal()).astimezone(pytz.UTC)
 
     # if time from string is smaller than now, with offset (to match time range of new events found)
     # offset shifts the boundary back in time, for which events to update rather than delete
@@ -496,7 +504,7 @@ def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     kept_events = {}
     for event in tqdm(events):
         if not time_in_past(event['start_time'], days_before):
-            updated_event_dict = process_event(event, event['hoster'], event.get('duplicate_occurrence', False))
+            updated_event_dict = process_event(event, event.get('hoster'), event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
     # return a dict of kept event IDs to their info
     return kept_events
