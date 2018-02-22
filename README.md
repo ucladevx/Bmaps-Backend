@@ -26,6 +26,7 @@ A single platform for events across campus. Mappening helps raise awareness of e
   - `make html`
   - TODO: Check this with Hannah. `make clean`?? 
 - Latest documentation is in the `_build` folder
+- Actual auto-generated documentation in `_build_generated`. Some manual HTML changes to `_build`
 
 ## How to Push Image to AWS ECS
 - Enter the repository
