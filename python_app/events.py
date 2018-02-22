@@ -437,7 +437,8 @@ def process_event_info(event):
                 'ticket_uri': event.get('ticket_uri', '<NONE>')
             },
             'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
-            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO'
+            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
+            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
         }
     }
     return formatted_info
@@ -455,16 +456,27 @@ def processed_time(old_time_str):
     return res_time_str
 
 # TODO: new endpoint to manually add Facebook page to DB
-# use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
-@Events.route('/api/add-page', methods=['GET'])
+@Events.route('/api/add-page')
 def add_page_to_database(type):
+    """
+    Call event_caller's add_facebook_page() to find the official info from Graph API,
+    returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
+    use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
+    """
     page_type = request.args.get('type', default='group', type=str)
     page_id = request.args.get('id', default='', type=str)
     page_exact_name = request.args.get('name', default='', type=str)
     if not page_id and not page_exact_name:
         return 'Add a page using URL parameters id or exact name, with optional type specified: group (default), page, place.'
+    
+    page_result = event_caller.add_facebook_page(page_type, page_id, page_exact_name)
+    if 'error' in page_result:
+        return page_result['error']
 
-    return 'Nothing happens yet.'
+    found_same_page = pages_collection.find_one({'id': page_result['id']})
+
+    # TODO
+    return page_result
 
 #     Now refresh pages we search separately, can be done way less frequently than event search
 
@@ -492,22 +504,28 @@ def refresh_page_database():
 
     return 'Refreshed page database!'
 
-#    Get all UCLA-related Facebook events and add to database
-@Events.route('/api/populate-ucla-events-database')
-def populate_ucla_events_database():
-    print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
-    print('BEGIN POPULATING EVENTS DATABASE')
-    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n\n\n\n\n\n\n')
-    # Location of Bruin Bear
-    # current_events = get_facebook_events(34.070964, -118.444757)
-
-    clear_old_db = request.args.get('clear', default=False, type=bool)
-    if clear_old_db:
-        print(clear_old_db, type(clear_old_db))
+@Events.route('/api/update-ucla-events')
+def call_populate_events_database():
+    # boolean doesn't work here: if clear parameter has any value, it is a string
+    # all non-empty strings are true, so just take it as a string
+    clear_old_db = request.args.get('clear', default='False', type=str)
+    print(clear_old_db, type(clear_old_db))
+    # could do .lower(), but only works for ASCII in Python 2...
+    if clear_old_db == 'True' or clear_old_db == 'true':
         events_collection.delete_many({})
 
     earlier_day_bound = request.args.get('days', default=0, type=int)
+    print(earlier_day_bound)
+    return update_ucla_events_database(earlier_day_bound)
 
+    
+# Get all UCLA-related Facebook events and add to database
+def update_ucla_events_database(earlier_day_bound=0):
+    print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
+    print('BEGIN POPULATING EVENTS DATABASE')
+    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
+    # Location of Bruin Bear
+    # current_events = get_facebook_events(34.070964, -118.444757)
     # take out all current events from DB, put into list, check for updates
     processed_db_events = event_caller.update_current_events(list(events_collection.find()), earlier_day_bound)
 
@@ -535,7 +553,7 @@ def populate_ucla_events_database():
     # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
     # normally use incremental Cursor, to save memory usage
     new_count = 0
-    for event in new_events_data['events']:
+    for event in tqdm(new_events_data['events']):
         curr_id = event['id']
         existing_event = processed_db_events.get(curr_id)
 
@@ -563,8 +581,8 @@ def populate_ucla_events_database():
 
 @Events.route('/api/test-code-update')
 def test_code_update():
-    return 'house lease'
-  
+    return 'LNY'
+
 def clean_collection(collection):
     """
     simply save each unique document and delete any that have been found already
