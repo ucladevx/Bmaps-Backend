@@ -1,0 +1,369 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Events &#8212; DevX 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to DevX’s documentation!" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to DevX’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">DevX 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to DevX’s documentation!</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-events">
+<span id="events"></span><h1>Events<a class="headerlink" href="#module-events" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA.
+An * event * object is a GeoJSON which means it has the following keys:</p>
+<ul class="simple">
+<li>geometry: with a type of “Point” and coordinates for latitude and longitude</li>
+<li>id: a unique id for this event</li>
+<li>properties: this contains all the event information and will be explored below</li>
+</ul>
+<p>** Mandatory Event Properties **
+These properties are guarenteed to be in every event. If the actual event has no value, the value will be ‘&lt;NONE&gt;’. Make sure to check for none in your code to avoid errors.</p>
+<ul class="simple">
+<li>category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have &lt;NONE&gt;</li>
+<li>cover_picture: A url to a photo for the event</li>
+<li>event_name: String of event’s name</li>
+<li>description: String description</li>
+<li>start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800</li>
+<li>end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800</li>
+<li>is_cancelled: Boolean indicating event is cancelled</li>
+<li>ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or ‘&lt;NONE&gt;’</li>
+<li>venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below</li>
+</ul>
+<p>** Potential Event Properties **
+* stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys ‘attending’, ‘noreply’, ‘interested’, and ‘maybe’ each with a integer value.
+* free_food: If event has free food, currently just a strong “NO”</p>
+<p>Here is a sample event::
+{</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>“geometry”: {</dt>
+<dd><dl class="first docutils">
+<dt>“coordinates”: [</dt>
+<dd>-118.451994,
+34.071474</dd>
+</dl>
+<p class="last">],
+“type”: “Point”</p>
+</dd>
+</dl>
+<p>},
+“id”: “1766863560001661”,
+“properties”: {</p>
+<blockquote>
+<div>“category”: “&lt;NONE&gt;”,
+“cover_picture”: “<a class="reference external" href="https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&amp;oe=5B136061">https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&amp;oe=5B136061</a>”,
+“description”: “Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks.</div></blockquote>
+</div></blockquote>
+<p>As a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we’ll be providing select hardware for hacking as well!</p>
+<p>LEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): <a class="reference external" href="https://hoth.splashthat.com/">https://hoth.splashthat.com/</a></p>
+<dl class="docutils">
+<dt>Sponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: <a class="reference external" href="https://isassociates.ucla.edu">https://isassociates.ucla.edu</a>”,</dt>
+<dd><blockquote class="first">
+<div><p>“duplicate_occurrence”: “NO”,
+“end_time”: “Sat, 17 Feb 2018 23:30:00 GMT-0800”,
+“event_name”: “ACM Hack | Hack on the Hill IV”,
+“free_food”: “NO”,
+“hoster”: {</p>
+<blockquote>
+<div>“id”: “369769286554402”,
+“name”: “UCLA Class of 2020”</div></blockquote>
+<p>},
+“is_cancelled”: false,
+“start_time”: “Sat, 17 Feb 2018 08:30:00 GMT-0800”,
+“stats”: {</p>
+<blockquote>
+<div>“attending”: 97,
+“interested”: 199,
+“maybe”: 199,
+“noreply”: 107</div></blockquote>
+<p>},
+“ticketing”: {</p>
+<blockquote>
+<div>“ticket_uri”: “<a class="reference external" href="https://hoth.splashthat.com/">https://hoth.splashthat.com/</a>”</div></blockquote>
+<p>},
+“venue”: {</p>
+<blockquote>
+<div><p>“id”: “955967887795957”,
+“location”: {</p>
+<blockquote>
+<div>“city”: “Los Angeles”,
+“country”: “United States”,
+“latitude”: 34.071474,
+“longitude”: -118.451994,
+“state”: “CA”,
+“street”: “330 De Neve Dr Ste L-16”,
+“zip”: “90024”</div></blockquote>
+<p>},
+“name”: “Carnesale Commons”</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p class="last">},
+“type”: “Feature”</p>
+</dd>
+</dl>
+<p>}</p>
+<dl class="function">
+<dt id="events.get_all_events">
+<code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a a few miles of UCLA</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/events</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_event_by_id">
+<code class="descclassname">events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-id/&lt;event_id&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> – value to match with event id’s to find specific event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_event_by_name">
+<code class="descclassname">events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-name/&lt;event_name&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> – string to match with event names</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_event_categories">
+<code class="descclassname">events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events.</td>
+</tr>
+</tbody>
+</table>
+<p>Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
+Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
+Party, Religion, Shopping, Sports, Theater, Wellness
+Conference, Lecture, Neighborhood, Networking</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_event_categories_by_date">
+<code class="descclassname">events.</code><code class="descname">get_event_categories_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories_by_date" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Get cursor to all events on a certain day and get unique categories list for that day</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories-by-date/&lt;date&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_events_by_category">
+<code class="descclassname">events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of currently existing event categories</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-category/&lt;event_category&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_category</strong> – string to match with event categories</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_events_by_category_and_date">
+<code class="descclassname">events.</code><code class="descname">get_events_by_category_and_date</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category_and_date" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events by event category starting on passed in date</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/events-by-category-and-date</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_events_by_date">
+<code class="descclassname">events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all events starting on passed in date</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/event-date/&lt;date&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_events_for_search">
+<code class="descclassname">events.</code><code class="descname">get_events_for_search</code><span class="sig-paren">(</span><em>search_term</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_for_search" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns JSON of events on date that match search term in format that Mapbox likes</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/api/search/&lt;search_term&gt;/&lt;date&gt;</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>search_term</strong> – a string to use to find events that contain that word</li>
+<li><strong>date</strong> – search in a certain date with raw date format or the following format -&gt; 22 January 2018</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.get_events_today_for_search">
+<code class="descclassname">events.</code><code class="descname">get_events_today_for_search</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_today_for_search" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events today that match search term in format that Mapbox likes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Route:</th><td class="field-body">/api/search/&lt;search_term&gt;</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> – a string to use to find events that contain that word</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to DevX’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">DevX 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, DevX.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.0.
+    </div>
+  </body>
+</html>
