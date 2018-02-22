@@ -11,7 +11,8 @@ import os
 from operator import itemgetter
 import process
 
-data = json.load(open('tokenizeData.json'))
+# data = json.load(open('tokenizeData.json'))
+data = json.load(open('sampleData.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -35,6 +36,7 @@ events_collection = db.map_events
 ml_events_collection = db.events_ml
 total_events_collection = db.total_events
 locations_collection = db.UCLA_locations
+unknown_locs_collection = db.unknown_locations
 
 # Returns JSON of all past locations/venues
 @Locations.route('/api/locations', methods=['GET'])
@@ -163,7 +165,10 @@ def db_locations():
     # For every location from events db
     for new_loc in new_locations:
       # Tokenize and remove unnecessary/common words 
-      place_name = process.processText(new_loc['location'].get('name', "NO NAME"))
+      place_name = re.sub(r'\bUCLA-\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
+      place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
+      place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
+      place_name = process.processText(place_name)
       processed_place = re.compile(place_name, re.IGNORECASE)
 
       # Find location of same coordinates/name
@@ -201,6 +206,7 @@ def db_locations():
         if updated:
           updated = False
           updated_locations.append(old_loc)
+          print "Updated: " + old_loc['location']['name']
           # Replace document with updated info
           if is_name:
             locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)  
@@ -213,6 +219,7 @@ def db_locations():
         if place_name != new_loc['location']['name'].lower():
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
+        print "Added: " + new_loc['location']['name']
         locations_collection.insert_one(new_loc.copy())
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
@@ -228,7 +235,10 @@ def get_mongo_textSearch(place_query):
     print "Original place query: " + place_query
 
     # Tokenize and remove unnecessary/common words 
-    processed_place = process.processText(place_query)
+    place_name = re.sub(r'\bUCLA-\s?', '', place_query, flags=re.IGNORECASE)
+    place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
+    place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
+    processed_place = process.processText(place_name)
     print "Processed place query: " + processed_place
 
     # Locations db has text search index on alternate_locations field
@@ -262,6 +272,14 @@ def get_mongo_textSearch(place_query):
           output_places.append(place['location'].get('name', "NO NAME"))
 
     return jsonify({"Database Results": output})
+
+# Given location name, return location data or some indication that no location
+# could be found. use on unknown_locs_collection for testing/metrics.
+# TODO
+
+# Go through ml_events_collection and search every location name. See if result
+# matches what we expected for metric purposes.
+# TODO
 
 # Insert locations from a JSON file to the db
 # See sample format in ./sampleData.json
