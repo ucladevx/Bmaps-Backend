@@ -1,77 +1,90 @@
 """
-Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA.
-An * event * object is a GeoJSON which means it has the following keys:
+Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url `api.ucladevx.com/events <http://api.ucladevx.com/events>`_ and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.
+
+-----------------
+Event Object
+-----------------
+An *event* object is a GeoJSON which means it has the following keys:
 
 * geometry: with a type of "Point" and coordinates for latitude and longitude
 * id: a unique id for this event
 * properties: this contains all the event information and will be explored below
 
-** Mandatory Event Properties **
-These properties are guarenteed to be in every event. If the actual event has no value, the value will be '<NONE>'. Make sure to check for none in your code to avoid errors.
+**Mandatory Event Properties**
+
+These properties must have a valid value for every event.
 
 * category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have <NONE>
-* cover_picture: A url to a photo for the event
 * event_name: String of event's name
-* description: String description
-* start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
-* end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
-* is_cancelled: Boolean indicating event is cancelled
-* ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or '<NONE>'
-* venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
-
-** Potential Event Properties **
 * stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
-* free_food: If event has free food, currently just a strong "NO"
+* start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* is_cancelled: Boolean indicating event is cancelled
 
-Here is a sample event::
-{
-  "geometry": {
-    "coordinates": [
-      -118.451994,
-      34.071474
-    ],
-    "type": "Point"
-  },
-  "id": "1766863560001661",
-  "properties": {
-    "category": "<NONE>",
-    "cover_picture": "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&oe=5B136061",
-    "description": "Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. \n\nAs a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we'll be providing select hardware for hacking as well!\n\nLEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/\n\nSponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu",
-    "duplicate_occurrence": "NO",
-    "end_time": "Sat, 17 Feb 2018 23:30:00 GMT-0800",
-    "event_name": "ACM Hack | Hack on the Hill IV",
-    "free_food": "NO",
-    "hoster": {
-      "id": "369769286554402",
-      "name": "UCLA Class of 2020"
-    },
-    "is_cancelled": false,
-    "start_time": "Sat, 17 Feb 2018 08:30:00 GMT-0800",
-    "stats": {
-      "attending": 97,
-      "interested": 199,
-      "maybe": 199,
-      "noreply": 107
-    },
-    "ticketing": {
-      "ticket_uri": "https://hoth.splashthat.com/"
-    },
-    "venue": {
-      "id": "955967887795957",
-      "location": {
-        "city": "Los Angeles",
-        "country": "United States",
-        "latitude": 34.071474,
-        "longitude": -118.451994,
-        "state": "CA",
-        "street": "330 De Neve Dr Ste L-16",
-        "zip": "90024"
+**Potential Event Properties**
+
+If the actual event has no value, the value will be <NONE>. Make sure to check for none in your code to avoid errors.
+
+* description: String description
+* venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
+* cover_picture: A url to a photo for the event
+* ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or <NONE>
+* end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
+* free_food: If event has free food, currently just a strong NO
+
+**Sample Event**::
+
+    {
+      "geometry": {
+        "coordinates": [
+          -118.451994,
+          34.071474
+        ],
+        "type": "Point"
       },
-      "name": "Carnesale Commons"
+      "id": "1766863560001661",
+      "properties": {
+        "category": "<NONE>",
+        "cover_picture": "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&oe=5B136061",
+        "description": "Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. As a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we'll be providing select hardware for hacking as well! LEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/ Sponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu",
+        "duplicate_occurrence": "NO",
+        "end_time": "Sat, 17 Feb 2018 23:30:00 GMT-0800",
+        "event_name": "ACM Hack | Hack on the Hill IV",
+        "free_food": "NO",
+        "hoster": {
+          "id": "369769286554402",
+          "name": "UCLA Class of 2020"
+        },
+        "is_cancelled": false,
+        "start_time": "Sat, 17 Feb 2018 08:30:00 GMT-0800",
+        "stats": {
+          "attending": 97,
+          "interested": 199,
+          "maybe": 199,
+          "noreply": 107
+        },
+        "ticketing": {
+          "ticket_uri": "https://hoth.splashthat.com/"
+        },
+        "venue": {
+          "id": "955967887795957",
+          "location": {
+            "city": "Los Angeles",
+            "country": "United States",
+            "latitude": 34.071474,
+            "longitude": -118.451994,
+            "state": "CA",
+            "street": "330 De Neve Dr Ste L-16",
+            "zip": "90024"
+          },
+          "name": "Carnesale Commons"
+        }
+      },
+      "type": "Feature"
     }
-  },
-  "type": "Feature"
-}
+
+-----------------
+API DOCS
+-----------------
 """
 # Interacting with events collection in mlab
 
@@ -106,8 +119,9 @@ total_events_collection = db.total_events
 @Events.route('/api/events', methods=['GET'])
 def get_all_events():
     """ 
-    :Description: Returns a GeoJSON of all events within a a few miles of UCLA 
     :Route: /api/events
+
+    :Description: Returns a GeoJSON of all events within a a few miles of UCLA 
 
     """
     return find_events_in_database(print_results=True)
@@ -115,9 +129,9 @@ def get_all_events():
 @Events.route('/api/search/<search_term>', methods=['GET'])
 def get_events_today_for_search(search_term):
     """ 
-    :Description: Returns JSON of events today that match search term in format that Mapbox likes 
-
     :Route: /api/search/<search_term>
+
+    :Description: Returns JSON of events today that match search term in format that Mapbox likes 
 
     :param search_term: a string to use to find events that contain that word
     """
@@ -155,9 +169,9 @@ def get_events_today_for_search(search_term):
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
     """
-    :Description: Returns JSON of events on date that match search term in format that Mapbox likes 
-
     :Route: /api/search/<search_term>/<date>
+
+    :Description: Returns JSON of events on date that match search term in format that Mapbox likes 
 
     :param search_term: a string to use to find events that contain that word
     :param date: search in a certain date with raw date format or the following format -> 22 January 2018
@@ -196,9 +210,9 @@ def get_events_for_search(search_term, date):
 @Events.route('/api/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
     """
-    :Description: Returns JSON of singular event by event name
-
     :Route: /api/event-name/<event_name>
+
+    :Description: Returns JSON of singular event by event name
 
     :param event_name: string to match with event names
     """
@@ -207,9 +221,9 @@ def get_event_by_name(event_name):
 @Events.route('/api/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
     """
-    :Description: Returns JSON of singular event by event id
-
     :Route: /api/event-id/<event_id>
+
+    :Description: Returns JSON of singular event by event id
 
     :param event_id: value to match with event id's to find specific event
 
@@ -219,9 +233,9 @@ def get_event_by_id(event_id):
 @Events.route('/api/event-date/<date>', methods=['GET'])
 def get_events_by_date(date):
     """
-    :Description: Returns JSON of all events starting on passed in date
-    
     :Route: /api/event-date/<date>
+    
+    :Description: Returns JSON of all events starting on passed in date
     
     :param date: can search by date in multiple formats (ex. 22 January 2018)
     """
@@ -233,9 +247,9 @@ def get_events_by_date(date):
 @Events.route('/api/event-categories-by-date/<date>', methods=['GET'])
 def get_event_categories_by_date(date):
     """
-    :Description: Get cursor to all events on a certain day and get unique categories list for that day
-    
     :Route: /api/event-categories-by-date/<date>
+    
+    :Description: Get cursor to all events on a certain day and get unique categories list for that day
     
     :param date: can search by date in multiple formats (ex. 22 January 2018)
     """
@@ -262,9 +276,10 @@ def get_event_categories_by_date(date):
 @Events.route('/api/events-by-category-and-date', methods=['GET'])
 def get_events_by_category_and_date():
     """
+    :Route: /api/events-by-category-and-date
+    
     :Description: Returns JSON of events by event category starting on passed in date
 
-    :Route: /api/events-by-category-and-date
     """
     date = request.args['date']
     event_category = request.args['category']
@@ -292,13 +307,10 @@ def get_events_by_category_and_date():
 @Events.route('/api/event-categories', methods=['GET'])
 def get_event_categories():
     """
-    :Description: Returns JSON of all event categories used in all events. 
-    Potential event categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film,
-    Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other,
-    Party, Religion, Shopping, Sports, Theater, Wellness
-    Conference, Lecture, Neighborhood, Networking
-
     :Route: /api/event-categories
+    
+    :Description: Returns JSON of all event categories used in all events. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
+
     """
     # Iterate through all events and get unique list of all categories
     # TODO: sort by quantity?
@@ -320,8 +332,10 @@ def get_event_categories():
 @Events.route('/api/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
     """
-    :Description: Returns JSON of currently existing event categories
     :Route: /api/event-category/<event_category>
+        
+    :Description: Returns JSON of currently existing event categories
+    
     :param event_category: string to match with event categories
     """
     """

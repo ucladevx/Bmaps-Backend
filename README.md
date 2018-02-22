@@ -27,6 +27,14 @@ A single platform for events across campus. Mappening helps raise awareness of e
   - TODO: Check this with Hannah. `make clean`?? 
 - Latest documentation is in the `_build` folder
 - Actual auto-generated documentation in `_build_generated`. Some manual HTML changes to `_build`
+- Minified js/css files in `_static`
+- Manually changed "Classes" to "APIs": `<h2>APIs Documented<a class="headerlink" href="#classes-documented" title="Permalink to this headline">¶</a></h2>`
+- Most manual changes for events.html
+- basic.css remove div.body max and min width
+- sphinx-autobuild with sudo pip, then `sphinx-autobuild . ./_build/html` and navigate to http://127.0.0.1:8000/events.html
+- embed html using rst or something http://www.sphinx-doc.org/en/stable/rest.html
+.field-name{min-width:85px;
+
 
 ## How to Push Image to AWS ECS
 - Enter the repository
