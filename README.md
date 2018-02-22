@@ -9,12 +9,23 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - mLab: Database-as-a-Service cloud-hosted MongoDB
 - Pymongo: Database Connector between MongoDB and Flask
 - AWS EC2/Elastic Container Service for deployment
+- Sphinx to automatically generate documentation
 
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
 - Clone this repository 
   - `git clone https://github.com/ucladevx/Mappening-Backend.git`
 - Get the `.env` file which contains sensitive information from a dev and add it to python_app/
+
+## Generating Documentation with Sphinx
+- Make sure required packages are installed
+  - `make sphinx-setup`
+- Read Sphinx help information
+  - `make sphinx-help`
+- Generate Sphinx documentation
+  - `make html`
+  - TODO: Check this with Hannah. `make clean`?? 
+- Latest documentation is in the `_build` folder
 
 ## How to Push Image to AWS ECS
 - Enter the repository
