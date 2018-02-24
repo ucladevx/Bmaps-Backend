@@ -271,11 +271,24 @@ def get_mongo_textSearch(place_query):
           })
           output_places.append(place['location'].get('name', "NO NAME"))
 
-    return jsonify({"Database Results": output})
+    return output
+
+# Pretty output of location search results
+@Locations.route('/api/location_search/<place_query>', methods=['GET'])
+def get_location_results(place_query):
+    output = get_mongo_textSearch(place_query)
+    return jsonify({"Database Results": output}) 
 
 # Given location name, return location data or some indication that no location
 # could be found. use on unknown_locs_collection for testing/metrics.
-# TODO
+@Locations.route('/api/location_search_result/<place_query>', methods=['GET'])
+def get_location_search_result(place_query):
+    output = get_mongo_textSearch(place_query)
+
+    if not output:
+      return "There were no results!"
+    else:
+      return jsonify(output[0]) 
 
 # Go through ml_events_collection and search every location name. See if result
 # matches what we expected for metric purposes.
