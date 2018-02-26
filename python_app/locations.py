@@ -1,4 +1,3 @@
-# TODO get locations without coords from jason
 # TODO MAJOR CLEANUP but I'm lazy
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -12,7 +11,7 @@ from operator import itemgetter
 import process
 
 # data = json.load(open('tokenizeData.json'))
-data = json.load(open('sampleData.json'))
+data = json.load(open('ucla.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -233,6 +232,39 @@ def get_mongo_textSearch(place_query):
 
     # Supplied string such as "Boelter Hall" for a location
     print "Original place query: " + place_query
+    # Remove leading/trailing white space
+    place_query = place_query.strip()
+
+    # Search for exact match first
+    # Sometimes regency village weighted more than sunset village due to repetition of village
+    # place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
+    place_regex = place_query
+    if place_query.lower() != "ucla":
+      place_regex = re.sub(r'\bUCLA\s?', '', place_regex, flags=re.IGNORECASE)
+    place_regex = place_regex.strip()
+    place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
+    places_cursor = locations_collection.find({'location.alternative_names': place_regex})
+    
+    # Places that match the name are appended to output
+    if places_cursor.count() > 0:
+      for place in places_cursor:
+        output.append({
+          'name': place['location'].get('name', "NO NAME"),
+          'street': place['location'].get('street', "NO STREET"),
+          'zip': place['location'].get('zip', "NO ZIP"),
+          'city': place['location'].get('city', "NO CITY"),
+          'state': place['location'].get('state', "NO STATE"),
+          'country': place['location'].get('country', "NO COUNTRY"),
+          'latitude': place['location'].get('latitude', "NO LATITUDE"),
+          'longitude': place['location'].get('longitude', "NO LONGITUDE"),
+          'alternative_names': place['location']['alternative_names']
+        })
+        output_places.append(place['location'].get('name', "NO NAME"))
+
+      print "Found exact match!"
+      return output
+
+    print "Doing text search..."
 
     # Tokenize and remove unnecessary/common words 
     place_name = re.sub(r'\bUCLA-\s?', '', place_query, flags=re.IGNORECASE)
@@ -288,11 +320,67 @@ def get_location_search_result(place_query):
     if not output:
       return "There were no results!"
     else:
-      return jsonify(output[0]) 
+      return output[0]
 
 # Go through ml_events_collection and search every location name. See if result
 # matches what we expected for metric purposes.
-# TODO
+@Locations.route('/api/test_locations', methods=['GET'])
+def test_locations_api():
+  num_correct = 0
+  num_wrong = 0
+  num_invalid = 0
+  wrong_locs = []
+  counter = 1
+
+  events_cursor = ml_events_collection.find({}, {'_id': False})
+  if events_cursor.count() > 0:
+    for event in events_cursor:
+      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong)
+      counter = counter + 1
+      if 'place' in event and 'location' in event['place']:
+        loc = get_location_search_result(event['place']['name'])
+        if loc != "There were no results!":
+          # Latitude and longitude are significant to the 4th digit, but 3rd to be safe
+          event_lat = event['place']['location'].get('latitude', 420)
+          event_long = event['place']['location'].get('longitude', 420)
+          lat_diff = abs(loc['latitude'] - event_lat)
+          long_diff = abs(loc['longitude'] - event_long)
+          if lat_diff < 0.0015 and long_diff < 0.0015:
+            print "Correct"
+            num_correct = num_correct + 1
+          else:
+            print "Wrong"
+            num_wrong = num_wrong + 1
+            wrong_locs.append({
+              "event": {
+                "place_name": event['place']['name'], 
+                "place_latitude": event['place']['location'].get('latitude', 420),
+                "place_longitude": event['place']['location'].get('longitude', 420)
+              },
+              "loc": {
+                "loc_name": loc['name'],
+                "loc_alt_names": loc['alternative_names'],
+                "loc_latitude": loc['latitude'],
+                "loc_longitude": loc['longitude']
+              }
+            }) 
+        else:
+          print "Invalid Loc"
+          num_invalid = num_invalid + 1
+          wrong_locs.append({
+              "event": {
+                "place_name": event['place']['name'], 
+                "place_latitude": event['place']['location'].get('latitude', 420),
+                "place_longitude": event['place']['location'].get('longitude', 420)
+              },
+              "loc": "NONE"
+            }) 
+  else:
+      print 'Cannot find any events!'
+
+  # Output typically contains name, city, country, latitude, longitude, state, 
+  # street, and zip for each location
+  return jsonify({'num_correct': num_correct, 'num_wrong': num_wrong, 'num_invalid': num_invalid, 'wrong_locs': wrong_locs})
 
 # Insert locations from a JSON file to the db
 # See sample format in ./sampleData.json
@@ -323,6 +411,27 @@ def get_tokenized_names():
       if updated:
         places.append(place)
         updated = False
+
+  return jsonify({"locations": places})
+
+# Add tokenized version of all alternate names to alternate names list
+@Locations.route('/api/UCLA_names', methods=['GET'])
+def get_UCLA_names():
+  places = []
+  loc_counter = 1
+
+  # Go through every location in json
+  for location in data['locations']:
+    loc_counter = loc_counter + 1
+    place = location
+    if 'alternative_names' in place['location']:
+      for alt_name in place['location']['alternative_names']:
+        processed_name = re.sub(r'\bUCLA\s?', '', alt_name, flags=re.IGNORECASE)
+        processed_name = processed_name.strip()
+        if processed_name.lower() not in (name.lower() for name in place['location']['alternative_names']):
+          if processed_name:
+            place['location']['alternative_names'].append(processed_name)
+      places.append(place)
 
   return jsonify({"locations": places})
 
