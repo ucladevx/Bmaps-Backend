@@ -25,7 +25,7 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-events_collection = db.map_events
+events_collection = db.ucla_events
 pages_collection = db.saved_pages
 total_events_collection = db.events_ml
 
@@ -322,6 +322,8 @@ def refresh_page_database():
 
     # raw_page_data = {"test_id": "test_name"}
 
+    new_page_count = 0
+    updated_page_count = 0
     # in contrast to raw_page_data, pages_collection is list of {"id": <id>, "name": <name>}
     for page_id, page_name in raw_page_data.iteritems():
         # See if event already existed
@@ -330,9 +332,12 @@ def refresh_page_database():
         # If it existed then delete it, new event gets inserted in both cases
         if update_page:
             pages_collection.delete_one({'id': page_id})
+            updated_page_count += 1
+            new_page_count -= 1
         pages_collection.insert_one({'id': page_id, 'name': page_name})
+        new_page_count += 1
 
-    return 'Refreshed page database!'
+    return 'Refreshed page database with {0} new pages and {1} updated pages.'.format(new_page_count, updated_event)
 
 # this endpoint call is separate from actual code logic,
 # because the request context (for URL args) is only set through endpoint,
@@ -415,7 +420,7 @@ def update_ucla_events_database(earlier_day_bound=0):
 
 @Events.route('/api/test-code-update')
 def test_code_update():
-    return 'LNY'
+    return 'Cold wave'
 
 # simply save each unique document and delete any that have been found already
 def clean_collection(collection):
