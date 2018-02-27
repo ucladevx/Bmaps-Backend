@@ -33,7 +33,6 @@ db = client['mappening_data']
 
 events_collection = db.map_events
 ml_events_collection = db.events_ml
-total_events_collection = db.total_events
 locations_collection = db.UCLA_locations
 unknown_locs_collection = db.unknown_locations
 
@@ -241,7 +240,12 @@ def get_mongo_textSearch(place_query):
     place_regex = place_query
     if place_query.lower() != "ucla":
       place_regex = re.sub(r'\bUCLA\s?', '', place_regex, flags=re.IGNORECASE)
+    place_regex = re.sub(r'\|', ' ', place_regex, flags=re.IGNORECASE)
+    place_regex = re.sub(r'\(', '', place_regex, flags=re.IGNORECASE)
+    place_regex = re.sub(r'\)', '', place_regex, flags=re.IGNORECASE)
     place_regex = place_regex.strip()
+    print "Regex place query: " + place_regex
+
     place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
     places_cursor = locations_collection.find({'location.alternative_names': place_regex})
     
@@ -322,6 +326,55 @@ def get_location_search_result(place_query):
     else:
       return output[0]
 
+# Go through unknown_locs_collection and search every location name. Manually
+# verify correctness or just look at cases that don't match
+@Locations.route('/api/test_unknown_locations', methods=['GET'])
+def test_unknown_locations():
+  num_assigned = 0
+  num_unassigned = 0
+  assigned_locs = []
+  unassigned_locs = []
+  counter = 1
+
+  locs_cursor = unknown_locs_collection.find({}, {'_id': False})
+  if locs_cursor.count() > 0:
+    for loc_db in locs_cursor:
+      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
+      counter = counter + 1
+      if 'location_name' in loc_db:
+        loc_result = get_location_search_result(loc_db['location_name'])
+        if loc_result != "There were no results!":
+          print "Found a match!"
+          num_assigned = num_assigned + 1
+          assigned_locs.append({
+            "unknown_loc": {
+              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+              "event_name": loc_db.get('event_name', "NO EVENT NAME")
+            },
+            "matching_loc": {
+              "loc_name": loc_result['name'],
+              "loc_alt_names": loc_result['alternative_names'],
+              "loc_latitude": loc_result['latitude'],
+              "loc_longitude": loc_result['longitude']
+            }
+          }) 
+        else:
+          print "Didn't find a location!"
+          num_unassigned = num_unassigned + 1
+          unassigned_locs.append({
+            "unknown_loc": {
+              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+              "event_name": loc_db.get('event_name', "NO EVENT NAME")
+            }
+          }) 
+  else:
+      print 'Cannot find any unknown locations!'
+
+  # Output typically contains name, city, country, latitude, longitude, state, 
+  # street, and zip for each location
+  return jsonify({'num_assigned': num_assigned, 'num_unassigned': num_unassigned, 'assigned_locs': assigned_locs, 'unassigned_locs': unassigned_locs})
+
+
 # Go through ml_events_collection and search every location name. See if result
 # matches what we expected for metric purposes.
 @Locations.route('/api/test_locations', methods=['GET'])
@@ -332,6 +385,7 @@ def test_locations_api():
   wrong_locs = []
   counter = 1
 
+  # events_cursor = events_collection.find({}, {'_id': False})
   events_cursor = ml_events_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
