@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 # Get environment vars for keeping sensitive info secure
 # Has to come before blueprints that use the env vars
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), 'python_app/.env')
 load_dotenv(dotenv_path)
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
@@ -19,7 +19,7 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 # Set up database connection
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
-unknown_locs_collection = db.test_unknown_locations
+unknown_locs_collection = db.test_unknown_locations # db.unknown_locations
 
 unknown_locations = []
 locations_cursor = unknown_locs_collection.find({}, {'_id': False})
