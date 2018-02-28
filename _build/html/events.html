@@ -147,6 +147,38 @@
 <div class="section" id="api-docs">
 <h2>API DOCS<a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="events.add_page_to_database">
+<code class="descclassname">events.</code><code class="descname">add_page_to_database</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#events.add_page_to_database" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/api/add-page</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Find official page info from Graph API given search items, and add to or update the page collection on DB as needed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type</strong> – the type of page desired, either ‘page’, ‘place’, or ‘group’; defaults to ‘group’ if not specified.</li>
+<li><strong>exact-id</strong> – a completely unique identifier used to find a page, either a long number or a page’s unique string ID (found in its Facebook URL).
+Preferred method of search.</li>
+<li><strong>search-string</strong> – if ‘exact-id’ parameter is not available, set this to a search word / phrase as specific as possible.
+Will attempt to find closely matching pages on Facebook and save them to DB.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="events.clean_collection">
+<code class="descclassname">events.</code><code class="descname">clean_collection</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#events.clean_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>simply save each unique document and delete any that have been found already</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="events.get_all_events">
 <code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
