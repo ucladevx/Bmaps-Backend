@@ -11,6 +11,8 @@ import pymongo
 import os
 from dotenv import load_dotenv
 
+import re
+
 # Get environment vars for keeping sensitive info secure
 # Has to come before blueprints that use the env vars
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -33,7 +35,17 @@ tkinter_TODO_collection = db.tkinter_TODO_locations
 # TODO: keep checking unknown locations until tkinter_unknown_locations is empty
 
 unknown_locations = []
-locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
+
+# Only look at locations starting with a certain letter 
+# to make sure everyone's working on something different
+# Too lazy to make this work better so just change this manually and rerun when letter is out
+########################### CHANGE THE LETTER #################################
+FILTER_LETTER = 'g'
+filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
+locations_cursor = tkinter_unknown_collection.find({'unknown_loc.loc_name': filter_regex})
+########################### CHANGE THE LETTER #################################
+
+# locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
     unknown_locations.append(loc)
