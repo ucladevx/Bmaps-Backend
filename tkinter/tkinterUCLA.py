@@ -56,7 +56,7 @@ class App:
     self.button.pack(side=LEFT)
 
   def isCorrect(self):
-    print "Location in UCLA, marking as checked"
+    print "Location in UCLA, marking as checked: " + unknown_locations[0]
 
     location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
     location['isUCLA'] = True
@@ -66,7 +66,7 @@ class App:
     self.changeText()
 
   def isWrong(self):
-    print "Location not in UCLA or an outlier, remove from database"
+    print "Location not in UCLA or an outlier, remove from database: " + unknown_locations[0]
     unknown_locs_collection.delete_one({'location_name': unknown_locations[0]})
     self.changeText()
 

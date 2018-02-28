@@ -88,7 +88,8 @@ class App:
     self.button.pack(side=LEFT)
 
   def isCorrect(self):
-    print "Coordinates are correct! Add to different database and remove from test database"
+    print "Coordinates are correct!"
+    print "Add to different database and remove from test database: " + unknown_locations[0]['unknown_loc']['loc_name']
 
     tkinter_known_collection.insert_one(unknown_locations[0])
     tkinter_unknown_collection.delete_one({'_id': unknown_locations[0]['_id']})
@@ -97,18 +98,18 @@ class App:
 
   def isWrong(self):
     print "Coordinates are wrong, enter correct location data and update database"
-    print "Leaving location in database for secondary verification"
+    print "Leaving location in database for secondary verification: " + unknown_locations[0]['unknown_loc']['loc_name']
 
     latitude = tkSimpleDialog.askfloat("Latitude", "Enter latitude value:", initialvalue=unknown_locations[0]['db_loc']['loc_latitude'], minvalue=34.05, maxvalue=34.08)
     longitude = tkSimpleDialog.askfloat("Longitude", "Enter longitude value:",initialvalue=unknown_locations[0]['db_loc']['loc_longitude'], minvalue=-118.46, maxvalue=-118.43)
     name = tkSimpleDialog.askstring("Alternate Name", "Enter alternate name or click cancel:")
 
     updated = False
-    if latitude != unknown_locations[0]['db_loc']['loc_latitude']:
+    if latitude and latitude != unknown_locations[0]['db_loc']['loc_latitude']:
       print "New latitude: " + str(latitude)
       unknown_locations[0]['db_loc']['loc_latitude'] = latitude
       updated = True
-    if longitude != unknown_locations[0]['db_loc']['loc_longitude']:
+    if longitude and longitude != unknown_locations[0]['db_loc']['loc_longitude']:
       print "New longitude: " + str(longitude)
       unknown_locations[0]['db_loc']['loc_longitude'] = longitude
       updated = True
@@ -120,12 +121,14 @@ class App:
     if updated:
       print "Updating location in database..."
       tkinter_unknown_collection.replace_one({'_id': unknown_locations[0]['_id']}, unknown_locations[0]) 
+    else:
+      print "Nothing changed, event is left unmodified..."
 
     self.changeText()
 
   def isFail(self):
     print "Not even the right location found... add to different database for manual correction"
-    print "Removing from test database"
+    print "Removing from test database: " + unknown_locations[0]['unknown_loc']['loc_name']
 
     tkinter_TODO_collection.insert_one(unknown_locations[0])
     tkinter_unknown_collection.delete_one({'_id': unknown_locations[0]['_id']})
