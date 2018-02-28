@@ -34,7 +34,9 @@ db = client['mappening_data']
 events_collection = db.map_events
 ml_events_collection = db.events_ml
 locations_collection = db.UCLA_locations
-unknown_locs_collection = db.unknown_locations
+unknown_locs_collection = db.tkinter_UCLA_locations
+tkinter_collection = db.tkinter_unknown_locations
+tkinter_TODO_collection = db.tkinter_TODO_collection
 
 # Returns JSON of all past locations/venues
 @Locations.route('/api/locations', methods=['GET'])
@@ -328,12 +330,12 @@ def get_location_search_result(place_query):
 
 # Go through unknown_locs_collection and search every location name. Manually
 # verify correctness or just look at cases that don't match
-@Locations.route('/api/test_unknown_locations', methods=['GET'])
+# TODO: process tkinter_UCLA_locations with tkinterUCLA.py before adding to tkinter_unknown_locations
+# curl -d -X POST http://localhost:5000/api/test_unknown_locations
+@Locations.route('/api/test_unknown_locations', methods=['POST'])
 def test_unknown_locations():
   num_assigned = 0
   num_unassigned = 0
-  assigned_locs = []
-  unassigned_locs = []
   counter = 1
 
   locs_cursor = unknown_locs_collection.find({}, {'_id': False})
@@ -346,34 +348,35 @@ def test_unknown_locations():
         if loc_result != "There were no results!":
           print "Found a match!"
           num_assigned = num_assigned + 1
-          assigned_locs.append({
+          tkinter_collection.insert_one({
             "unknown_loc": {
               "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
               "event_name": loc_db.get('event_name', "NO EVENT NAME")
             },
-            "matching_loc": {
+            "db_loc": {
               "loc_name": loc_result['name'],
               "loc_alt_names": loc_result['alternative_names'],
               "loc_latitude": loc_result['latitude'],
-              "loc_longitude": loc_result['longitude']
+              "loc_longitude": loc_result['longitude'],
+              "map_url": "https://www.google.com/maps/place/" + str(loc_result['latitude']) + "," + str(loc_result['longitude'])
             }
           }) 
         else:
           print "Didn't find a location!"
           num_unassigned = num_unassigned + 1
-          unassigned_locs.append({
+          tkinter_TODO_collection.insert_one({
             "unknown_loc": {
               "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
               "event_name": loc_db.get('event_name', "NO EVENT NAME")
-            }
+            },
+            "db_loc": {}
           }) 
   else:
       print 'Cannot find any unknown locations!'
 
-  # Output typically contains name, city, country, latitude, longitude, state, 
-  # street, and zip for each location
-  return jsonify({'num_assigned': num_assigned, 'num_unassigned': num_unassigned, 'assigned_locs': assigned_locs, 'unassigned_locs': unassigned_locs})
-
+  print "num_assigned: " + num_assigned
+  print "num_unassigned: " + num_unassigned
+  return "Added unknown locations to database\n"
 
 # Go through ml_events_collection and search every location name. See if result
 # matches what we expected for metric purposes.
