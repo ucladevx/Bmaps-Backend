@@ -12,6 +12,8 @@ GUI to ease checking/correcting location JSON data from scraping Facebook
 
 ## Setting Up the Environment
 - Get the `.env` file which contains sensitive information from a dev and add it to tkinter/
+- Add tkinter/ folder to your path
+  - `export PATH=$PATH:/path/to/Mappening-Backend/tkinter/`
 - If you have `pip` installed: `sudo pip install selenium`
   - Otherwise run `make tkinter-setup`
 
