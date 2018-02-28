@@ -9,6 +9,10 @@ tkinter-setup:
 
 	sudo pip install selenium
 
+# TODO: make path target
+# path:
+# 	export PATH=$$(PATH):$(abspath .)
+
 # Check whether locations are in UCLA or not!
 ucla:
 	python tkinterUCLA.py
