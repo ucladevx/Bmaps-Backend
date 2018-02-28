@@ -25,7 +25,11 @@ unknown_locations = []
 locations_cursor = unknown_locs_collection.find({}, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
-    unknown_locations.append(loc['location_name'])
+    if 'isUCLA' in loc: 
+      if not loc['isUCLA']:
+        unknown_locations.append(loc['location_name'])
+    else:
+      unknown_locations.append(loc['location_name'])
 else:
     print 'Cannot find any locations in database!'
     quit()
@@ -52,7 +56,13 @@ class App:
     self.button.pack(side=LEFT)
 
   def isCorrect(self):
-    print "Location in UCLA, keep in database"
+    print "Location in UCLA, marking as checked"
+
+    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
+    location['isUCLA'] = True
+
+    unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+
     self.changeText()
 
   def isWrong(self):
@@ -94,7 +104,13 @@ question.pack()
 location = StringVar()
 Label(root, textvariable=location, font=("Open Sans", 14)).pack()
 
-location.set(unknown_locations[0])
+if unknown_locations:
+  location.set(unknown_locations[0])
+else:
+  location.set("No more locations to check")
+  self.correct.config(state = DISABLED)
+  self.wrong.config(state = DISABLED)
+  self.skip.config(state = DISABLED)
 
 app = App(root)
 
