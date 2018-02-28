@@ -5,6 +5,8 @@ import pymongo
 import os
 from dotenv import load_dotenv
 
+import re
+
 # Get environment vars for keeping sensitive info secure
 # Has to come before blueprints that use the env vars
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -22,7 +24,17 @@ db = client['mappening_data']
 unknown_locs_collection = db.tkinter_UCLA_locations
 
 unknown_locations = []
-locations_cursor = unknown_locs_collection.find({}, {'_id': False})
+
+# Only look at locations starting with a certain letter 
+# to make sure everyone's working on something different
+# Too lazy to make this work better so just change this manually and rerun when letter is out
+########################### CHANGE THE LETTER #################################
+FILTER_LETTER = 'a'
+filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
+locations_cursor = unknown_locs_collection.find({'location_name': filter_regex}, {'_id': False})
+########################### CHANGE THE LETTER #################################
+
+# locations_cursor = unknown_locs_collection.find({}, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
     if 'isUCLA' in loc: 
@@ -40,13 +52,13 @@ class App:
     frame = Frame(master)
     frame.pack()
 
-    self.correct = Button(frame, text="CORRECT", command=self.isCorrect)
+    self.correct = Button(frame, text="YES!", command=self.isCorrect)
     self.correct.pack(side=LEFT)
 
-    self.wrong = Button(frame, text="WRONG", command=self.isWrong)
+    self.wrong = Button(frame, text="NO!", command=self.isWrong)
     self.wrong.pack(side=LEFT)
 
-    self.skip = Button(frame, text="SKIP", command=self.changeText)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.changeText)
     self.skip.pack(side=LEFT)
 
     self.help = Button(frame, text="HELP", command=self.helpInstructions)
