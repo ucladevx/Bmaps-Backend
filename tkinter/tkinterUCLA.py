@@ -84,10 +84,11 @@ class App:
 
     # Find location with matching name and tag it as correct
     location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
-    location['isUCLA'] = True
+    if location:
+      location['isUCLA'] = True
 
-    # Replace updated location in database
-    unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+      # Replace updated location in database
+      unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
 
     # Move on to next location, update display
     self.changeText()
@@ -103,16 +104,17 @@ class App:
 
   def skip(self):
     print "Skipping this location, idk what to do with it... " + unknown_locations[0]
-    
+
     # Find location with matching name and keep a count of how many times it has been skipped
     location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
-    if 'skip_count' in location:
-      location['skip_count'] = location['skip_count'] + 1
-    else:
-      location['skip_count'] = 1
+    if location:
+      if 'skip_count' in location:
+        location['skip_count'] = location['skip_count'] + 1
+      else:
+        location['skip_count'] = 1
 
-    # Replace updated location in database
-    unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+      # Replace updated location in database
+      unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
 
     # Move on to next location, update display
     self.changeText()
