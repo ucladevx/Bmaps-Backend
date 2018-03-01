@@ -1,5 +1,6 @@
 from Tkinter import *
 import tkMessageBox
+import tkSimpleDialog
 
 import pymongo
 import os
@@ -22,20 +23,12 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 unknown_locs_collection = db.tkinter_UCLA_locations
 
-unknown_locations = []
-
+# Initialize unknown_locations to all locations
 # Only look at locations starting with a certain letter 
 # to make sure everyone's working on something different
-# Too lazy to make this work better so just change this manually and rerun when letter is out
-########################### CHANGE THE LETTER #################################
-FILTER_LETTER = 'a'
-filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
-locations_cursor = unknown_locs_collection.find({'location_name': filter_regex}, {'_id': False})
-########################### CHANGE THE LETTER #################################
+unknown_locations = []
 
-# locations_cursor = unknown_locs_collection.find({}, {'_id': False})
-
-# Append each location doc to a list to process (this is why we try to prevent overlap)
+locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
     # Locations we already processed and approved have `isUCLA = True`
@@ -69,8 +62,13 @@ class App:
 
     # Skip - don't know if in UCLA or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.changeText)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
     self.skip.pack(side=LEFT)
+
+    # Filter Letter - if multiple people are working on this at same time
+    # Filter by letter so everyone is wokring on something different
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter.pack(side=LEFT)
 
     # Help - displays instructions
     self.help = Button(frame, text="HELP", command=self.helpInstructions)
@@ -103,16 +101,34 @@ class App:
     # Move on to next location, update display
     self.changeText()
 
+  def skip(self):
+    print "Skipping this location, idk what to do with it... " + unknown_locations[0]
+    
+    # Find location with matching name and keep a count of how many times it has been skipped
+    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
+    if 'skip_count' in location:
+      location['skip_count'] = location['skip_count'] + 1
+    else:
+      location['skip_count'] = 1
+
+    # Replace updated location in database
+    unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+
+    # Move on to next location, update display
+    self.changeText()
+
   def helpInstructions(self):
     print "Displaying instructions!"
 
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
       "Instructions",
-      "Hello! Thanks for your help checking whether or not these locations we scraped are even in UCLA/Westwood. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The location name is in UCLA, approve the location!\n\nWRONG: The location isn't in UCLA/Westwood, reject it!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
+      "Hello! Thanks for your help checking whether or not these locations we scraped are even in UCLA/Westwood. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The location name is in UCLA, approve the location!\n\nWRONG: The location isn't in UCLA/Westwood, reject it!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
     )
 
   def quit(self, frame):
+    print "Quitting tkinter thing..."
+
     # Prompt a yes/no response
     choice = tkMessageBox.askquestion("Ready to quit?", "Thanks for your help!", icon='warning')
     # If quitting, kill the chrome driver and the tkinter frame/display
@@ -130,10 +146,59 @@ class App:
       location.set(unknown_locations[0])
     else:
       # No more locations to process, disable everything but HELP/QUIT
-      location.set("No more locations to check")
-      self.correct.config(state = DISABLED)
-      self.wrong.config(state = DISABLED)
-      self.skip.config(state = DISABLED)
+      self.disable()
+
+  def filterLetter(self):
+    print "Filter what locations we're looking at by letter..."
+    print "Do this if multiple people are doing this at the same time"
+
+    self.enable()
+
+    # Ask user for input to filter what locations you're looking at
+    # Only look at locations starting with a certain letter 
+    # to make sure everyone's working on something different
+    letter_num = tkSimpleDialog.askinteger("Letter Number", "Enter an int (1-26) to correspond to the letters (a-z):", minvalue=1, maxvalue=26)
+
+    if letter_num:
+      FILTER_LETTER = chr(ord('a') + letter_num - 1)
+      print "Looking at locations starting with letter " + FILTER_LETTER
+
+      # Get all the locations that start with the letter
+      filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
+      locations_cursor = unknown_locs_collection.find({'location_name': filter_regex})
+      
+      # Append each location doc to a list to process (this is why we try to prevent overlap)
+      # Empty list beforehand
+      del unknown_locations[:]
+      # globals()['unknown_locations'] = []
+      if locations_cursor.count() > 0:
+        for loc in locations_cursor:
+          # Locations we already processed and approved have `isUCLA = True`
+          # Look for locations that haven't been processed and add to list
+          if 'isUCLA' in loc: 
+            if not loc['isUCLA']:
+              unknown_locations.append(loc['location_name'])
+          else:
+            unknown_locations.append(loc['location_name'])
+        location.set(unknown_locations[0])
+      else:
+          print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          self.disable()
+    else:
+      print "No letter chosen for filtering, leaving unfiltered"
+
+  def disable(self):
+    # No more locations to process, disable everything but HELP/QUIT
+    location.set("No more locations to check")
+    self.correct.config(state = DISABLED)
+    self.wrong.config(state = DISABLED)
+    self.skip.config(state = DISABLED)
+
+  def enable(self):
+    # Enable buttons
+    self.correct.config(state = "normal")
+    self.wrong.config(state = "normal")
+    self.skip.config(state = "normal")
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
