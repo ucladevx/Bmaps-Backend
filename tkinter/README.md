@@ -1,4 +1,4 @@
-# Using Mappening's Tkinter Tools
+# Using Mappening's Internal Tools
 
 ## Overview
 GUI to ease checking/correcting location JSON data from scraping Facebook

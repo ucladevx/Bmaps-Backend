@@ -31,20 +31,12 @@ tkinter_TODO_collection = db.tkinter_TODO_locations
 # TODO: manually fix tkinter_TODO_locations
 # TODO: keep checking unknown locations until tkinter_unknown_locations is empty
 
-unknown_locations = []
-
+# Initialize unknown_locations to all locations
 # Only look at locations starting with a certain letter 
 # to make sure everyone's working on something different
-# Too lazy to make this work better so just change this manually and rerun when letter is out
-########################### CHANGE THE LETTER #################################
-FILTER_LETTER = 'g'
-filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
-locations_cursor = tkinter_unknown_collection.find({'unknown_loc.loc_name': filter_regex})
-########################### CHANGE THE LETTER #################################
+unknown_locations = []
 
-# locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
-
-# Append each location doc to a list to process (this is why we try to prevent overlap)
+locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
     unknown_locations.append(loc)
@@ -103,6 +95,11 @@ class App:
     # Just moves on to next location without modifying any databases
     self.skip = Button(frame, text="SKIP location", command=self.changeText)
     self.skip.pack(side=LEFT)
+
+    # Filter Letter - if multiple people are working on this at same time
+    # Filter by letter so everyone is wokring on something different
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter.pack(side=LEFT)
 
     # Help - displays instructions
     self.help = Button(frame, text="HELP", command=self.helpInstructions)
@@ -176,7 +173,7 @@ class App:
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
       "Instructions",
-      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
+      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
     )
 
   def quit(self, frame):
@@ -195,28 +192,75 @@ class App:
 
     # Check that there are still locations left to process and update displays/labels
     if unknown_locations:
-      location.set("LOCATION NAME: " + unknown_locations[0]['unknown_loc']['loc_name'])
-      latitude_str.set("LATITUDE: " + str(unknown_locations[0]['db_loc']['loc_latitude']))
-      longitude_str.set("LONGITUDE: " + str(unknown_locations[0]['db_loc']['loc_longitude']))
-
-      alt_names = "ALTERNATIVE NAMES:\n=================="
-      for name in unknown_locations[0]['db_loc']['loc_alt_names']:
-        alt_names = alt_names + "\n" + name
-      alternate_names.set(alt_names)
-
-      # Open Maps display to current coordinates
-      dr.get(unknown_locations[0]['db_loc']['map_url'])
+      self.setLabels()
     else:
-      # No more locations to process, disable everything but HELP/QUIT
-      location.set("No more locations to check!")
-      latitude_str.set("Thanks for all your help!")
-      longitude_str.set("")
-      alternate_names.set("~ Mappening Team ~")
+      self.disable()
 
-      self.correct.config(state = DISABLED)
-      self.wrong.config(state = DISABLED)
-      self.fail.config(state = DISABLED)
-      self.skip.config(state = DISABLED)
+  def filterLetter(self):
+    print "Filter what locations we're looking at by letter..."
+    print "Do this if multiple people are doing this at the same time"
+
+    self.enable()
+
+    # Ask user for input to filter what locations you're looking at
+    # Only look at locations starting with a certain letter 
+    # to make sure everyone's working on something different
+    letter_num = tkSimpleDialog.askinteger("Letter Number", "Enter an int (1-26) to correspond to the letters (a-z):", minvalue=1, maxvalue=26)
+    if letter_num:
+      FILTER_LETTER = chr(ord('a') + letter_num - 1)
+      print "Looking at locations starting with letter " + FILTER_LETTER
+
+      # Get all the locations that start with the letter
+      filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
+      locations_cursor = tkinter_unknown_collection.find({'unknown_loc.loc_name': filter_regex})
+      
+      # Append each location doc to a list to process (this is why we try to prevent overlap)
+      # Empty list beforehand
+      del unknown_locations[:]
+      # globals()['unknown_locations'] = []
+      if locations_cursor.count() > 0:
+        for loc in locations_cursor:
+          unknown_locations.append(loc)
+        self.setLabels()
+      else:
+          print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          self.disable()
+    else:
+      print "No letter chosen for filtering, leaving unfiltered"
+
+  def disable(self):
+    # No more locations to process, disable everything but HELP/QUIT
+    location.set("No more locations to check!")
+    latitude_str.set("Thanks for all your help!")
+    longitude_str.set("")
+    alternate_names.set("~ Mappening Team ~")
+
+    self.correct.config(state = DISABLED)
+    self.wrong.config(state = DISABLED)
+    self.fail.config(state = DISABLED)
+    self.skip.config(state = DISABLED)
+
+  def enable(self):
+    # Enable buttons
+    self.correct.config(state = "normal")
+    self.wrong.config(state = "normal")
+    self.fail.config(state = "normal")
+    self.skip.config(state = "normal")
+
+  def setLabels(self):
+    # Set all the labels to unknown_locations[0]
+    location.set("LOCATION NAME: " + unknown_locations[0]['unknown_loc']['loc_name'])
+    latitude_str.set("LATITUDE: " + str(unknown_locations[0]['db_loc']['loc_latitude']))
+    longitude_str.set("LONGITUDE: " + str(unknown_locations[0]['db_loc']['loc_longitude']))
+
+    alt_names = "ALTERNATIVE NAMES:\n=================="
+    for name in unknown_locations[0]['db_loc']['loc_alt_names']:
+      alt_names = alt_names + "\n" + name
+    alternate_names.set(alt_names)
+
+    # Open Maps display to current coordinates
+    dr.get(unknown_locations[0]['db_loc']['map_url'])
+
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
