@@ -491,19 +491,20 @@ def add_page_to_database(type):
 @Events.route('/api/refresh-page-database')
 def refresh_page_database():
     # separately run from refreshing events, also check for new pages under set of search terms
+    print('Refreshing pages...')
 
     # update just like accumulated events list
     # remember: find() just returns a cursor, not whole data structure
     saved_pages = pages_collection.find()
     # returns a dict of IDs to names
     raw_page_data = event_caller.find_ucla_entities()
-
+    print('Found them.')
     # raw_page_data = {"test_id": "test_name"}
 
     new_page_count = 0
     updated_page_count = 0
     # in contrast to raw_page_data, pages_collection is list of {"id": <id>, "name": <name>}
-    for page_id, page_name in raw_page_data.iteritems():
+    for page_id, page_name in tqdm(raw_page_data.iteritems()):
         # See if event already existed
         update_page = pages_collection.find_one({'id': page_id})
 
@@ -515,7 +516,7 @@ def refresh_page_database():
         pages_collection.insert_one({'id': page_id, 'name': page_name})
         new_page_count += 1
 
-    return 'Refreshed page database with {0} new pages and {1} updated pages.'.format(new_page_count, updated_event)
+    return 'Refreshed database pages: {0} new, {1} updated.'.format(new_page_count, updated_page_count)
 
 @Events.route('/api/update-ucla-events')
 def call_populate_events_database():
