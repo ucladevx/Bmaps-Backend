@@ -1,9 +1,5 @@
 # Mappening
 id_rsa_mappening.pem
-./python_app/secrets.json
-
-# Frontend Docker
-node_app/
 
 # Debug Output
 *.json
