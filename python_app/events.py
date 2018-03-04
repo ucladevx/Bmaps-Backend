@@ -112,9 +112,8 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 
 # Set up database connection
 client = pymongo.MongoClient(uri)
-db = client['mappening_data']
-
-events_collection = db.map_events
+db = client['mappening_data'] 
+events_collection = db.ucla_events
 pages_collection = db.saved_pages
 total_events_collection = db.events_ml
 
@@ -163,10 +162,8 @@ def get_events_today_for_search(search_term):
                 'category': event.get('category', '<NONE>'),
             }})
     else:
-        print "No event(s) matched '{}'".format(search_term)
+        print("No event(s) matched '{}'".format(search_term))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
-
-
 
 @Events.route('/api/search/<search_term>/<date>', methods=['GET'])
 def get_events_for_search(search_term, date):
@@ -459,13 +456,24 @@ def processed_time(old_time_str):
 @Events.route('/api/add-page')
 def add_page_to_database(type):
     """
-    Call event_caller's add_facebook_page() to find the official info from Graph API,
-    returns array of 1 or multiple results (if search), and add into existing data on DB IF not already there
+    :Route: /api/add-page
+
+    :Description: Find official page info from Graph API given search items, and add to or update the page collection on DB as needed.
+
+    :param type: the type of page desired, either 'page', 'place', or 'group'; defaults to 'group' if not specified.
+    :param exact-id: a completely unique identifier used to find a page, either a long number or a page's unique string ID (found in its Facebook URL).
+        Preferred method of search.
+    :param search-string: if 'exact-id' parameter is not available, set this to a search word / phrase as specific as possible.
+        Will attempt to find closely matching pages on Facebook and save them to DB.
+    """
+    """
+    event_caller.add_facebook_page returns array of 1 or multiple pages (if search)
+    assume that if search returns multiple, insert/update up to the first 3 (hopefully desired page included there)
     use URL parameters, either id= or name=, and optional type=page, group, or place if needed (default = group)
     """
     page_type = request.args.get('type', default='group', type=str)
-    page_id = request.args.get('id', default='', type=str)
-    page_exact_name = request.args.get('name', default='', type=str)
+    page_id = request.args.get('exact-id', default='', type=str)
+    page_exact_name = request.args.get('search-string', default='', type=str)
     if not page_id and not page_exact_name:
         return 'Add a page using URL parameters id or exact name, with optional type specified: group (default), page, place.'
     
@@ -475,34 +483,39 @@ def add_page_to_database(type):
 
     found_same_page = pages_collection.find_one({'id': page_result['id']})
 
-    # TODO
+    
     return page_result
 
-#     Now refresh pages we search separately, can be done way less frequently than event search
-
+# Now refresh pages we search separately, can be done way less frequently than event search
 @Events.route('/api/refresh-page-database')
 def refresh_page_database():
     # separately run from refreshing events, also check for new pages under set of search terms
+    print('Refreshing pages...')
 
     # update just like accumulated events list
     # remember: find() just returns a cursor, not whole data structure
     saved_pages = pages_collection.find()
     # returns a dict of IDs to names
     raw_page_data = event_caller.find_ucla_entities()
-
+    print('Found them.')
     # raw_page_data = {"test_id": "test_name"}
 
+    new_page_count = 0
+    updated_page_count = 0
     # in contrast to raw_page_data, pages_collection is list of {"id": <id>, "name": <name>}
-    for page_id, page_name in raw_page_data.iteritems():
+    for page_id, page_name in tqdm(raw_page_data.iteritems()):
         # See if event already existed
         update_page = pages_collection.find_one({'id': page_id})
 
         # If it existed then delete it, new event gets inserted in both cases
         if update_page:
             pages_collection.delete_one({'id': page_id})
+            updated_page_count += 1
+            new_page_count -= 1
         pages_collection.insert_one({'id': page_id, 'name': page_name})
+        new_page_count += 1
 
-    return 'Refreshed page database!'
+    return 'Refreshed database pages: {0} new, {1} updated.'.format(new_page_count, updated_page_count)
 
 @Events.route('/api/update-ucla-events')
 def call_populate_events_database():
@@ -581,7 +594,7 @@ def update_ucla_events_database(earlier_day_bound=0):
 
 @Events.route('/api/test-code-update')
 def test_code_update():
-    return 'LNY'
+    return 'Cold wave'
 
 def clean_collection(collection):
     """
