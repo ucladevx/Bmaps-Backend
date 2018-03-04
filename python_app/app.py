@@ -14,6 +14,9 @@ load_dotenv(dotenv_path)
 from facebookAuth import FbAuth
 from users import Users
 from events import Events, update_ucla_events_database
+from locations import Locations
+from process import Process
+
 import pymongo
 import json
 
@@ -27,6 +30,8 @@ app = Flask(__name__)
 app.register_blueprint(FbAuth)
 app.register_blueprint(Users)
 app.register_blueprint(Events)
+app.register_blueprint(Locations)
+app.register_blueprint(Process)
 app.config['SECRET_KEY'] = os.getenv('APP_SECRET_KEY')
 
 # Enable Cross Origin Resource Sharing (CORS)

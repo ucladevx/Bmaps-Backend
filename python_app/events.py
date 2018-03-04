@@ -312,7 +312,6 @@ def get_event_categories():
 
     """
     # Iterate through all events and get unique list of all categories
-    # TODO: sort by quantity?
     uniqueList = []
     output = []
 
