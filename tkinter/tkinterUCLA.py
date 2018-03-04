@@ -22,22 +22,22 @@ uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USE
 client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 unknown_locs_collection = db.tkinter_UCLA_locations
+TODO_locs_collection = db.tkinter_UCLATODO_locations
 
 # Initialize unknown_locations to all locations
 # Only look at locations starting with a certain letter 
 # to make sure everyone's working on something different
 unknown_locations = []
+counter = 0
 
 locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
 if locations_cursor.count() > 0:
   for loc in locations_cursor:
     # Locations we already processed and approved have `isUCLA = True`
     # Look for locations that haven't been processed and add to list
-    if 'isUCLA' in loc: 
-      if not loc['isUCLA']:
-        unknown_locations.append(loc['location_name'])
-    else:
-      unknown_locations.append(loc['location_name'])
+    if 'isUCLA' not in loc or not loc['isUCLA']:
+      unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+      counter = counter + 1
 else:
     print 'Cannot find any locations in database!'
     quit()
@@ -45,6 +45,9 @@ else:
 class App:
 
   def __init__(self, master):
+    empty1 = Label(root, text="", font=("Open Sans", 10))
+    empty1.pack()
+
     frame = Frame(master)
     frame.pack()
 
@@ -79,37 +82,76 @@ class App:
     self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
     self.button.pack(side=LEFT)
 
+    # Define all the labels and strings used in the display
+    empty2 = Label(root, text="", font=("Open Sans", 10))
+    empty2.pack()
+
+    question = Label(root, text="         Is this event location in UCLA/Westwood?          ", font=("Open Sans", 20))
+    question.pack()
+
+    Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
+    counterLabel.set("Events Remaining: " + str(counter))
+
+    Label(root, textvariable=location, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
+
+    Label(root, textvariable=event, font=("Open Sans", 12), wraplength=450, justify=CENTER).pack()
+
+    empty3 = Label(root, text="", font=("Open Sans", 10))
+    empty3.pack()
+
+    # Set all the labels for the display to the first event
+    if unknown_locations:
+      location.set(unknown_locations[0]['location'])
+      event.set(unknown_locations[0]['event'])
+    else:
+      # No more locations to process, disable everything but HELP/QUIT
+      location.set("No more locations to check")
+      event.set("Thanks for your help!")
+      self.correct.config(state = DISABLED)
+      self.wrong.config(state = DISABLED)
+      self.skip.config(state = DISABLED)
+
   def isCorrect(self):
-    print "Location in UCLA, marking as checked: " + unknown_locations[0]
+    print "Location in UCLA, marking as checked:                                " + unknown_locations[0]['location']
 
     # Find location with matching name and tag it as correct
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
+    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
     if location:
       location['isUCLA'] = True
 
       # Replace updated location in database
       unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+    else:
+      print "No such location found in db to replace, moving on...                " + unknown_locations[0]['location']
 
     # Move on to next location, update display
     self.changeText()
 
   def isWrong(self):
-    print "Location not in UCLA or an outlier, remove from database: " + unknown_locations[0]
+    print "Location not in UCLA or an outlier, remove from database:            " + unknown_locations[0]['location']
 
     # Delete location we don't care about from database
-    unknown_locs_collection.delete_one({'location_name': unknown_locations[0]})
+    unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
 
     # Move on to next location, update display
     self.changeText()
 
   def skip(self):
-    print "Skipping this location, idk what to do with it... " + unknown_locations[0]
+    print "Skipping this location, idk what to do with it...                    " + unknown_locations[0]['location']
 
     # Find location with matching name and keep a count of how many times it has been skipped
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]})
+    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
     if location:
       if 'skip_count' in location:
         location['skip_count'] = location['skip_count'] + 1
+        # If number of times it has been skipped is > 3 move to todo_locs db
+        if location['skip_count'] > 3:
+          print "Location has been skipped too often... moving to TODO db:            " + unknown_locations[0]['location']
+          # Insert to one database and remove from original
+          loc = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
+          if loc:
+            TODO_locs_collection.insert_one(loc)
+            unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
       else:
         location['skip_count'] = 1
 
@@ -140,17 +182,26 @@ class App:
       print "Not done yet!"
 
   def changeText(self):
+    global counter
+
     # Remove location we just processed from list
     unknown_locations.pop(0)
 
+    # Decrement number of events remaining to process
+    counter = counter - 1
+    counterLabel.set("Events Remaining: " + str(counter))
+
     # Check that there are still locations left to process and update name label
     if unknown_locations:
-      location.set(unknown_locations[0])
+      location.set(unknown_locations[0]['location'])
+      event.set(unknown_locations[0]['event'])
     else:
       # No more locations to process, disable everything but HELP/QUIT
       self.disable()
 
   def filterLetter(self):
+    global counter
+
     print "Filter what locations we're looking at by letter..."
     print "Do this if multiple people are doing this at the same time"
 
@@ -159,32 +210,61 @@ class App:
     # Ask user for input to filter what locations you're looking at
     # Only look at locations starting with a certain letter 
     # to make sure everyone's working on something different
-    letter_num = tkSimpleDialog.askinteger("Letter Number", "Enter an int (1-26) to correspond to the letters (a-z):", minvalue=1, maxvalue=26)
+    letter_num = tkSimpleDialog.askinteger("Letter Number", "Ints (1-26) correspond to letters (a-z)\nEnter 0 to look at all locations", minvalue=0, maxvalue=26)
 
-    if letter_num:
-      FILTER_LETTER = chr(ord('a') + letter_num - 1)
-      print "Looking at locations starting with letter " + FILTER_LETTER
-
-      # Get all the locations that start with the letter
-      filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
-      locations_cursor = unknown_locs_collection.find({'location_name': filter_regex})
-      
-      # Append each location doc to a list to process (this is why we try to prevent overlap)
-      # Empty list beforehand
-      del unknown_locations[:]
-      # globals()['unknown_locations'] = []
-      if locations_cursor.count() > 0:
-        for loc in locations_cursor:
-          # Locations we already processed and approved have `isUCLA = True`
-          # Look for locations that haven't been processed and add to list
-          if 'isUCLA' in loc: 
-            if not loc['isUCLA']:
-              unknown_locations.append(loc['location_name'])
+    if letter_num != None:
+      if letter_num == 0:
+        locations_cursor = unknown_locs_collection.find({})
+        del unknown_locations[:]
+        counter = 0
+        if locations_cursor.count() > 0:
+          for loc in locations_cursor:
+            # Locations we already processed and approved have `isUCLA = True`
+            # Look for locations that haven't been processed and add to list
+            if 'isUCLA' not in loc or not loc['isUCLA']:
+              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              counter = counter + 1
+          if counter > 0:
+            location.set(unknown_locations[0]['location'])
+            event.set(unknown_locations[0]['event'])
+            counterLabel.set("Events Remaining: " + str(counter))
           else:
-            unknown_locations.append(loc['location_name'])
-        location.set(unknown_locations[0])
+            print 'Cannot find any locations in database!'
+            quit()
+        else:
+          print 'Cannot find any locations in database!'
+          quit()
       else:
+        FILTER_LETTER = chr(ord('a') + letter_num - 1)
+        print "Looking at locations starting with letter " + FILTER_LETTER
+
+        # Get all the locations that start with the letter
+        filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
+        locations_cursor = unknown_locs_collection.find({'location_name': filter_regex})
+        
+        # Append each location doc to a list to process (this is why we try to prevent overlap)
+        # Empty list beforehand
+        del unknown_locations[:]
+        # globals()['unknown_locations'] = []
+        counter = 0
+        if locations_cursor.count() > 0:
+          for loc in locations_cursor:
+            # Locations we already processed and approved have `isUCLA = True`
+            # Look for locations that haven't been processed and add to list
+            if 'isUCLA' not in loc or not loc['isUCLA']:
+              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              counter = counter + 1
+          if counter > 0:
+            location.set(unknown_locations[0]['location'])
+            event.set(unknown_locations[0]['event'])
+            counterLabel.set("Events Remaining: " + str(counter))
+          else:
+            print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+            counterLabel.set("Events Remaining: " + str(counter))
+            self.disable()
+        else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          counterLabel.set("Events Remaining: " + str(counter))
           self.disable()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
@@ -192,6 +272,7 @@ class App:
   def disable(self):
     # No more locations to process, disable everything but HELP/QUIT
     location.set("No more locations to check")
+    event.set("Thanks for your help!")
     self.correct.config(state = DISABLED)
     self.wrong.config(state = DISABLED)
     self.skip.config(state = DISABLED)
@@ -204,24 +285,14 @@ class App:
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
-root.geometry("+%d+%d" % (450, 200))
+# root.geometry('250x150+0+0')
+# root.geometry("+%d+%d" % (450, 200))
+root.geometry("+450+200")
 
-# Define all the labels and strings used in the display
-question = Label(root, text="Is this event location in UCLA/Westwood?", font=("Open Sans", 20))
-question.pack()
-
+# Global labels/strings
+counterLabel = StringVar()
 location = StringVar()
-Label(root, textvariable=location, font=("Open Sans", 14)).pack()
-
-# Set all the labels for the display to the first event
-if unknown_locations:
-  location.set(unknown_locations[0])
-else:
-  # No more locations to process, disable everything but HELP/QUIT
-  location.set("No more locations to check")
-  self.correct.config(state = DISABLED)
-  self.wrong.config(state = DISABLED)
-  self.skip.config(state = DISABLED)
+event = StringVar()
 
 # Initializes App so tkinter/butttons are working
 app = App(root)
