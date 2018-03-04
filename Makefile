@@ -45,11 +45,11 @@ sphinx-setup:
 	python get-pip.py
 	rm distribute_setup.py get-pip.py
 
-	pip uninstall dotenv
-	pip uninstall python-dotenv
+	-pip uninstall dotenv
+	-pip uninstall python-dotenv
 	pip install python-dotenv
 
-	sudo pip install Sphinx
+	sudo pip install Sphinx==1.7.0
 	which sphinx-quickstart
 
 # Help for sphinx usage
