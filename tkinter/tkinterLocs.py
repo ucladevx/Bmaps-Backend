@@ -70,6 +70,9 @@ dr.get("https://stackoverflow.com/")
 class App:
 
   def __init__(self, master):
+    empty1 = Label(root, text="", font=("Open Sans", 10))
+    empty1.pack()
+
     frame = Frame(master)
     frame.pack()
 
@@ -109,6 +112,47 @@ class App:
     # TODO: remove extra check to quit, let there in case we wanted to use similar code in future
     self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
     self.button.pack(side=LEFT)
+
+    # Define all the labels and strings used in the display
+    empty1 = Label(root, text="", font=("Open Sans", 10))
+    empty1.pack()
+
+    question = Label(root, text="Is this location in the correct place?", font=("Open Sans", 20))
+    question.pack()
+
+    Label(root, textvariable=location, font=("Open Sans", 14)).pack()
+
+    Label(root, textvariable=latitude_str, font=("Open Sans", 12)).pack()
+
+    Label(root, textvariable=longitude_str, font=("Open Sans", 12)).pack()
+
+    Label(root, textvariable=alternate_names, font=("Open Sans", 12)).pack()
+
+    # Set all the labels for the display to the first event
+    location.set("LOCATION NAME: " + unknown_locations[0]['unknown_loc']['loc_name'])
+    latitude_str.set("LATITUDE: " + str(unknown_locations[0]['db_loc']['loc_latitude']))
+    longitude_str.set("LONGITUDE: " + str(unknown_locations[0]['db_loc']['loc_longitude']))
+
+    # Jank way to make columns
+    alt_names = "ALTERNATIVE NAMES:\n=================="
+    col = True
+    for name in unknown_locations[0]['db_loc']['loc_alt_names']:
+      if col:
+        alt_names = alt_names + "\n" + name
+        col = False
+      else:
+        alt_names = alt_names + "\t\t\t" + name
+        col = True
+
+    if len(unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
+      alt_names = alt_names + "\t\t\t\t\t\t"
+
+    alternate_names.set(alt_names)
+
+    dr.get(unknown_locations[0]['db_loc']['map_url'])
+
+    empty1 = Label(root, text="", font=("Open Sans", 10))
+    empty1.pack()
 
   def isCorrect(self):
     print "Coordinates are correct!                                             " + unknown_locations[0]['unknown_loc']['loc_name']
@@ -253,9 +297,20 @@ class App:
     latitude_str.set("LATITUDE: " + str(unknown_locations[0]['db_loc']['loc_latitude']))
     longitude_str.set("LONGITUDE: " + str(unknown_locations[0]['db_loc']['loc_longitude']))
 
+    # Jank way to make columns
     alt_names = "ALTERNATIVE NAMES:\n=================="
+    col = True
     for name in unknown_locations[0]['db_loc']['loc_alt_names']:
-      alt_names = alt_names + "\n" + name
+      if col:
+        alt_names = alt_names + "\n" + name
+        col = False
+      else:
+        alt_names = alt_names + "\t\t\t" + name
+        col = True
+
+    if len(unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
+      alt_names = alt_names + "\t\t\t\t\t\t"
+
     alternate_names.set(alt_names)
 
     # Open Maps display to current coordinates
@@ -264,35 +319,13 @@ class App:
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
-root.geometry("+%d+%d" % (300, 0))
-
-# Define all the labels and strings used in the display
-question = Label(root, text="Is this location in the correct place?", font=("Open Sans", 20))
-question.pack()
+# root.geometry("+%d+%d" % (300, 0))
+root.geometry("+300+0")
 
 location = StringVar()
-Label(root, textvariable=location, font=("Open Sans", 14)).pack()
-
 latitude_str = StringVar()
-Label(root, textvariable=latitude_str, font=("Open Sans", 12)).pack()
-
 longitude_str = StringVar()
-Label(root, textvariable=longitude_str, font=("Open Sans", 12)).pack()
-
 alternate_names = StringVar()
-Label(root, textvariable=alternate_names, font=("Open Sans", 12)).pack()
-
-# Set all the labels for the display to the first event
-location.set("LOCATION NAME: " + unknown_locations[0]['unknown_loc']['loc_name'])
-latitude_str.set("LATITUDE: " + str(unknown_locations[0]['db_loc']['loc_latitude']))
-longitude_str.set("LONGITUDE: " + str(unknown_locations[0]['db_loc']['loc_longitude']))
-
-alt_names = "ALTERNATIVE NAMES:\n=================="
-for name in unknown_locations[0]['db_loc']['loc_alt_names']:
-  alt_names = alt_names + "\n" + name
-alternate_names.set(alt_names)
-
-dr.get(unknown_locations[0]['db_loc']['map_url'])
 
 # Initializes App so tkinter/butttons are working
 app = App(root)
