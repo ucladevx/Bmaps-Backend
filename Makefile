@@ -1,47 +1,63 @@
 ECR_REPO=698514710897.dkr.ecr.us-west-1.amazonaws.com
-APP_NAME_FLASK=web_flask
-APP_NAME_NGINX=web_nginx
-APP_NAME_NODE=web_node
-EC2_IP=52.53.72.98
+APP_NAME=mappening/backend
 
-############################## FOR RUNNING LOCALLY #############################
+##########################      AWS / PRODUCTION      ##########################
 
-build-local:
-	docker-compose -f docker-compose.local.yml build
-
-run: build-local
-	docker-compose -f docker-compose.local.yml up
-
-stop:
-	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
-
-reset:
-	-docker ps -a | tail -n +2 | cut -d ' ' -f 1 | xargs docker rm
-	-docker images | tail -n +2 | tr -s ' ' | cut -d ' ' -f 3 | xargs docker rmi --force
-
-################################ DEPLOYING ON AWS ##############################
-
+# Authenticate Docker client
 ecr-login:
 	$(shell aws ecr get-login --no-include-email --region us-west-1)
 
+# Build backend image
 build:
-	docker build ./python_app -t $(APP_NAME_FLASK)
-	docker build ./nginx_app -t $(APP_NAME_NGINX)
-	docker build ./node_app -t $(APP_NAME_NODE)
+	docker build ./python_app -t $(APP_NAME)
 
+# Login, build, and push latest image to AWS
 push: ecr-login build
-	docker tag $(APP_NAME_FLASK):latest $(ECR_REPO)/$(APP_NAME_FLASK):latest
-	docker push $(ECR_REPO)/$(APP_NAME_FLASK):latest
+	docker tag $(APP_NAME):latest $(ECR_REPO)/$(APP_NAME):latest
+	docker push $(ECR_REPO)/$(APP_NAME):latest
 
-	docker tag $(APP_NAME_NGINX):latest $(ECR_REPO)/$(APP_NAME_NGINX):latest
-	docker push $(ECR_REPO)/$(APP_NAME_NGINX):latest
+##################       LOCAL DEVELOPMENT (Backend Only)     ################## 
 
-	docker tag $(APP_NAME_NODE):latest $(ECR_REPO)/$(APP_NAME_NODE):latest
-	docker push $(ECR_REPO)/$(APP_NAME_NODE):latest
+# Build and run backend image
+dev: build
+	docker run --rm --name backend-dev -v $(shell pwd)/python_app:/app -p "5000:5000" -it $(APP_NAME)
 
-ssh:
-	ssh ubuntu@$(EC2_IP) -i id_rsa_mappening.pem
+# Stop running containers
+stop:
+	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
 
-deploy: ecr-login
-	docker-compose pull
-	docker-compose up
+
+# Minimal makefile for Sphinx documentation
+
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = Mappening
+SOURCEDIR     = .
+BUILDDIR      = _build
+
+# Installs pip, sphinx, and checks success
+# TODO: reorg Makefile and add checks to see if pip/package already exists before trying to install
+sphinx-setup:
+	curl -O http://python-distribute.org/distribute_setup.py
+	python distribute_setup.py
+	curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+	python get-pip.py
+	rm distribute_setup.py get-pip.py
+
+	pip uninstall dotenv
+	pip uninstall python-dotenv
+	pip install python-dotenv
+
+	sudo pip install Sphinx
+	which sphinx-quickstart
+
+# Help for sphinx usage
+sphinx-help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  e.g. `make html`
+# $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
