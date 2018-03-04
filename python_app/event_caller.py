@@ -262,8 +262,7 @@ def add_facebook_page(page_type='group', id='', name=''):
         return {}
     return {}
 
-
-def get_events_from_pages(pages_by_id, days_before):
+def get_events_from_pages(pages_by_id, days_before, page_debug_mode=False):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
     # dict of event ids mapped to their info, for fast duplicate checking
 
@@ -323,8 +322,11 @@ def get_events_from_pages(pages_by_id, days_before):
         # specify list of ids to call at once, limited to 50 at a time, and counts as 50 API calls
         # still is faster than individual calls
         id_list.append(page_id)
-        if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
-            continue
+
+        # will tell exactly which page might have gone wrong
+        if not page_debug_mode:
+            if (i+1) % 50 != 0 and i < len(pages_by_id)-1:
+                continue
 
         # print('Checking page {0}'.format(i+1))
         # pass in whole comma separated list of ids
@@ -379,6 +381,7 @@ def get_events_from_pages(pages_by_id, days_before):
     total_events = {}
     for page_info in tqdm(id_jsons.values()):
         host_entity_info = {}
+
         host_entity_info['id'] = page_info['id']
         host_entity_info['name'] = page_info['name']
         # case where no events to get from this page, at this time
@@ -413,11 +416,27 @@ def process_event(event, host_info, add_duplicate_tag=False):
     }
 
     # only want events with the specified accepted location within UCLA
-    if 'place' not in event or 'location' not in event['place']:
+    if 'place' not in event:
+        return {}
+    event_place_info = event['place']
+    if 'location' not in event_place_info and 'name' in event_place_info:
         # many places have location in name only
         # TODO: get these out with ML
+
+        # temp code to gather all place names from events we find
+        # no repeats 
+        # if unknown_loc_collection.find_one({'location_name': event_place_info['name']}):
+        #     return {}
+
+        # unknown_loc_dict = {
+        #     'event_id': event['id'],
+        #     'event_name': event['name'],
+        #     'location_name': event_place_info['name']
+        # }
+        # unknown_loc_collection.insert_one(unknown_loc_dict)
         return {}
-    if not entity_in_right_location(event['place']['location']):
+        
+    if not entity_in_right_location(event_place_info['location']):
         return {}
 
     # for when updating old events and transferring manually added tags over
@@ -501,10 +520,11 @@ def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
     """
     # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
     # to tell if multi-day event, check "duplicate_occurrence" tag
+    print('Go through currently stored events to update.')
     kept_events = {}
     for event in tqdm(events):
         if not time_in_past(event['start_time'], days_before):
-            updated_event_dict = process_event(event, event.get('hoster'), event.get('duplicate_occurrence', False))
+            updated_event_dict = process_event(event, event.get('hoster', '<NONE, UPDATE>'), event.get('duplicate_occurrence', False))
             kept_events.update(updated_event_dict)
     # return a dict of kept event IDs to their info
     return kept_events
@@ -525,6 +545,7 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     return total_event_object
 
 def find_many_events():
+    unknown_loc_collection.delete_many({})
     """
     find events up to 2 years ago
     """
@@ -536,7 +557,7 @@ def find_many_events():
 
 if __name__ == '__main__':
     res = get_facebook_events()
-    pprint(res['events'][:10])
+    pprint(res['events'][:3])
     
     # find_many_events()
 
