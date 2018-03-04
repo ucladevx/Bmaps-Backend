@@ -9,3 +9,4 @@ schedule
 python-dotenv
 pytz
 tqdm
+nltk
