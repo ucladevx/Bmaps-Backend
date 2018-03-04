@@ -111,8 +111,8 @@ class App:
     self.button.pack(side=LEFT)
 
   def isCorrect(self):
-    print "Coordinates are correct!"
-    print "Add to different database and remove from test database: " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Coordinates are correct!                                             " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Adding to different database and remove from test database"
 
     # Insert to one database and remove from original
     tkinter_known_collection.insert_one(unknown_locations[0])
@@ -122,8 +122,8 @@ class App:
     self.changeText()
 
   def isWrong(self):
-    print "Coordinates are wrong, enter correct location data and update database"
-    print "Leaving location in database for secondary verification: " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Coordinates are wrong, enter correct location data:                  " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Leaving location in database for secondary verification"
 
     # Prompt user to correct the coordinates
     # User can `cancel` or fill out prompts
@@ -157,8 +157,8 @@ class App:
     self.changeText()
 
   def isFail(self):
-    print "Not even the right location found... add to different database for manual correction"
-    print "Removing from test database: " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Locations API matched wrong location:                                " + unknown_locations[0]['unknown_loc']['loc_name']
+    print "Moving to different database for manual correction."
 
     # Insert to one database and remove from original
     tkinter_TODO_collection.insert_one(unknown_locations[0])

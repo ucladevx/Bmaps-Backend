@@ -11,6 +11,7 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Facebook Graph API + Login/OAuth for getting event information and user authentication
 - Google Maps/Places API Web Service for getting place information
 - AWS EC2/Elastic Container Service for deployment
+- Tkinter, Selenium, Google chromedriver for internal tools
 
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
