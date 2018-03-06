@@ -24,29 +24,28 @@ db = client['mappening_data']
 unknown_locs_collection = db.tkinter_UCLA_locations
 TODO_locs_collection = db.tkinter_UCLATODO_locations
 
-# Initialize unknown_locations to all locations
-# Only look at locations starting with a certain letter 
-# to make sure everyone's working on something different
-unknown_locations = []
-counter = 0
-lastAction = "none"
-lastLocation = {}
-
-locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
-if locations_cursor.count() > 0:
-  for loc in locations_cursor:
-    # Locations we already processed and approved have `isUCLA = True`
-    # Look for locations that haven't been processed and add to list
-    if 'isUCLA' not in loc or not loc['isUCLA']:
-      unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-      counter = counter + 1
-else:
-    print 'Cannot find any locations in database!'
-    quit()
-
 class App:
+  # Initialize unknown_locations to all locations
+  # Only look at locations starting with a certain letter 
+  # to make sure everyone's working on something different
+  unknown_locations = []
+  counter = 0
+  lastAction = "none"
+  lastLocation = {}
 
   def __init__(self, master):
+    locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
+    if locations_cursor.count() > 0:
+      for loc in locations_cursor:
+        # Locations we already processed and approved have `isUCLA = True`
+        # Look for locations that haven't been processed and add to list
+        if 'isUCLA' not in loc or not loc['isUCLA']:
+          self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+          self.counter += 1
+    else:
+        print 'Cannot find any locations in database!'
+        quit()
+
     empty1 = Label(root, text="", font=("Open Sans", 10))
     empty1.pack()
 
@@ -55,7 +54,7 @@ class App:
     frame.bind('<Left>', self.left)
     frame.bind('<Right>', self.right)
     frame.focus_set()
-    # Pack
+    # Pack aka display
     frame.pack()
 
     # Single display with the following buttons:
@@ -102,9 +101,9 @@ class App:
     question.pack()
 
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
-    counterLabel.set("Locations Remaining: " + str(counter))
+    counterLabel.set("Locations Remaining: " + str(self.counter))
 
-    Label(root, textvariable=locationLabel, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
+    Label(root, textvariable=locationLabel, font=("Open Sans Bold", 14), wraplength=450, justify=CENTER).pack()
 
     Label(root, textvariable=eventLabel, font=("Open Sans", 12), wraplength=450, justify=CENTER).pack()
 
@@ -112,9 +111,9 @@ class App:
     empty3.pack()
 
     # Set all the labels for the display to the first event
-    if unknown_locations:
-      locationLabel.set(unknown_locations[0]['location'])
-      eventLabel.set(unknown_locations[0]['event'])
+    if self.unknown_locations:
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
     else:
       # No more locations to process, disable everything but HELP/QUIT
       locationLabel.set("No more locations to check")
@@ -132,17 +131,15 @@ class App:
     self.isWrong()
 
   def isCorrect(self):
-    print "Location in UCLA, marking as checked:                                " + unknown_locations[0]['location']
+    print "Location in UCLA, marking as checked:                                " + self.unknown_locations[0]['location']
 
-    global lastAction
-    global lastLocation
     self.undo.config(state = "normal")
 
     # Find location with matching name and tag it as correct
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
+    location = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']})
     if location:
-      lastAction = "YES ucla"
-      lastLocation = location
+      self.lastAction = "YES ucla"
+      self.lastLocation = location
 
       location['isUCLA'] = True
 
@@ -150,25 +147,23 @@ class App:
       unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
 
     else:
-      print "No such location found in db to replace, moving on...                " + unknown_locations[0]['location']
+      print "No such location found in db to replace, moving on...                " + self.unknown_locations[0]['location']
 
-      lastAction = "YES none"
-      lastLocation = unknown_locations[0]
+      self.lastAction = "YES none"
+      self.lastLocation = self.unknown_locations[0]
 
     # Move on to next location, update display
     self.changeText()
 
   def isWrong(self):
-    print "Location not in UCLA or an outlier, remove from database:            " + unknown_locations[0]['location']
+    print "Location not in UCLA or an outlier, remove from database:            " + self.unknown_locations[0]['location']
     
-    global lastAction
-    global lastLocation
-    lastAction = "NO"
-    lastLocation = unknown_locations[0]
+    self.lastAction = "NO"
+    self.lastLocation = self.unknown_locations[0]
     self.undo.config(state = "normal")
 
     # Delete location we don't care about from database
-    unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
+    unknown_locs_collection.delete_one({'location_name': self.unknown_locations[0]['location']})
 
     # Move on to next location, update display
     self.changeText()
@@ -176,43 +171,37 @@ class App:
   def undo(self):
     print "Undoing last yes/no!"
 
-    global lastAction
-    global lastLocation
-    global unknown_locations
-    global counter
-    global locationLabel
-    global eventLabel
-    global counterLabel
+    self.enable()
 
-    if lastAction == "NO":
+    if self.lastAction == "NO":
       print "Reinserting location we just deleted..."
       # Reinsert location we just deleted
-      unknown_locs_collection.insert_one({'location_name': lastLocation['location'], 'event_name': lastLocation['event']})
+      unknown_locs_collection.insert_one({'location_name': self.lastLocation['location'], 'event_name': self.lastLocation['event']})
 
       # Add to beginning of locations list
-      unknown_locations.insert(0, lastLocation)
-      counter = counter + 1
+      self.unknown_locations.insert(0, self.lastLocation)
+      self.counter += 1
 
       # Update labels
-      locationLabel.set(unknown_locations[0]['location'])
-      eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Locations Remaining: " + str(counter))
-    elif lastAction == "YES none":
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
+    elif self.lastAction == "YES none":
       print "Adding previous event back to the list of locations..."
       # Only skipped/moved past event
       # Add to beginning of locations list
-      unknown_locations.insert(0, lastLocation)
-      counter = counter + 1
+      self.unknown_locations.insert(0, self.lastLocation)
+      self.counter += 1
 
       # Update labels
-      locationLabel.set(unknown_locations[0]['location'])
-      eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Locations Remaining: " + str(counter))
-    elif lastAction == "YES ucla":
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
+    elif self.lastAction == "YES ucla":
       print "Removing UCLA tag from previous event..."
       # Marked as ucla location
       # Find location with matching name and remove ucla tag
-      location = unknown_locs_collection.find_one({'location_name': lastLocation['location_name']})
+      location = unknown_locs_collection.find_one({'location_name': self.lastLocation['location_name']})
       if location:
         location.pop('isUCLA', None)
 
@@ -220,45 +209,43 @@ class App:
         unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
 
       # Add to beginning of locations list
-      loc = { 'location': lastLocation['location_name'], 'event': lastLocation['event_name'] }
-      unknown_locations.insert(0, loc)
-      counter = counter + 1
+      loc = { 'location': self.lastLocation['location_name'], 'event': self.lastLocation['event_name'] }
+      self.unknown_locations.insert(0, loc)
+      self.counter += 1
 
       # Update labels
-      locationLabel.set(unknown_locations[0]['location'])
-      eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Locations Remaining: " + str(counter))
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
     else:
       # Not undoing last action as it wasn't a YES/NO
       print "Nothing to undo!"
 
 
-    lastAction = "none"
-    lastLocation = {}
+    self.lastAction = "none"
+    self.lastLocation = {}
     self.undo.config(state = DISABLED)
 
   def skip(self):
-    print "Skipping this location, idk what to do with it...                    " + unknown_locations[0]['location']
+    print "Skipping this location, idk what to do with it...                    " + self.unknown_locations[0]['location']
 
-    global lastAction
-    global lastLocation
-    lastAction = "none"
-    lastLocation = {}
+    self.lastAction = "none"
+    self.lastLocation = {}
     self.undo.config(state = DISABLED)
 
     # Find location with matching name and keep a count of how many times it has been skipped
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
+    location = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']})
     if location:
       if 'skip_count' in location:
         location['skip_count'] = location['skip_count'] + 1
         # If number of times it has been skipped is > 3 move to todo_locs db
         if location['skip_count'] > 3:
-          print "Location has been skipped too often... moving to TODO db:            " + unknown_locations[0]['location']
+          print "Location has been skipped too often... moving to TODO db:            " + self.unknown_locations[0]['location']
           # Insert to one database and remove from original
-          loc = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
+          loc = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
           if loc:
             TODO_locs_collection.insert_one(loc)
-            unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
+            unknown_locs_collection.delete_one({'location_name': self.unknown_locations[0]['location']})
       else:
         location['skip_count'] = 1
 
@@ -289,29 +276,25 @@ class App:
       print "Not done yet!"
 
   def changeText(self):
-    global counter
 
     # Remove location we just processed from list
-    unknown_locations.pop(0)
+    self.unknown_locations.pop(0)
 
     # Decrement number of events remaining to process
-    counter = counter - 1
-    counterLabel.set("Locations Remaining: " + str(counter))
+    self.counter -= 1
+    counterLabel.set("Locations Remaining: " + str(self.counter))
 
     # Check that there are still locations left to process and update name label
-    if unknown_locations:
-      locationLabel.set(unknown_locations[0]['location'])
-      eventLabel.set(unknown_locations[0]['event'])
+    if self.unknown_locations:
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
     else:
       # No more locations to process, disable everything but HELP/QUIT
       self.disable()
 
   def filterLetter(self):
-    global counter
-    global lastAction
-    global lastLocation
-    lastAction = "none"
-    lastLocation = {}
+    self.lastAction = "none"
+    self.lastLocation = {}
 
     print "Filter what locations we're looking at by letter..."
     print "Do this if multiple people are doing this at the same time"
@@ -327,19 +310,19 @@ class App:
     if letter_num != None:
       if letter_num == 0:
         locations_cursor = unknown_locs_collection.find({})
-        del unknown_locations[:]
-        counter = 0
+        self.unknown_locations = []
+        self.counter = 0
         if locations_cursor.count() > 0:
           for loc in locations_cursor:
             # Locations we already processed and approved have `isUCLA = True`
             # Look for locations that haven't been processed and add to list
             if 'isUCLA' not in loc or not loc['isUCLA']:
-              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-              counter = counter + 1
-          if counter > 0:
-            locationLabel.set(unknown_locations[0]['location'])
-            eventLabel.set(unknown_locations[0]['event'])
-            counterLabel.set("Locations Remaining: " + str(counter))
+              self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              self.counter += 1
+          if self.counter > 0:
+            locationLabel.set(self.unknown_locations[0]['location'])
+            eventLabel.set(self.unknown_locations[0]['event'])
+            counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
             print 'Cannot find any locations in database!'
             quit()
@@ -356,27 +339,26 @@ class App:
         
         # Append each location doc to a list to process (this is why we try to prevent overlap)
         # Empty list beforehand
-        del unknown_locations[:]
-        # globals()['unknown_locations'] = []
-        counter = 0
+        self.unknown_locations = []
+        self.counter = 0
         if locations_cursor.count() > 0:
           for loc in locations_cursor:
             # Locations we already processed and approved have `isUCLA = True`
             # Look for locations that haven't been processed and add to list
             if 'isUCLA' not in loc or not loc['isUCLA']:
-              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-              counter = counter + 1
-          if counter > 0:
-            locationLabel.set(unknown_locations[0]['location'])
-            eventLabel.set(unknown_locations[0]['event'])
-            counterLabel.set("Locations Remaining: " + str(counter))
+              self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              self.counter += 1
+          if self.counter > 0:
+            locationLabel.set(self.unknown_locations[0]['location'])
+            eventLabel.set(self.unknown_locations[0]['event'])
+            counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
             print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-            counterLabel.set("Locations Remaining: " + str(counter))
+            counterLabel.set("Locations Remaining: " + str(self.counter))
             self.disable()
         else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-          counterLabel.set("Locations Remaining: " + str(counter))
+          counterLabel.set("Locations Remaining: " + str(self.counter))
           self.disable()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
