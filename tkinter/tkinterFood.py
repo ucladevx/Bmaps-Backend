@@ -23,29 +23,28 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 ml_collection = db.events_ml
 
-# Initialize events to all events
-# Only look at events starting with a certain letter 
-# to make sure everyone's working on something different
-events = []
-counter = 0
-lastAction = "none"
-lastEvent = {}
-
-events_cursor = ml_collection.find({}) #, {'_id': False})
-if events_cursor.count() > 0:
-  for event in events_cursor:
-    # Events we already processed and approved have 'free_food' field
-    # Look for events that haven't been processed and add to list
-    if 'free_food' not in event:
-      events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
-      counter = counter + 1
-else:
-    print 'Cannot find any events in database!'
-    quit()
-
 class App:
+  # Initialize events to all events
+  # Only look at events starting with a certain letter 
+  # to make sure everyone's working on something different
+  events = []
+  counter = 0
+  lastAction = "none"
+  lastEvent = {}
 
   def __init__(self, master):
+    events_cursor = ml_collection.find({}) #, {'_id': False})
+    if events_cursor.count() > 0:
+      for event in events_cursor:
+        # Events we already processed and approved have 'free_food' field
+        # Look for events that haven't been processed and add to list
+        if 'free_food' not in event:
+          self.events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
+          self.counter += 1
+    else:
+        print 'Cannot find any events in database!'
+        quit()
+
     empty1 = Label(root, text="", font=("Open Sans", 10))
     empty1.pack()
 
@@ -101,7 +100,7 @@ class App:
     question.pack()
 
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
-    counterLabel.set("Events Remaining: " + str(counter))
+    counterLabel.set("Events Remaining: " + str(self.counter))
 
     # TODO: wraplength
     Label(root, textvariable=eventLabel, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
@@ -112,9 +111,9 @@ class App:
     empty3.pack()
 
     # Set all the labels for the display to the first event
-    if events:
-      eventLabel.set(events[0]['name'])
-      descriptionLabel.set(events[0]['description'])
+    if self.events:
+      eventLabel.set(self.events[0]['name'])
+      descriptionLabel.set(self.events[0]['description'])
     else:
       # No more events to process, disable everything but HELP/QUIT
       eventLabel.set("No more events to check")
@@ -132,17 +131,14 @@ class App:
     self.isWrong()
 
   def isCorrect(self):
-    print "Event has free food!                                                 " + events[0]['name']
-
-    global lastAction
-    global lastEvent
+    print "Event has free food!                                                 " + self.events[0]['name']
     self.undo.config(state = "normal")
 
     # Find event with matching id and tag it as free food
-    event = ml_collection.find_one({'_id': events[0]['id']})
+    event = ml_collection.find_one({'_id': self.events[0]['id']})
     if event:
-      lastAction = "free food"
-      lastEvent = event
+      self.lastAction = "free food"
+      self.lastEvent = event
 
       event['free_food'] = True
 
@@ -150,26 +146,23 @@ class App:
       ml_collection.replace_one({'_id': event['_id']}, event.copy()) 
 
     else:
-      print "No such event found in db to replace, moving on...                   " + events[0]['name']
+      print "No such event found in db to replace, moving on...                   " + self.events[0]['name']
 
-      lastAction = "NOT FOUND"
-      lastEvent = events[0]
+      self.lastAction = "NOT FOUND"
+      self.lastEvent = self.events[0]
 
     # Move on to next event, update display
     self.changeText()
 
   def isWrong(self):
-    print "Event does not have free food!                                       " + events[0]['name']
-    
-    global lastAction
-    global lastEvent
+    print "Event does not have free food!                                       " + self.events[0]['name']
     self.undo.config(state = "normal")
 
     # Find event with matching id and tag it as no free food
-    event = ml_collection.find_one({'_id': events[0]['id']})
+    event = ml_collection.find_one({'_id': self.events[0]['id']})
     if event:
-      lastAction = "free food"
-      lastEvent = event
+      self.lastAction = "free food"
+      self.lastEvent = event
 
       event['free_food'] = False
 
@@ -177,10 +170,10 @@ class App:
       ml_collection.replace_one({'_id': event['_id']}, event.copy()) 
 
     else:
-      print "No such event found in db to replace, moving on...                   " + events[0]['name']
+      print "No such event found in db to replace, moving on...                   " + self.events[0]['name']
 
-      lastAction = "NOT FOUND"
-      lastEvent = events[0]
+      self.lastAction = "NOT FOUND"
+      self.lastEvent = self.events[0]
 
     # Move on to next event, update display
     self.changeText()
@@ -188,30 +181,22 @@ class App:
   def undo(self):
     print "Undoing last yes/no!"
 
-    global lastAction
-    global lastEvent
-    global events
-    global counter
-    global eventLabel
-    global descriptionLabel
-    global counterLabel
-
-    if lastAction == "NOT FOUND":
+    if self.lastAction == "NOT FOUND":
       print "Adding previous event back to the list of events..."
       # Only skipped/moved past event
       # Add to beginning of events list
-      events.insert(0, lastEvent)
-      counter = counter + 1
+      self.events.insert(0, self.lastEvent)
+      self.counter += 1
 
       # Update labels
-      eventLabel.set(events[0]['name'])
-      descriptionLabel.set(events[0]['description'])
-      counterLabel.set("Events Remaining: " + str(counter))
-    elif lastAction == "free food":
+      eventLabel.set(self.events[0]['name'])
+      descriptionLabel.set(self.events[0]['description'])
+      counterLabel.set("Events Remaining: " + str(self.counter))
+    elif self.lastAction == "free food":
       print "Unmarking event and adding back to the list of events..."
       # Marked as free_food = true/false
       # Find event with matching id and remove free_food tag
-      event = ml_collection.find_one({'_id': lastEvent['_id']})
+      event = ml_collection.find_one({'_id': self.lastEvent['_id']})
       if event:
         event.pop('free_food', None)
 
@@ -220,13 +205,13 @@ class App:
 
         # Add to beginning of events list
         new_event = { 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] }
-        events.insert(0, new_event)
-        counter = counter + 1
+        self.events.insert(0, new_event)
+        self.counter += 1
 
         # Update labels
-        eventLabel.set(events[0]['name'])
-        descriptionLabel.set(events[0]['description'])
-        counterLabel.set("Events Remaining: " + str(counter))
+        eventLabel.set(self.events[0]['name'])
+        descriptionLabel.set(self.events[0]['description'])
+        counterLabel.set("Events Remaining: " + str(self.counter))
       else:
         print "Didn't find an event to remove label from!"
     else:
@@ -234,17 +219,15 @@ class App:
       print "Nothing to undo!"
 
 
-    lastAction = "none"
-    lastEvent = {}
+    self.lastAction = "none"
+    self.lastEvent = {}
     self.undo.config(state = DISABLED)
 
   def skip(self):
-    print "Skipping this event, idk what to do with it...                       " + events[0]['name']
+    print "Skipping this event, idk what to do with it...                       " + self.events[0]['name']
 
-    global lastAction
-    global lastEvent
-    lastAction = "none"
-    lastEvent = {}
+    self.lastAction = "none"
+    self.lastEvent = {}
     self.undo.config(state = DISABLED)
 
     # Move on to next event, update display
@@ -271,29 +254,24 @@ class App:
       print "Not done yet!"
 
   def changeText(self):
-    global counter
-
     # Remove event we just processed from list
-    events.pop(0)
+    self.events.pop(0)
 
     # Decrement number of events remaining to process
-    counter = counter - 1
-    counterLabel.set("Events Remaining: " + str(counter))
+    self.counter = self.counter - 1
+    counterLabel.set("Events Remaining: " + str(self.counter))
 
     # Check that there are still events left to process and update name label
-    if events:
-      eventLabel.set(events[0]['name'])
-      descriptionLabel.set(events[0]['description'])
+    if self.events:
+      eventLabel.set(self.events[0]['name'])
+      descriptionLabel.set(self.events[0]['description'])
     else:
       # No more events to process, disable everything but HELP/QUIT
       self.disable()
 
   def filterLetter(self):
-    global counter
-    global lastAction
-    global lastEvent
-    lastAction = "none"
-    lastEvent = {}
+    self.lastAction = "none"
+    self.lastEvent = {}
 
     print "Filter what events we're looking at by letter..."
     print "Do this if multiple people are doing this at the same time"
@@ -309,19 +287,19 @@ class App:
     if letter_num != None:
       if letter_num == 0:
         events_cursor = ml_collection.find({})
-        del events[:]
-        counter = 0
+        self.events = []
+        self.counter = 0
         if events_cursor.count() > 0:
           for event in events_cursor:
             # Events we already processed and approved have 'free_food' field
             # Look for events that haven't been processed and add to list
             if 'free_food' not in event:
-              events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
-              counter = counter + 1
-          if counter > 0:
-            eventLabel.set(events[0]['name'])
-            descriptionLabel.set(events[0]['description'])
-            counterLabel.set("Events Remaining: " + str(counter))
+              self.events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
+              self.counter = self.counter + 1
+          if self.counter > 0:
+            eventLabel.set(self.events[0]['name'])
+            descriptionLabel.set(self.events[0]['description'])
+            counterLabel.set("Events Remaining: " + str(self.counter))
           else:
             print 'Cannot find any events in database!'
             quit()
@@ -338,27 +316,26 @@ class App:
         
         # Append each event doc to a list to process (this is why we try to prevent overlap)
         # Empty list beforehand
-        del events[:]
-        # globals()['events'] = []
-        counter = 0
+        self.events = []
+        self.counter = 0
         if events_cursor.count() > 0:
           for event in events_cursor:
             # Events we already processed and approved have 'free_food' field
             # Look for events that haven't been processed and add to list
             if 'free_food' not in event:
-              events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
-              counter = counter + 1
-          if counter > 0:
-            eventLabel.set(events[0]['name'])
-            descriptionLabel.set(events[0]['description'])
-            counterLabel.set("Events Remaining: " + str(counter))
+              self.events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
+              self.counter += 1
+          if self.counter > 0:
+            eventLabel.set(self.events[0]['name'])
+            descriptionLabel.set(self.events[0]['description'])
+            counterLabel.set("Events Remaining: " + str(self.counter))
           else:
             print 'Cannot find any events in database starting with letter ' + FILTER_LETTER
-            counterLabel.set("Events Remaining: " + str(counter))
+            counterLabel.set("Events Remaining: " + str(self.counter))
             self.disable()
         else:
           print 'Cannot find any events in database starting with letter ' + FILTER_LETTER
-          counterLabel.set("Events Remaining: " + str(counter))
+          counterLabel.set("Events Remaining: " + str(self.counter))
           self.disable()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
@@ -385,7 +362,7 @@ root = Tk()
 # root.geometry("+%d+%d" % (450, 200))
 root.geometry("+450+200")
 
-# Global labels/strings
+# Labels/strings
 counterLabel = StringVar()
 eventLabel = StringVar()
 descriptionLabel = StringVar()
