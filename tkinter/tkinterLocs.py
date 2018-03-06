@@ -65,14 +65,7 @@ class App:
   lastLocation = {}
 
   def __init__(self, master):
-    locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
-    if locations_cursor.count() > 0:
-      for loc in locations_cursor:
-        self.unknown_locations.append(loc)
-        self.counter += 1
-    else:
-        print 'Cannot find any locations in database!'
-        quit()
+    self.allLocations()
 
     empty1 = Label(root, text="", font=("Open Sans", 10))
     empty1.pack()
@@ -89,13 +82,13 @@ class App:
 
     # Correct - location data matches location name
     # Will be removed from `unknown` database and added to `known` database
-    self.correct = Button(frame, text="CORRECT location data!", command=self.isCorrect)
+    self.correct = Button(frame, text="CORRECT!", command=self.isCorrect)
     self.correct.pack(side=LEFT)
 
     # Wrong - location data does not match location name (e.g. the coordinates aren't right)
     # Prompts user to input correct coordinates and an additional name (1 max)
     # Keeps modified location in `unknown` database for secondary verification
-    self.wrong = Button(frame, text="Location data is WRONG!", command=self.isWrong)
+    self.wrong = Button(frame, text="WRONG Location Data!", command=self.isWrong)
     self.wrong.pack(side=LEFT)
 
     # Fail - location name doesn't seem to match with the location data the locations api found
@@ -105,11 +98,11 @@ class App:
 
     # Skip - don't know if right or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.changeText)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
     self.skip.pack(side=LEFT)
 
     # Undo - only undoes last CORRECT/WRONG action
-    self.undo = Button(frame, text="UNDO last CORRECT/WRONG", command=self.undo)
+    self.undo = Button(frame, text="UNDO last CORRECT/WRONG/FAIL", command=self.undo)
     self.undo.pack(side=LEFT)
     self.undo.config(state = DISABLED)
 
@@ -135,7 +128,6 @@ class App:
     question.pack()
 
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
-    counterLabel.set("Locations Remaining: " + str(self.counter))
 
     Label(root, textvariable=locationLabel, font=("Open Sans Bold", 14), wraplength=450, justify=CENTER).pack()
 
@@ -150,44 +142,17 @@ class App:
 
     # Set all the labels for the display to the first event
     if self.unknown_locations:
-      locationLabel.set("LOCATION NAME: " + self.unknown_locations[0]['unknown_loc']['loc_name'])
-      latitudeLabel.set("LATITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_latitude']))
-      longitudeLabel.set("LONGITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_longitude']))
-
-      # Jank way to make columns
-      alt_names = "ALTERNATIVE NAMES:\n=================="
-      col = True
-      for name in self.unknown_locations[0]['db_loc']['loc_alt_names']:
-        if col:
-          alt_names = alt_names + "\n" + name
-          col = False
-        else:
-          alt_names = alt_names + "\t\t\t" + name
-          col = True
-
-      if len(self.unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
-        alt_names = alt_names + "\t\t\t\t\t\t"
-
-      alternate_namesLabel.set(alt_names)
-
-      dr.get(self.unknown_locations[0]['db_loc']['map_url'])
+      self.updateLabels()
     else:
       # No more locations to process, disable everything but HELP/QUIT
-      locationLabel.set("No more locations to check!")
-      latitudeLabel.set("Thanks for all your help!")
-      longitudeLabel.set("")
-      alternate_namesLabel.set("~ Mappening Team ~")
-      self.correct.config(state = DISABLED)
-      self.wrong.config(state = DISABLED)
-      self.fail.config(state = DISABLED)
-      self.skip.config(state = DISABLED)
+      self.disableLabels()
 
   def left(self, event):
-    # print "Left key pressed"
+    print "Left key pressed"
     # self.isCorrect()
 
   def right(self, event):
-    # print "Right key pressed"
+    print "Right key pressed"
     # self.isWrong()
 
   def isCorrect(self):
@@ -262,9 +227,10 @@ class App:
   def undo(self):
     print "Undoing last correct/wrong/fail!"
 
-    self.enable()
+    self.enableLabels()
 
     if self.lastAction == "CORRECT":
+      print "Undoing last CORRECT action..."
       tkinter_unknown_collection.insert_one(self.lastLocation)
       tkinter_known_collection.delete_one({'_id': self.lastLocation['_id']})
 
@@ -273,30 +239,10 @@ class App:
       self.counter += 1
 
       # Update labels
-      locationLabel.set("LOCATION NAME: " + self.unknown_locations[0]['unknown_loc']['loc_name'])
-      latitudeLabel.set("LATITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_latitude']))
-      longitudeLabel.set("LONGITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_longitude']))
-      counterLabel.set("Locations Remaining: " + str(self.counter))
-
-      # Jank way to make columns
-      alt_names = "ALTERNATIVE NAMES:\n=================="
-      col = True
-      for name in self.unknown_locations[0]['db_loc']['loc_alt_names']:
-        if col:
-          alt_names = alt_names + "\n" + name
-          col = False
-        else:
-          alt_names = alt_names + "\t\t\t" + name
-          col = True
-
-      if len(self.unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
-        alt_names = alt_names + "\t\t\t\t\t\t"
-
-      alternate_namesLabel.set(alt_names)
-
-      dr.get(self.unknown_locations[0]['db_loc']['map_url'])
+      self.updateLabels()
 
     elif self.lastAction == "WRONG":
+      print "Undoing last WRONG action..."
       tkinter_unknown_collection.replace_one({'_id': self.lastLocation['_id']}, self.lastLocation) 
 
       # Add to beginning of events list
@@ -304,29 +250,10 @@ class App:
       self.counter += 1
 
       # Update labels
-      locationLabel.set("LOCATION NAME: " + self.unknown_locations[0]['unknown_loc']['loc_name'])
-      latitudeLabel.set("LATITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_latitude']))
-      longitudeLabel.set("LONGITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_longitude']))
-      counterLabel.set("Locations Remaining: " + str(self.counter))
+      self.updateLabels()
 
-      # Jank way to make columns
-      alt_names = "ALTERNATIVE NAMES:\n=================="
-      col = True
-      for name in self.unknown_locations[0]['db_loc']['loc_alt_names']:
-        if col:
-          alt_names = alt_names + "\n" + name
-          col = False
-        else:
-          alt_names = alt_names + "\t\t\t" + name
-          col = True
-
-      if len(self.unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
-        alt_names = alt_names + "\t\t\t\t\t\t"
-
-      alternate_namesLabel.set(alt_names)
-
-      dr.get(self.unknown_locations[0]['db_loc']['map_url'])
     elif self.lastAction == "FAIL":
+      print "Undoing last FAIL action..."
       tkinter_unknown_collection.insert_one(self.lastLocation)
       tkinter_TODO_collection.delete_one({'_id': self.lastLocation['_id']})
 
@@ -335,28 +262,8 @@ class App:
       self.counter += 1
 
       # Update labels
-      locationLabel.set("LOCATION NAME: " + self.unknown_locations[0]['unknown_loc']['loc_name'])
-      latitudeLabel.set("LATITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_latitude']))
-      longitudeLabel.set("LONGITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_longitude']))
-      counterLabel.set("Locations Remaining: " + str(self.counter))
+      self.updateLabels()
 
-      # Jank way to make columns
-      alt_names = "ALTERNATIVE NAMES:\n=================="
-      col = True
-      for name in self.unknown_locations[0]['db_loc']['loc_alt_names']:
-        if col:
-          alt_names = alt_names + "\n" + name
-          col = False
-        else:
-          alt_names = alt_names + "\t\t\t" + name
-          col = True
-
-      if len(self.unknown_locations[0]['db_loc']['loc_alt_names']) % 2 == 1:
-        alt_names = alt_names + "\t\t\t\t\t\t"
-
-      alternate_namesLabel.set(alt_names)
-
-      dr.get(self.unknown_locations[0]['db_loc']['map_url'])
     else:
       # Not undoing last action as it wasn't a YES/NO
       print "Nothing to undo!"
@@ -375,25 +282,6 @@ class App:
     # Move on to next event, update display
     self.changeText()
 
-  def helpInstructions(self):
-    print "Displaying instructions!"
-
-    # Display message dialog with instructions explaining the buttons and our website
-    tkMessageBox.showinfo(
-      "Instructions",
-      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
-    )
-
-  def quit(self, frame):
-    # Prompts a yes/no responce
-    choice = tkMessageBox.askquestion("Ready to quit?", "Thanks for your help!", icon='warning')
-    # If quitting, kill the chrome driver and the tkinter frame/display
-    if choice == 'yes':
-      dr.quit()
-      frame.quit()
-    else:
-      print "Not done yet!"
-
   def changeText(self):
     # Remove location we just processed from list
     self.unknown_locations.pop(0)
@@ -404,9 +292,9 @@ class App:
 
     # Check that there are still locations left to process and update displays/labels
     if self.unknown_locations:
-      self.setLabels()
+      self.updateLabels()
     else:
-      self.disable()
+      self.disableLabels()
 
   def filterLetter(self):
     print "Filter what locations we're looking at by letter..."
@@ -414,7 +302,7 @@ class App:
 
     self.lastAction = "none"
     self.lastLocation = {}
-    self.enable()
+    self.enableLabels()
     self.undo.config(state = DISABLED)
 
     # Ask user for input to filter what locations you're looking at
@@ -436,10 +324,10 @@ class App:
       if locations_cursor.count() > 0:
         for loc in locations_cursor:
           self.unknown_locations.append(loc)
-        self.setLabels()
+        self.updateLabels()
       else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-          self.disable()
+          self.disableLabels()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
@@ -447,16 +335,10 @@ class App:
       if letter_num == 0:
         self.unknown_locations = []
         self.counter = 0
-        locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
-        if locations_cursor.count() > 0:
-          for loc in locations_cursor:
-            self.unknown_locations.append(loc)
-            self.counter += 1
-          if self.counter > 0:
-            self.setLabels()
-          else:
-            print 'Cannot find any locations in database!'
-            quit()
+        self.allLocations()
+        
+        if self.counter > 0:
+          self.updateLabels()
         else:
           print 'Cannot find any locations in database!'
           quit()
@@ -477,20 +359,49 @@ class App:
             self.unknown_locations.append(loc)
             self.counter += 1
           if self.counter > 0:
-            self.setLabels()
+            self.updateLabels()
           else:
             print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-            counterLabel.set("Locations Remaining: " + str(self.counter))
-            self.disable()
+            self.disableLabels()
         else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-          counterLabel.set("Locations Remaining: " + str(self.counter))
-          self.disable()
+          self.disableLabels()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
-  def disable(self):
+  def helpInstructions(self):
+    print "Displaying instructions!"
+
+    # Display message dialog with instructions explaining the buttons and our website
+    tkMessageBox.showinfo(
+      "Instructions",
+      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nUNDO: Undo last CORRECT/WRONG/FAIL action.\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
+    )
+
+  def quit(self, frame):
+    # Prompts a yes/no responce
+    choice = tkMessageBox.askquestion("Ready to quit?", "Thanks for your help!", icon='warning')
+    # If quitting, kill the chrome driver and the tkinter frame/display
+    if choice == 'yes':
+      dr.quit()
+      frame.quit()
+    else:
+      print "Not done yet!"
+
+  # Populates unknown_locations with all locations left to process
+  def allLocations(self):
+    locations_cursor = tkinter_unknown_collection.find({}) #, {'_id': False})
+    if locations_cursor.count() > 0:
+      for loc in locations_cursor:
+        self.unknown_locations.append(loc)
+        self.counter += 1
+    else:
+        print 'Cannot find any locations in database!'
+        quit()
+
+  def disableLabels(self):
     # No more locations to process, disable everything but HELP/QUIT
+    counterLabel.set("Locations Remaining: " + str(self.counter))
     locationLabel.set("No more locations to check!")
     latitudeLabel.set("Thanks for all your help!")
     longitudeLabel.set("")
@@ -501,19 +412,19 @@ class App:
     self.fail.config(state = DISABLED)
     self.skip.config(state = DISABLED)
 
-  def enable(self):
+  def enableLabels(self):
     # Enable buttons
     self.correct.config(state = "normal")
     self.wrong.config(state = "normal")
     self.fail.config(state = "normal")
     self.skip.config(state = "normal")
 
-  def setLabels(self):
-    # Set all the labels to self.unknown_locations[0]
+  # Updates all labels
+  def updateLabels(self):
+    counterLabel.set("Locations Remaining: " + str(self.counter))
     locationLabel.set("LOCATION NAME: " + self.unknown_locations[0]['unknown_loc']['loc_name'])
     latitudeLabel.set("LATITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_latitude']))
     longitudeLabel.set("LONGITUDE: " + str(self.unknown_locations[0]['db_loc']['loc_longitude']))
-    counterLabel.set("Locations Remaining: " + str(self.counter))
 
     # Jank way to make columns
     alt_names = "ALTERNATIVE NAMES:\n=================="
@@ -531,9 +442,7 @@ class App:
 
     alternate_namesLabel.set(alt_names)
 
-    # Open Maps display to current coordinates
     dr.get(self.unknown_locations[0]['db_loc']['map_url'])
-
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
