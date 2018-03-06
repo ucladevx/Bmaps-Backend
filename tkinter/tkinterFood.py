@@ -53,7 +53,7 @@ class App:
     frame.bind('<Left>', self.left)
     frame.bind('<Right>', self.right)
     frame.focus_set()
-    # Pack
+    # Pack aka display
     frame.pack()
 
     # Single display with the following buttons:
@@ -102,8 +102,7 @@ class App:
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
     counterLabel.set("Events Remaining: " + str(self.counter))
 
-    # TODO: wraplength
-    Label(root, textvariable=eventLabel, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
+    Label(root, textvariable=eventLabel, font=("Open Sans Bold", 14), wraplength=450, justify=CENTER).pack()
 
     Label(root, textvariable=descriptionLabel, font=("Open Sans", 12), wraplength=450, justify=CENTER).pack()
 
@@ -180,6 +179,8 @@ class App:
 
   def undo(self):
     print "Undoing last yes/no!"
+
+    self.enable()
 
     if self.lastAction == "NOT FOUND":
       print "Adding previous event back to the list of events..."
@@ -258,7 +259,7 @@ class App:
     self.events.pop(0)
 
     # Decrement number of events remaining to process
-    self.counter = self.counter - 1
+    self.counter -= 1
     counterLabel.set("Events Remaining: " + str(self.counter))
 
     # Check that there are still events left to process and update name label
