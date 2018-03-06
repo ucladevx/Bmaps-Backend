@@ -102,7 +102,7 @@ class App:
     question.pack()
 
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
-    counterLabel.set("Events Remaining: " + str(counter))
+    counterLabel.set("Locations Remaining: " + str(counter))
 
     Label(root, textvariable=locationLabel, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
 
@@ -196,7 +196,7 @@ class App:
       # Update labels
       locationLabel.set(unknown_locations[0]['location'])
       eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Events Remaining: " + str(counter))
+      counterLabel.set("Locations Remaining: " + str(counter))
     elif lastAction == "YES none":
       print "Adding previous event back to the list of locations..."
       # Only skipped/moved past event
@@ -207,7 +207,7 @@ class App:
       # Update labels
       locationLabel.set(unknown_locations[0]['location'])
       eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Events Remaining: " + str(counter))
+      counterLabel.set("Locations Remaining: " + str(counter))
     elif lastAction == "YES ucla":
       print "Removing UCLA tag from previous event..."
       # Marked as ucla location
@@ -227,7 +227,7 @@ class App:
       # Update labels
       locationLabel.set(unknown_locations[0]['location'])
       eventLabel.set(unknown_locations[0]['event'])
-      counterLabel.set("Events Remaining: " + str(counter))
+      counterLabel.set("Locations Remaining: " + str(counter))
     else:
       # Not undoing last action as it wasn't a YES/NO
       print "Nothing to undo!"
@@ -296,7 +296,7 @@ class App:
 
     # Decrement number of events remaining to process
     counter = counter - 1
-    counterLabel.set("Events Remaining: " + str(counter))
+    counterLabel.set("Locations Remaining: " + str(counter))
 
     # Check that there are still locations left to process and update name label
     if unknown_locations:
@@ -339,7 +339,7 @@ class App:
           if counter > 0:
             locationLabel.set(unknown_locations[0]['location'])
             eventLabel.set(unknown_locations[0]['event'])
-            counterLabel.set("Events Remaining: " + str(counter))
+            counterLabel.set("Locations Remaining: " + str(counter))
           else:
             print 'Cannot find any locations in database!'
             quit()
@@ -369,14 +369,14 @@ class App:
           if counter > 0:
             locationLabel.set(unknown_locations[0]['location'])
             eventLabel.set(unknown_locations[0]['event'])
-            counterLabel.set("Events Remaining: " + str(counter))
+            counterLabel.set("Locations Remaining: " + str(counter))
           else:
             print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-            counterLabel.set("Events Remaining: " + str(counter))
+            counterLabel.set("Locations Remaining: " + str(counter))
             self.disable()
         else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-          counterLabel.set("Events Remaining: " + str(counter))
+          counterLabel.set("Locations Remaining: " + str(counter))
           self.disable()
     else:
       print "No letter chosen for filtering, leaving unfiltered"

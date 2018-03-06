@@ -21,3 +21,7 @@ ucla:
 # Check whether location data is right!
 unknown:
 	python tkinterLocs.py
+
+# Check whether event has free food!
+food:
+	python tkinterFood.py
