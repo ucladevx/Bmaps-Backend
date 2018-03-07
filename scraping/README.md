@@ -7,3 +7,9 @@
 - Go through each link and get the appropriate event information from the site with Beautiful Soup
   - `make happenings`
 
+## [https://www.studiousapp.com/ucla](https://www.studiousapp.com/ucla)
+- View page source
+- See categories/pages of categories
+  - Get links for each place in each category
+  - Different categories have different information, otherwise could go through each place
+  - Some locations are part of other locations (e.g. 53 locations within Ackerman)
