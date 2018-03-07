@@ -73,6 +73,25 @@ def getLinkedLocations():
   with open('studiousInsideLocations.json', 'w') as outfile:
     print json.dump(data, outfile, indent=4)
 
+# Handle duplicate locations in json data
+def handleDuplicateLocations():
+  data = []
+  duplicates = []
+  urls = []
+
+  locations = json.load(open('studiousInsideLocations.json'))
+  for location in locations:
+    if location['url'] not in urls:
+      urls.append(location['url'])
+      data.append(location)
+    else:
+      duplicates.append(location)
+
+  with open('studiousAppLocations.json', 'w') as outfile:
+    print json.dump(data, outfile, indent=4)
+
+  with open('studiousDuplicateLocations.json', 'w') as outfile:
+    print json.dump(duplicates, outfile, indent=4)
 
 # Go through all the location urls we gathered and get all available location information
 # TODO: keep track of done places, aka don't have duplicates as we do now
@@ -177,4 +196,7 @@ def getLocationInfo():
 # getLocationInfo()
 
 # From the inside_pages urls figure out which locations are linked
-getLinkedLocations()
+# getLinkedLocations()
+
+# Handle duplicate locations in json data
+handleDuplicateLocations()
