@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 
-debugMode = False
+debugMode = True
 
 # Go through all pages of locations and get the url to each individual location
 # Separated by category
@@ -39,6 +39,13 @@ def getLocationsFromPages():
   with open('studiousPages.json', 'w') as outfile:
     print json.dump(locations, outfile, indent=4)
 
-# Go through each place and get information for the location
-getLocationsFromPages()
+# Go through all the location urls we gathered and get all available location information
+# TODO: recursively go through associated locations?
+def getLocationInfo():
+  # TODO
 
+# Go through each category and get all the individual location urls
+# getLocationsFromPages()
+
+# Go individual locations and get location information
+getLocationInfo()
