@@ -39,6 +39,10 @@ def getLocationsFromPages():
   with open('studiousPages.json', 'w') as outfile:
     print json.dump(locations, outfile, indent=4)
 
+# From the inside_pages urls figure out which locations are linked
+def getLinkedLocations():
+  # TODO
+
 # Go through all the location urls we gathered and get all available location information
 # TODO: recursively go through associated/inside locations?
 # TODO: keep track of done places
