@@ -3,12 +3,44 @@ from bs4 import BeautifulSoup
 import re
 import json
 
-data = []
-counter = 0
 debugMode = False
 
-with open('happenings_eventLinks.txt', 'r') as f:
-  for url in f:
+# Go through feed and get the URL for each event
+def getEventsFromFeed():
+  events = []
+  counter = 0
+
+  pageURL = "http://feeds.feedburner.com/uclahappenings-all-alldays"
+  if debugMode: print "PAGE URL: " + pageURL.strip()
+
+  # Query website to get html of the page
+  page = urllib2.urlopen(pageURL.strip())
+
+  # Parse HTML using BeautifulSoup
+  soup = BeautifulSoup(page, "html.parser")
+  if debugMode: print soup
+
+  # Get the event urls
+  # tags = soup.find_all('feedburner:origLink')
+  # print tags
+  urls = re.findall('<feedburner:origlink>.*</feedburner:origlink>', str(soup))
+
+  for link in urls:
+    link_re = re.sub('</?feedburner:origlink>','', link)
+    events.append(link_re)
+
+  if debugMode: print events
+
+  with open('happeningsPages.json', 'w') as outfile:
+    print json.dump(events, outfile, indent=4)
+
+# Go through each event page and get event info
+def getEventInfo():
+  data = []
+  counter = 0
+
+  urls = json.load(open('happeningsPages.json'))
+  for url in urls:
     if debugMode: print "URL: " + url.strip() + '\n'
     data.append({'url': url.strip()})
 
@@ -71,8 +103,13 @@ with open('happenings_eventLinks.txt', 'r') as f:
           data[counter]['info'] = data[counter]['info'] + "\n" + t.text.strip()
 
     if debugMode: print "~~~~~~~~~~"
-    print counter
     counter += 1
 
-with open('data.txt', 'w') as outfile:
-  json.dump(data, outfile, indent=4) #, sort_keys=True)
+  with open('happeningsEvents.json', 'w') as outfile:
+    json.dump(data, outfile, indent=4) #, sort_keys=True)
+
+# Go through feed and get the URL for each event
+getEventsFromFeed()
+
+# Go through each event page and get event info
+getEventInfo()
