@@ -12,3 +12,7 @@ soup-setup:
 # Scrape http://feeds.feedburner.com/uclahappenings-all-alldays aka http://happenings.ucla.edu/
 happenings:
 	python ./happenings/happenings.py
+
+# Scrape https://www.studiousapp.com/ucla
+studious:
+	python ./studious/studiousapp.py
