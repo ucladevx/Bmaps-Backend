@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 
-debugMode = True
+debugMode = False
 
 # Go through all pages of locations and get the url to each individual location
 # Separated by category
@@ -51,6 +51,7 @@ def getLocationInfo():
     for url in type['locationURLs']:
       if debugMode: print "URL: " + url.strip() + '\n'
       data.append({'url': url.strip()})
+      data[counter]['type'] = type['type']
 
       # Query website to get html of the page
       page = urllib2.urlopen(url.strip())
@@ -60,50 +61,80 @@ def getLocationInfo():
 
       # Get the location information
       # Location name
+      # TODO: strip all types (can have multi-types)
       location_name = soup.find('h1')
-      location_name_re = re.sub(type['type'],'', location_name.text, flags=re.IGNORECASE)
-      if debugMode: print "NAME: " + location_name_re.strip() + '\n'
-      data[counter]['location_name'] = location_name_re.strip()
+      if location_name:
+        location_name_re = re.sub(type['type'],'', location_name.text, flags=re.IGNORECASE)
+        if debugMode: print "NAME: " + location_name_re.strip() + '\n'
+        data[counter]['location_name'] = location_name_re.strip()
+      else:
+        data[counter]['location_name'] = ""
 
       # Latitude/Longitude
       location_coordinates = soup.find('div', attrs={'data-map-marker': True})
-      print "LATITUDE: " + str(location_coordinates['data-map-marker-latitude']) + '\n'
-      print "LONGITUDE: " + str(location_coordinates['data-map-marker-longitude']) + '\n'
+      if location_coordinates:
+        if debugMode: print "LATITUDE: " + str(location_coordinates['data-map-marker-latitude']) + '\n'
+        if debugMode: print "LONGITUDE: " + str(location_coordinates['data-map-marker-longitude']) + '\n'
+        data[counter]['latitude'] = location_coordinates['data-map-marker-latitude']
+        data[counter]['longitude'] = location_coordinates['data-map-marker-longitude']
+      else:
+        data[counter]['latitude'] = 420
+        data[counter]['longitude'] = 420
+        data[counter]['description'] = ""
 
       # Description
-      location_description = location_coordinates.parent.find('div', attrs={'class': 'panel-body'})
-      if location_description:
-        print "DESCRIPTION: " + location_description.text.strip() + '\n'
+      if location_coordinates:
+        location_description = location_coordinates.parent.find('div', attrs={'class': 'panel-body'})
+        if location_description:
+          if debugMode: print "DESCRIPTION: " + location_description.text.strip() + '\n'
+          data[counter]['description'] = location_description.text.strip()
+        else:
+          data[counter]['description'] = ""
 
       # Links
       location_links = soup.find('h3', text='Links')
-      print "LINKS: "
-      for content in location_links.parent.contents:
-        if content.name == 'ul':
-          for aTag in content.find_all('a', href=True):
-            print aTag['href']
-      print '\n'
+      data[counter]['links'] = []
+      if location_links:
+        if debugMode: print "LINKS: "
+        for content in location_links.parent.contents:
+          if content.name == 'ul':
+            for aTag in content.find_all('a', href=True):
+              if debugMode: print aTag['href']
+              data[counter]['links'].append(aTag['href'])
+        if debugMode: print '\n'
+
 
       # Entrances
       location_entrances = soup.find_all('img')
-      if debugMode: print "ENTRANCES: "
-      for entrance in location_entrances:
-        if debugMode: print entrance['alt'].strip()
-        data[counter]['location_entrances'] = entrance['alt'].strip()
-      print '\n'
+      data[counter]['entrances'] = []
+      if location_entrances:
+        if debugMode: print "ENTRANCES: "
+        for entrance in location_entrances:
+          if debugMode: print entrance['alt'].strip()
+          data[counter]['entrances'].append(entrance['alt'].strip())
+        if debugMode: print '\n'
 
       # What's Inside
       location_insides_pages = soup.find('ul', attrs={'class': 'pagination'})
-      inside_pages = location_insides_pages.find_all('a', href=True)
-      for page in inside_pages:
-        print page['href']
-        # TODO remove duplicate and add page=1
+      data[counter]['inside_pages'] = []
+      if location_insides_pages:
+        inside_pages = location_insides_pages.find_all('a', href=True)
+        if inside_pages:
+          data[counter]['inside_pages'].append(url + '?page=1')
+          for page in inside_pages:
+            if page['href'] not in data[counter]['inside_pages']:
+              if debugMode: print page['href']
+              data[counter]['inside_pages'].append(page['href'])
 
       # NO: Levels
 
       # NO: Hours
 
-      quit()
+      print "~~~~~ " + str(counter) + " ~~~~~"
+      counter += 1
+
+  with open('studiousLocations.json', 'w') as outfile:
+    print json.dump(data, outfile, indent=4)
 
 # Go through each category and get all the individual location urls
 # getLocationsFromPages()

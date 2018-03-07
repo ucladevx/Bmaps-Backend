@@ -15,4 +15,4 @@
   - Some locations are part of other locations (e.g. 53 locations within Ackerman)
   - `python studiousapp.py`
 - 29 different categories
-  - See more information in `studiousCategoryLinks.txt`
+  - See more information in `studiousLinks.txt`
