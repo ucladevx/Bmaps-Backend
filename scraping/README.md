@@ -13,3 +13,5 @@
   - Get links for each place in each category
   - Different categories have different information, otherwise could go through each place
   - Some locations are part of other locations (e.g. 53 locations within Ackerman)
+- 29 different categories
+  - See more information in `studiousCategoryLinks.txt`
