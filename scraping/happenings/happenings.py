@@ -109,7 +109,7 @@ def getEventInfo():
     json.dump(data, outfile, indent=4) #, sort_keys=True)
 
 # Go through feed and get the URL for each event
-getEventsFromFeed()
+# getEventsFromFeed()
 
 # Go through each event page and get event info
 getEventInfo()
