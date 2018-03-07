@@ -41,11 +41,41 @@ def getLocationsFromPages():
 
 # From the inside_pages urls figure out which locations are linked
 def getLinkedLocations():
-  # TODO
+  data = []
+  counter = 0
+
+  locations = json.load(open('studiousLocations.json'))
+  for location in locations:
+    location['inside_locations'] = []
+    for page in location['inside_pages']:
+      if debugMode: print "URL: " + page.strip() + '\n'
+
+      # Query website to get html of the page
+      pageHTML = urllib2.urlopen(page.strip())
+
+      # Parse HTML using BeautifulSoup
+      soup = BeautifulSoup(pageHTML, 'html.parser')
+
+      # Read all links for locations inside the location
+      location_insides_pages = soup.find('ul', attrs={'class': 'list-group'})
+      if location_insides_pages:
+        inside_urls = location_insides_pages.find_all('a', attrs={'class': 'list-group-item'}, href=True)
+        if inside_urls:
+          for url in inside_urls:
+            if debugMode: print "href: " + url['href']
+            location['inside_locations'].append(url['href'])
+      if debugMode: print '\n'
+    data.append(location)
+
+    print "~~~~~ " + str(counter) + " ~~~~~"
+    counter += 1
+
+  with open('studiousInsideLocations.json', 'w') as outfile:
+    print json.dump(data, outfile, indent=4)
+
 
 # Go through all the location urls we gathered and get all available location information
-# TODO: recursively go through associated/inside locations?
-# TODO: keep track of done places
+# TODO: keep track of done places, aka don't have duplicates as we do now
 def getLocationInfo():
   data = []
   counter = 0
@@ -144,4 +174,7 @@ def getLocationInfo():
 # getLocationsFromPages()
 
 # Go individual locations and get location information
-getLocationInfo()
+# getLocationInfo()
+
+# From the inside_pages urls figure out which locations are linked
+getLinkedLocations()
