@@ -1,3 +1,5 @@
+from mappening.utils.database import *
+
 import requests
 import json
 import time, datetime, dateutil.parser, pytz
@@ -9,27 +11,6 @@ from tqdm import tqdm   # a progress bar, pretty
 # for sys.exit()
 import sys
 import os
-
-# for testing just this file
-# -----------------------------------------------------------
-from dotenv import load_dotenv
-
-# Get environment vars for keeping sensitive info secure
-# Has to come before blueprints that use the env vars
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-# -----------------------------------------------------------
-
-MLAB_USERNAME = os.getenv('MLAB_USERNAME')
-MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
-uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
-
-import pymongo
-client = pymongo.MongoClient(uri)
-db = client['mappening_data']
-ml_collection = db.events_ml
-pages_collection = db.saved_pages
-unknown_loc_collection = db.unknown_locations
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
@@ -213,14 +194,15 @@ def add_pages_from_json(filename):
             page_list.append(abridged_info)
 
     for page in tqdm(page_list):
-        if pages_collection.find_one({'id': page['id']}):
-            pages_collection.delete_one({'id': page['id']})
-        pages_collection.insert_one(page)
+        if saved_pages_collection.find_one({'id': page['id']}):
+            saved_pages_collection.delete_one({'id': page['id']})
+        saved_pages_collection.insert_one(page)
 
 
 # TODO: add facebook page by exact name that appears in URL, or ID
+# TODO: JASON maybe make a pages_utils.py or something rather than sticking it all in events? idk how related they are
 
-def add_facebook_page(page_type='group', id='', name=''):
+def add_facebook_page_from_id(page_id, page_type):
     """
     RULES TO INSERT:
     In General: to GUARANTEE the ID, Inspect Element
@@ -230,12 +212,6 @@ def add_facebook_page(page_type='group', id='', name=''):
     Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
     Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
     """
-    page_id = str(id)
-    # convert integer IDs to strings
-    # if no info given then just don't do anything
-    if not page_id and not name:
-        return 'Give ID or exact name of group to insert a page.'
-
     app_access_token = get_app_token()
     
     # if ID given, always use that
@@ -243,6 +219,20 @@ def add_facebook_page(page_type='group', id='', name=''):
     if page_id:
         return {}
 
+# TODO: add facebook page by exact name that appears in URL, or ID
+
+def add_facebook_page_from_search(search_string, page_type):
+    """
+    RULES TO INSERT:
+    In General: to GUARANTEE the ID, Inspect Element
+    --> under <head> tag, find <meta property=... content="fb://group OR page/?id=<id>">
+    ** may need some scrolling
+    Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
+    Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
+    Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
+    """
+    app_access_token = get_app_token()
+    
     search_args = {
         'limit': '3',   # want small limit, since only expecting 1 page anyway
         'fields': 'name',
@@ -425,7 +415,7 @@ def process_event(event, host_info, add_duplicate_tag=False):
 
         # temp code to gather all place names from events we find
         # no repeats 
-        # if unknown_loc_collection.find_one({'location_name': event_place_info['name']}):
+        # if unknown_locations_collection.find_one({'location_name': event_place_info['name']}):
         #     return {}
 
         # unknown_loc_dict = {
@@ -433,7 +423,7 @@ def process_event(event, host_info, add_duplicate_tag=False):
         #     'event_name': event['name'],
         #     'location_name': event_place_info['name']
         # }
-        # unknown_loc_collection.insert_one(unknown_loc_dict)
+        # unknown_locations_collection.insert_one(unknown_loc_dict)
         return {}
         
     if not entity_in_right_location(event_place_info['location']):
@@ -534,7 +524,7 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     search for UCLA-associated places and groups, using existing list on DB
     """
     pages_by_id = {}
-    for page in pages_collection.find():
+    for page in saved_pages_collection.find():
         pages_by_id[page['id']] = page['name']
 
     # turn event ID dict to array of their values
@@ -545,14 +535,14 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     return total_event_object
 
 def find_many_events():
-    unknown_loc_collection.delete_many({})
+    unknown_locations_collection.delete_many({})
     """
     find events up to 2 years ago
     """
     raw_events = get_facebook_events(730)
     # still the dumb but simple update method
-    ml_collection.delete_many({})
-    ml_collection.insert_many(raw_events['events'])
+    events_ml_collection.delete_many({})
+    events_ml_collection.insert_many(raw_events['events'])
     print('Found {0} events'.format(raw_events['metadata']['events']))
 
 if __name__ == '__main__':

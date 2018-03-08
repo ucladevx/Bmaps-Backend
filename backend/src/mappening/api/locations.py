@@ -1,49 +1,28 @@
 # TODO MAJOR CLEANUP but I'm lazy
+from mappening.utils.database import *
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests
 import re
-import pymongo
 import json
 import os
 from operator import itemgetter
-import process
 
-# data = json.load(open('tokenizeData.json'))
-data = json.load(open('ucla.json'))
+# Must be on same level as app.py
+data = json.load(open('sampleData.json'))
 
-Locations = Blueprint('Locations', __name__)
-
-# Enable Cross Origin Resource Sharing (CORS)
-cors = CORS(Locations)
+locations = Blueprint('locations', __name__)
 
 # Google API Key
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
-# Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = os.getenv('MLAB_USERNAME')
-MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
-
-uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
-
-# Set up database connection
-client = pymongo.MongoClient(uri)
-db = client['mappening_data'] 
-
-events_collection = db.map_events
-ml_events_collection = db.events_ml
-locations_collection = db.UCLA_locations
-unknown_locs_collection = db.tkinter_UCLA_locations
-tkinter_collection = db.tkinter_unknown_locations
-tkinter_TODO_collection = db.tkinter_TODO_collection
-
 # Returns JSON of all past locations/venues
-@Locations.route('/api/locations', methods=['GET'])
+@locations.route('/', methods=['GET'])
 def get_all_locations():
     output = []
 
-    locations_cursor = locations_collection.find({}, {'_id': False})
+    locations_cursor = UCLA_locations_collection.find({}, {'_id': False})
     if locations_cursor.count() > 0:
       for loc in locations_cursor:
         output.append({"location": loc})
@@ -69,7 +48,7 @@ def find_locations():
     
     # TODO: Integrate with new events caller
     # Every time there are new events, check location info and update db if necessary
-    # events_cursor = ml_events_collection.find({"place": {"$exists": True}})
+    # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
     events_cursor = total_events_collection.find({"place": {"$exists": True}})
     if events_cursor.count() > 0:
       for event in events_cursor:
@@ -151,7 +130,7 @@ def find_locations():
 # Add locations to mlab db
 # Gives some duplicate events in db
 # Duplicate events resolved if the different names used are put under alternate_names
-@Locations.route('/api/db_locations')
+@locations.route('/db_locations')
 def db_locations():
     # Update locations or insert new locations from events in db
     new_locations = find_locations()
@@ -172,8 +151,8 @@ def db_locations():
       processed_place = re.compile(place_name, re.IGNORECASE)
 
       # Find location of same coordinates/name
-      coord_loc = locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
+      coord_loc = UCLA_locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
+      alt_name_loc = UCLA_locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
 
       # If there exists a pre-existing location with matching coordinates/name
       if coord_loc or alt_name_loc:
@@ -209,9 +188,9 @@ def db_locations():
           print "Updated: " + old_loc['location']['name']
           # Replace document with updated info
           if is_name:
-            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)  
+            UCLA_locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)  
           else:
-            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+            UCLA_locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
                     
       else:
         # No pre-existing location so insert new location to db
@@ -220,13 +199,13 @@ def db_locations():
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
         print "Added: " + new_loc['location']['name']
-        locations_collection.insert_one(new_loc.copy())
+        UCLA_locations_collection.insert_one(new_loc.copy())
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
 # Given a location string try to return coordinates/relevant location info
 # e.g. BH 3400 => Boelter Hall vs. Engr 4 => Engineering IV vs. Engineering VI
-@Locations.route('/api/coordinates/<place_query>', methods=['GET'])
+@locations.route('/coordinates/<place_query>', methods=['GET'])
 def get_mongo_textSearch(place_query):
     output = []
     output_places = []
@@ -249,7 +228,7 @@ def get_mongo_textSearch(place_query):
     print "Regex place query: " + place_regex
 
     place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
-    places_cursor = locations_collection.find({'location.alternative_names': place_regex})
+    places_cursor = UCLA_locations_collection.find({'location.alternative_names': place_regex})
     
     # Places that match the name are appended to output
     if places_cursor.count() > 0:
@@ -284,7 +263,7 @@ def get_mongo_textSearch(place_query):
     # Default stop words for english language, case insensitive
     # Sort by score (based on number of occurances of query words in alternate names)
     # Can limit numer of results as well
-    places_cursor = locations_collection.find( 
+    places_cursor = UCLA_locations_collection.find( 
       { '$text': { '$search': processed_place, '$language': 'english', '$caseSensitive': False } },
       { 'score': { '$meta': 'textScore' } }
     ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)
@@ -312,14 +291,14 @@ def get_mongo_textSearch(place_query):
     return output
 
 # Pretty output of location search results
-@Locations.route('/api/location_search/<place_query>', methods=['GET'])
+@locations.route('/location_search/<place_query>', methods=['GET'])
 def get_location_results(place_query):
     output = get_mongo_textSearch(place_query)
     return jsonify({"Database Results": output}) 
 
 # Given location name, return location data or some indication that no location
-# could be found. use on unknown_locs_collection for testing/metrics.
-@Locations.route('/api/location_search_result/<place_query>', methods=['GET'])
+# could be found. use on tkinter_UCLA_locations_collection for testing/metrics.
+@locations.route('/location_search_result/<place_query>', methods=['GET'])
 def get_location_search_result(place_query):
     output = get_mongo_textSearch(place_query)
 
@@ -328,17 +307,17 @@ def get_location_search_result(place_query):
     else:
       return output[0]
 
-# Go through unknown_locs_collection and search every location name. Manually
+# Go through tkinter_UCLA_locations_collection and search every location name. Manually
 # verify correctness or just look at cases that don't match
 # TODO: process tkinter_UCLA_locations with tkinterUCLA.py before adding to tkinter_unknown_locations
-# curl -d -X POST http://localhost:5000/api/test_unknown_locations
-@Locations.route('/api/test_unknown_locations', methods=['POST'])
+# curl -d -X POST http://localhost:5000/test_unknown_locations
+@locations.route('/test_unknown_locations', methods=['POST'])
 def test_unknown_locations():
   num_assigned = 0
   num_unassigned = 0
   counter = 1
 
-  locs_cursor = unknown_locs_collection.find({}, {'_id': False})
+  locs_cursor = tkinter_UCLA_locations_collection.find({}, {'_id': False})
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
       print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
@@ -348,7 +327,7 @@ def test_unknown_locations():
         if loc_result != "There were no results!":
           print "Found a match!"
           num_assigned = num_assigned + 1
-          tkinter_collection.insert_one({
+          tkinter_unknown_locations_collection.insert_one({
             "unknown_loc": {
               "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
               "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -364,7 +343,7 @@ def test_unknown_locations():
         else:
           print "Didn't find a location!"
           num_unassigned = num_unassigned + 1
-          tkinter_TODO_collection.insert_one({
+          tkinter_TODO_locations_collection.insert_one({
             "unknown_loc": {
               "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
               "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -378,9 +357,9 @@ def test_unknown_locations():
   print "num_unassigned: " + num_unassigned
   return "Added unknown locations to database\n"
 
-# Go through ml_events_collection and search every location name. See if result
+# Go through events_ml_collection and search every location name. See if result
 # matches what we expected for metric purposes.
-@Locations.route('/api/test_locations', methods=['GET'])
+@locations.route('/test_locations', methods=['GET'])
 def test_locations_api():
   num_correct = 0
   num_wrong = 0
@@ -388,8 +367,7 @@ def test_locations_api():
   wrong_locs = []
   counter = 1
 
-  # events_cursor = events_collection.find({}, {'_id': False})
-  events_cursor = ml_events_collection.find({}, {'_id': False})
+  events_cursor = events_ml_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
       print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong)
@@ -441,16 +419,16 @@ def test_locations_api():
 
 # Insert locations from a JSON file to the db
 # See sample format in ./sampleData.json
-# curl -d -X POST http://localhost:5000/api/insert_locations
+# curl -d -X POST http://localhost:5000/insert_locations
 # TODO make other things that should be POST post lmao
-@Locations.route('/api/insert_locations', methods=['POST'])
+@locations.route('/insert_locations', methods=['POST'])
 def insert_locations():
-  locations_collection.insert_many(data['locations'])
+  UCLA_locations_collection.insert_many(data['locations'])
   return "Successfully inserted location documents to db!"
 
 
 # Add tokenized version of all alternate names to alternate names list
-@Locations.route('/api/tokenize_names', methods=['GET'])
+@locations.route('/tokenize_names', methods=['GET'])
 def get_tokenized_names():
   places = []
   updated = False
@@ -472,7 +450,7 @@ def get_tokenized_names():
   return jsonify({"locations": places})
 
 # Add tokenized version of all alternate names to alternate names list
-@Locations.route('/api/UCLA_names', methods=['GET'])
+@locations.route('/UCLA_names', methods=['GET'])
 def get_UCLA_names():
   places = []
   loc_counter = 1
@@ -497,7 +475,7 @@ def get_UCLA_names():
 # Tries to fill out those missing fields using name field or street if supplied
 # Takes top result to fill out info, MAY BE INCORRECT
 # Warning: pretty slow, limit of 1000 requests? 100 requests?
-@Locations.route('/api/location_data', methods=['GET'])
+@locations.route('/location_data', methods=['GET'])
 def get_location_data():
   places = []
   updated_places = []
@@ -620,7 +598,7 @@ def google_textSearch(place_query):
 
 # Run Google Maps TextSearch on given query and print all results in JSON
 # Uses same function as before but for printing rather than use in event processing
-@Locations.route('/api/place_textSearch/<place_query>', methods=['GET'])
+@locations.route('/place_textSearch/<place_query>', methods=['GET'])
 def get_textsearch(place_query):
     output = google_textSearch(place_query)
 
@@ -630,7 +608,7 @@ def get_textsearch(place_query):
 # Run Google Maps NearbySearch on given query. Uses Google Places API Web Service
 # to search for places within specified area. Takes in location, radius, and a keyword.
 # Optional rankby parameter, and also returns more results than textSearch
-@Locations.route('/api/place_nearbySearch/<place_query>', methods=['GET'])
+@locations.route('/place_nearbySearch/<place_query>', methods=['GET'])
 def get_nearbysearch(place_query):
     # Set parameters for Bruin Bear/Center of UCLA
     CENTER_LATITUDE = "34.070966"

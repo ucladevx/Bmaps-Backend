@@ -1,13 +1,14 @@
 # Facebook Authentication
+from mappening.utils.database import *
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_login import UserMixin, LoginManager, login_required, current_user, login_user, logout_user
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from flask_oauth import OAuth
 from datetime import datetime
-import pymongo
 import json
-import os
+
+auth = Blueprint('auth', __name__)
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 DEBUG = True
@@ -15,37 +16,24 @@ SECRET_KEY = os.getenv('FACEBOOK_SECRET_KEY')
 FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 
-FbAuth = Blueprint('FbAuth', __name__)
-FbAuth.debug = DEBUG
-FbAuth.secret_key = SECRET_KEY
+# Flask-Oauth - set up authentication
+auth.debug = DEBUG
+auth.secret_key = SECRET_KEY
 oauth = OAuth()
 
-# Enable Cross Origin Resource Sharing (CORS)
-cors = CORS(FbAuth)
-
-# Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = os.getenv('MLAB_USERNAME')
-MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
-
-uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
-
-# Set up database connection
-client = pymongo.MongoClient(uri)
-db = client['mappening_data'] 
-users_collection = db.map_users
-
-# Flask-Login
-# Configure application for login
+# Flask-Login - configure application for login
 login_manager = LoginManager()
 
 # Required to allow Blueprints to work with flask_login
 # on_load is run when Blueprint is first registered to the app
-@FbAuth.record_once
+@auth.record_once
 def on_load(state):
     login_manager.init_app(state.app)
     # login_manager.session_protection = "strong" 
     # Enable session protection to prevent user sessions from being stolen
     # By default is in "basic" mode. Can be set to "None or "strong"
+
+    print "Login manager set up with auth Blueprint!"
 
 
 # OAuth for authentication. Also supports Google Authentication.
@@ -78,7 +66,7 @@ class User(UserMixin):
     # # True if user has an activated account that they can log in to
     # # Otherwise account will be rejected/suspended from use
     # def is_active(self):
-    #     user = users_collection.find_one({'user_id': self.user_id})
+    #     user = map_users_collection.find_one({'user_id': self.user_id})
     #     if user != None:
     #         return True
     #     else:
@@ -96,7 +84,7 @@ class User(UserMixin):
 # Return user
 def get_user(user_id):
     # Check that user exists
-    user = users_collection.find_one({'user_id': user_id})
+    user = map_users_collection.find_one({'user_id': user_id})
     if user != None:
         return True
     else:
@@ -109,7 +97,7 @@ def get_user(user_id):
 @login_manager.user_loader
 def user_loader(user_id):
     if get_user(user_id):
-        user = users_collection.find_one({'user_id': user_id})
+        user = map_users_collection.find_one({'user_id': user_id})
         user = User(user['user_name'], user['user_id'])
         return user
     return None    
@@ -118,22 +106,22 @@ def user_loader(user_id):
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
-@FbAuth.route('/api/login-failed')
+@auth.route('/api/login-failed')
 def login_failed():
     return "Failed to log user in!"
 
-@FbAuth.route('/api/register')
+@auth.route('/api/register')
 def register():
     return redirect(url_for('FbAuth.facebook_register'))
 
-@FbAuth.route('/api/register/facebook')
+@auth.route('/api/register/facebook')
 def facebook_register():
     return facebook.authorize(
       callback=url_for('FbAuth.facebook_authorized',
       next=request.args.get('next') or None, _external=True))
 
 # Checks whether authentication works or access is denied
-@FbAuth.route('/api/register/authorized')
+@auth.route('/api/register/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
     if resp is None or 'access_token' not in resp:
@@ -157,7 +145,7 @@ def facebook_authorized(resp):
     userID = me.data['id']
     userName = me.data['name']
     accessToken = resp['access_token']
-    fb_user = users_collection.find_one({'user_id': userID})
+    fb_user = map_users_collection.find_one({'user_id': userID})
 
     # If user exists in collection, logs them in
     # Otherwise, registers new user and logs them in
@@ -174,11 +162,11 @@ def facebook_authorized(resp):
 # Registers new user in DB
 def add_user(userID, userName, firstName, lastName, accessToken):
     # Check if user already exists in collection
-    if users_collection.find({'user_id': userID}).count() > 0:
+    if map_users_collection.find({'user_id': userID}).count() > 0:
       return "USER_ALREADY_EXISTS"
 
     # Insert new user
-    users_collection.insert_one({
+    map_users_collection.insert_one({
         "user_id": userID, 
         "user_name": userName, 
         "user_firstname": firstName, 
@@ -189,13 +177,13 @@ def add_user(userID, userName, firstName, lastName, accessToken):
       })
 
     # Check that user was successfully added to collection
-    if users_collection.find({'user_id': userID}).count() > 0:
+    if map_users_collection.find({'user_id': userID}).count() > 0:
       return "ADDED_USER"
     else:
       return "ADDING_USER_FAILED"
 
 # Only works if already logged in
-@FbAuth.route('/api/user-id', methods=['GET'])
+@auth.route('/api/user-id', methods=['GET'])
 @login_required
 def facebook_user_id():
     me = facebook.get('/me?fields=id')
@@ -203,7 +191,7 @@ def facebook_user_id():
 
 # Log out user. 
 # Will no longer be able to access any route decorated with @login_required
-@FbAuth.route('/api/logout')
+@auth.route('/api/logout')
 @login_required
 def logout():
     logout_user()
