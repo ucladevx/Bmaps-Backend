@@ -13,6 +13,7 @@ GUI to ease checking/correcting location JSON data from scraping Facebook
 ## Setting Up the Environment
 - Get the `.env` file which contains sensitive information from a dev and add it to tkinter/
 - (Optional) use the *.ttf font files to get the fonts used by tkinter
+  - Doesn't work with conda :(
 - If you have `pip` installed:
   - `make setup` of `make sudo-setup`
   - If this fails:
@@ -21,12 +22,12 @@ GUI to ease checking/correcting location JSON data from scraping Facebook
       - `./Miniconda2-latest-WHATEVER-VERSION.sh`
     - Update conda if necessary: `conda update -n base conda`
     - Create conda environment: `conda create --name myenv pip python=2`
-    - Activate conda env: `conda activate myenv`
+    - Activate conda env: `conda activate myenv` or whatever command they give you (e.g. `source activate myenv`)
     - `make setup`
     - Add tkinter/ folder to your path
       - `export PATH=$PATH:/path/to/Mappening-Backend/tkinter/`
     - Hopefully it works now :\
-    - Deactivate conda env: `conda deactivate`
+    - Deactivate conda env: `conda deactivate` or whatever command they give you (e.g. `source deactivate`)
     - (Optional) remove conda env: `conda env remove --name myenv`
 - UCLA_WIFI not UCLA_WEB
 
