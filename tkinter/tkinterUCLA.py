@@ -24,31 +24,37 @@ db = client['mappening_data']
 unknown_locs_collection = db.tkinter_UCLA_locations
 TODO_locs_collection = db.tkinter_UCLATODO_locations
 
-# Initialize unknown_locations to all locations
-# Only look at locations starting with a certain letter 
-# to make sure everyone's working on something different
-unknown_locations = []
-counter = 0
-
-locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
-if locations_cursor.count() > 0:
-  for loc in locations_cursor:
-    # Locations we already processed and approved have `isUCLA = True`
-    # Look for locations that haven't been processed and add to list
-    if 'isUCLA' not in loc or not loc['isUCLA']:
-      unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-      counter = counter + 1
-else:
-    print 'Cannot find any locations in database!'
-    quit()
-
 class App:
+  # Initialize unknown_locations to all locations
+  # Only look at locations starting with a certain letter 
+  # to make sure everyone's working on something different
+  unknown_locations = []
+  counter = 0
+  lastAction = "none"
+  lastLocation = {}
 
   def __init__(self, master):
+    locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
+    if locations_cursor.count() > 0:
+      for loc in locations_cursor:
+        # Locations we already processed and approved have `isUCLA = True`
+        # Look for locations that haven't been processed and add to list
+        if 'isUCLA' not in loc or not loc['isUCLA']:
+          self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+          self.counter += 1
+    else:
+        print 'Cannot find any locations in database!'
+        quit()
+
     empty1 = Label(root, text="", font=("Open Sans", 10))
     empty1.pack()
 
     frame = Frame(master)
+    # Key Bindings
+    frame.bind('<Left>', self.left)
+    frame.bind('<Right>', self.right)
+    frame.focus_set()
+    # Pack aka display
     frame.pack()
 
     # Single display with the following buttons:
@@ -67,6 +73,11 @@ class App:
     # Just moves on to next location without modifying any databases
     self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
     self.skip.pack(side=LEFT)
+
+    # Undo - only undoes last YES/NO action
+    self.undo = Button(frame, text="UNDO last YES/NO", command=self.undo)
+    self.undo.pack(side=LEFT)
+    self.undo.config(state = DISABLED)
 
     # Filter Letter - if multiple people are working on this at same time
     # Filter by letter so everyone is wokring on something different
@@ -90,68 +101,151 @@ class App:
     question.pack()
 
     Label(root, textvariable=counterLabel, font=("Open Sans", 16)).pack()
-    counterLabel.set("Events Remaining: " + str(counter))
+    counterLabel.set("Locations Remaining: " + str(self.counter))
 
-    Label(root, textvariable=location, font=("Open Sans", 14), wraplength=450, justify=CENTER).pack()
+    Label(root, textvariable=locationLabel, font=("Open Sans Bold", 14), wraplength=450, justify=CENTER).pack()
 
-    Label(root, textvariable=event, font=("Open Sans", 12), wraplength=450, justify=CENTER).pack()
+    Label(root, textvariable=eventLabel, font=("Open Sans", 12), wraplength=450, justify=CENTER).pack()
 
     empty3 = Label(root, text="", font=("Open Sans", 10))
     empty3.pack()
 
     # Set all the labels for the display to the first event
-    if unknown_locations:
-      location.set(unknown_locations[0]['location'])
-      event.set(unknown_locations[0]['event'])
+    if self.unknown_locations:
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
     else:
       # No more locations to process, disable everything but HELP/QUIT
-      location.set("No more locations to check")
-      event.set("Thanks for your help!")
+      locationLabel.set("No more locations to check")
+      eventLabel.set("Thanks for your help!")
       self.correct.config(state = DISABLED)
       self.wrong.config(state = DISABLED)
       self.skip.config(state = DISABLED)
 
+  def left(self, event):
+    # print "Left key pressed"
+    self.isCorrect()
+
+  def right(self, event):
+    # print "Right key pressed"
+    self.isWrong()
+
   def isCorrect(self):
-    print "Location in UCLA, marking as checked:                                " + unknown_locations[0]['location']
+    print "Location in UCLA, marking as checked:                                " + self.unknown_locations[0]['location']
+
+    self.undo.config(state = "normal")
 
     # Find location with matching name and tag it as correct
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
+    location = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']})
     if location:
+      self.lastAction = "YES ucla"
+      self.lastLocation = location
+
       location['isUCLA'] = True
 
       # Replace updated location in database
       unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+
     else:
-      print "No such location found in db to replace, moving on...                " + unknown_locations[0]['location']
+      print "No such location found in db to replace, moving on...                " + self.unknown_locations[0]['location']
+
+      self.lastAction = "YES none"
+      self.lastLocation = self.unknown_locations[0]
 
     # Move on to next location, update display
     self.changeText()
 
   def isWrong(self):
-    print "Location not in UCLA or an outlier, remove from database:            " + unknown_locations[0]['location']
+    print "Location not in UCLA or an outlier, remove from database:            " + self.unknown_locations[0]['location']
+    
+    self.lastAction = "NO"
+    self.lastLocation = self.unknown_locations[0]
+    self.undo.config(state = "normal")
 
     # Delete location we don't care about from database
-    unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
+    unknown_locs_collection.delete_one({'location_name': self.unknown_locations[0]['location']})
 
     # Move on to next location, update display
     self.changeText()
 
+  def undo(self):
+    print "Undoing last yes/no!"
+
+    self.enable()
+
+    if self.lastAction == "NO":
+      print "Reinserting location we just deleted..."
+      # Reinsert location we just deleted
+      unknown_locs_collection.insert_one({'location_name': self.lastLocation['location'], 'event_name': self.lastLocation['event']})
+
+      # Add to beginning of locations list
+      self.unknown_locations.insert(0, self.lastLocation)
+      self.counter += 1
+
+      # Update labels
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
+    elif self.lastAction == "YES none":
+      print "Adding previous event back to the list of locations..."
+      # Only skipped/moved past event
+      # Add to beginning of locations list
+      self.unknown_locations.insert(0, self.lastLocation)
+      self.counter += 1
+
+      # Update labels
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
+    elif self.lastAction == "YES ucla":
+      print "Removing UCLA tag from previous event..."
+      # Marked as ucla location
+      # Find location with matching name and remove ucla tag
+      location = unknown_locs_collection.find_one({'location_name': self.lastLocation['location_name']})
+      if location:
+        location.pop('isUCLA', None)
+
+        # Replace updated location in database
+        unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
+
+      # Add to beginning of locations list
+      loc = { 'location': self.lastLocation['location_name'], 'event': self.lastLocation['event_name'] }
+      self.unknown_locations.insert(0, loc)
+      self.counter += 1
+
+      # Update labels
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
+      counterLabel.set("Locations Remaining: " + str(self.counter))
+    else:
+      # Not undoing last action as it wasn't a YES/NO
+      print "Nothing to undo!"
+
+
+    self.lastAction = "none"
+    self.lastLocation = {}
+    self.undo.config(state = DISABLED)
+
   def skip(self):
-    print "Skipping this location, idk what to do with it...                    " + unknown_locations[0]['location']
+    print "Skipping this location, idk what to do with it...                    " + self.unknown_locations[0]['location']
+
+    self.lastAction = "none"
+    self.lastLocation = {}
+    self.undo.config(state = DISABLED)
 
     # Find location with matching name and keep a count of how many times it has been skipped
-    location = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']})
+    location = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']})
     if location:
       if 'skip_count' in location:
         location['skip_count'] = location['skip_count'] + 1
         # If number of times it has been skipped is > 3 move to todo_locs db
         if location['skip_count'] > 3:
-          print "Location has been skipped too often... moving to TODO db:            " + unknown_locations[0]['location']
+          print "Location has been skipped too often... moving to TODO db:            " + self.unknown_locations[0]['location']
           # Insert to one database and remove from original
-          loc = unknown_locs_collection.find_one({'location_name': unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
+          loc = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
           if loc:
             TODO_locs_collection.insert_one(loc)
-            unknown_locs_collection.delete_one({'location_name': unknown_locations[0]['location']})
+            unknown_locs_collection.delete_one({'location_name': self.unknown_locations[0]['location']})
       else:
         location['skip_count'] = 1
 
@@ -167,7 +261,7 @@ class App:
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
       "Instructions",
-      "Hello! Thanks for your help checking whether or not these locations we scraped are even in UCLA/Westwood. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The location name is in UCLA, approve the location!\n\nWRONG: The location isn't in UCLA/Westwood, reject it!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
+      "Hello! Thanks for your help checking whether or not these locations we scraped are even in UCLA/Westwood. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The location name is in UCLA, approve the location! Also triggered with the LEFT arrow key.\n\nWRONG: The location isn't in UCLA/Westwood, reject it! Also triggered with the RIGHT arrow key.\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
     )
 
   def quit(self, frame):
@@ -182,30 +276,31 @@ class App:
       print "Not done yet!"
 
   def changeText(self):
-    global counter
 
     # Remove location we just processed from list
-    unknown_locations.pop(0)
+    self.unknown_locations.pop(0)
 
     # Decrement number of events remaining to process
-    counter = counter - 1
-    counterLabel.set("Events Remaining: " + str(counter))
+    self.counter -= 1
+    counterLabel.set("Locations Remaining: " + str(self.counter))
 
     # Check that there are still locations left to process and update name label
-    if unknown_locations:
-      location.set(unknown_locations[0]['location'])
-      event.set(unknown_locations[0]['event'])
+    if self.unknown_locations:
+      locationLabel.set(self.unknown_locations[0]['location'])
+      eventLabel.set(self.unknown_locations[0]['event'])
     else:
       # No more locations to process, disable everything but HELP/QUIT
       self.disable()
 
   def filterLetter(self):
-    global counter
+    self.lastAction = "none"
+    self.lastLocation = {}
 
     print "Filter what locations we're looking at by letter..."
     print "Do this if multiple people are doing this at the same time"
 
     self.enable()
+    self.undo.config(state = DISABLED)
 
     # Ask user for input to filter what locations you're looking at
     # Only look at locations starting with a certain letter 
@@ -215,19 +310,19 @@ class App:
     if letter_num != None:
       if letter_num == 0:
         locations_cursor = unknown_locs_collection.find({})
-        del unknown_locations[:]
-        counter = 0
+        self.unknown_locations = []
+        self.counter = 0
         if locations_cursor.count() > 0:
           for loc in locations_cursor:
             # Locations we already processed and approved have `isUCLA = True`
             # Look for locations that haven't been processed and add to list
             if 'isUCLA' not in loc or not loc['isUCLA']:
-              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-              counter = counter + 1
-          if counter > 0:
-            location.set(unknown_locations[0]['location'])
-            event.set(unknown_locations[0]['event'])
-            counterLabel.set("Events Remaining: " + str(counter))
+              self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              self.counter += 1
+          if self.counter > 0:
+            locationLabel.set(self.unknown_locations[0]['location'])
+            eventLabel.set(self.unknown_locations[0]['event'])
+            counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
             print 'Cannot find any locations in database!'
             quit()
@@ -244,44 +339,45 @@ class App:
         
         # Append each location doc to a list to process (this is why we try to prevent overlap)
         # Empty list beforehand
-        del unknown_locations[:]
-        # globals()['unknown_locations'] = []
-        counter = 0
+        self.unknown_locations = []
+        self.counter = 0
         if locations_cursor.count() > 0:
           for loc in locations_cursor:
             # Locations we already processed and approved have `isUCLA = True`
             # Look for locations that haven't been processed and add to list
             if 'isUCLA' not in loc or not loc['isUCLA']:
-              unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
-              counter = counter + 1
-          if counter > 0:
-            location.set(unknown_locations[0]['location'])
-            event.set(unknown_locations[0]['event'])
-            counterLabel.set("Events Remaining: " + str(counter))
+              self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
+              self.counter += 1
+          if self.counter > 0:
+            locationLabel.set(self.unknown_locations[0]['location'])
+            eventLabel.set(self.unknown_locations[0]['event'])
+            counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
             print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-            counterLabel.set("Events Remaining: " + str(counter))
+            counterLabel.set("Locations Remaining: " + str(self.counter))
             self.disable()
         else:
           print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
-          counterLabel.set("Events Remaining: " + str(counter))
+          counterLabel.set("Locations Remaining: " + str(self.counter))
           self.disable()
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
   def disable(self):
     # No more locations to process, disable everything but HELP/QUIT
-    location.set("No more locations to check")
-    event.set("Thanks for your help!")
+    locationLabel.set("No more locations to check")
+    eventLabel.set("Thanks for your help!")
     self.correct.config(state = DISABLED)
     self.wrong.config(state = DISABLED)
     self.skip.config(state = DISABLED)
+    self.undo.config(state = DISABLED)
 
   def enable(self):
     # Enable buttons
     self.correct.config(state = "normal")
     self.wrong.config(state = "normal")
     self.skip.config(state = "normal")
+    self.undo.config(state = "normal")
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
@@ -291,8 +387,8 @@ root.geometry("+450+200")
 
 # Global labels/strings
 counterLabel = StringVar()
-location = StringVar()
-event = StringVar()
+locationLabel = StringVar()
+eventLabel = StringVar()
 
 # Initializes App so tkinter/butttons are working
 app = App(root)

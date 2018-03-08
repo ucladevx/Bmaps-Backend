@@ -1,5 +1,6 @@
 # Mappening
 id_rsa_mappening.pem
+scraping/data/
 
 # Mac Stuff
 .DS_Store
