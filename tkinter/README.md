@@ -14,8 +14,10 @@ GUI to ease checking/correcting location JSON data from scraping Facebook
 - Get the `.env` file which contains sensitive information from a dev and add it to tkinter/
 - Add tkinter/ folder to your path
   - `export PATH=$PATH:/path/to/Mappening-Backend/tkinter/`
-- If you have `pip` installed: `sudo pip install selenium`
-  - Otherwise run `make tkinter-setup`
+- If you have `pip` installed:
+  - `make setup`
+  - Otherwise install pip and then install the `requirements.txt`
+- UCLA_WIFI not UCLA_WEB
 
 ## Processing Unknown Locations
 - `unknown_locations` is a collection of locations scraped from Facebook events that don't have corresponding location data
