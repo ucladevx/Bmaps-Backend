@@ -151,7 +151,7 @@ def find_locations():
 # Add locations to mlab db
 # Gives some duplicate events in db
 # Duplicate events resolved if the different names used are put under alternate_names
-@Locations.route('/api/db_locations')
+@Locations.route('/api/db_locations', methods=['POST'])
 def db_locations():
     # Update locations or insert new locations from events in db
     new_locations = find_locations()
