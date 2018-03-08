@@ -1,5 +1,8 @@
 # Need pip to be installed
 setup:
+	pip install -r requirements.txt
+
+sudo-setup:
 	sudo pip install -r requirements.txt
 
 # Check whether locations are in UCLA or not!
