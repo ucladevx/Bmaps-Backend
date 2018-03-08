@@ -12,11 +12,22 @@ GUI to ease checking/correcting location JSON data from scraping Facebook
 
 ## Setting Up the Environment
 - Get the `.env` file which contains sensitive information from a dev and add it to tkinter/
-- Add tkinter/ folder to your path
-  - `export PATH=$PATH:/path/to/Mappening-Backend/tkinter/`
+- (Optional) use the *.ttf font files to get the fonts used by tkinter
 - If you have `pip` installed:
-  - `make setup`
-  - Otherwise install pip and then install the `requirements.txt`
+  - `make setup` of `make sudo-setup`
+  - If this fails:
+    - Install MiniConda from this bash script: [https://conda.io/miniconda.html](https://conda.io/miniconda.html)
+      - `chmod +x Miniconda2-latest-WHATEVER-VERSION.sh`
+      - `./Miniconda2-latest-WHATEVER-VERSION.sh`
+    - Update conda if necessary: `conda update -n base conda`
+    - Create conda environment: `conda create --name myenv pip python=2`
+    - Activate conda env: `conda activate myenv`
+    - `make setup`
+    - Add tkinter/ folder to your path
+      - `export PATH=$PATH:/path/to/Mappening-Backend/tkinter/`
+    - Hopefully it works now :\
+    - Deactivate conda env: `conda deactivate`
+    - (Optional) remove conda env: `conda env remove --name myenv`
 - UCLA_WIFI not UCLA_WEB
 
 ## Processing Unknown Locations
