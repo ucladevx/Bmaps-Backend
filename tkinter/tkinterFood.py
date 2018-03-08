@@ -35,6 +35,7 @@ class App:
   lastEvent = {}
 
   def __init__(self, master):
+    global frame
     events_cursor = ml_collection.find({}) #, {'_id': False})
     if events_cursor.count() > 0:
       for event in events_cursor:
