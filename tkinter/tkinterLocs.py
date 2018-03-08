@@ -151,12 +151,12 @@ class App:
       self.disableLabels()
 
   def left(self, event):
-    print "Left key pressed"
-    # self.isCorrect()
+    # print "Left key pressed"
+    self.isCorrect()
 
   def right(self, event):
-    print "Right key pressed"
-    # self.isWrong()
+    # print "Right key pressed"
+    self.isWrong()
 
   def isCorrect(self):
     print "Coordinates are correct!                                             " + self.unknown_locations[0]['unknown_loc']['loc_name']
