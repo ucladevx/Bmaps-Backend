@@ -1,0 +1,12 @@
+flask
+flask_cors
+flask_oauth
+flask_login
+pymongo
+requests
+python-dateutil
+schedule
+python-dotenv
+pytz
+tqdm
+nltk
