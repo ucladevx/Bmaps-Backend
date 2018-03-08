@@ -24,6 +24,8 @@ db = client['mappening_data']
 unknown_locs_collection = db.tkinter_UCLA_locations
 TODO_locs_collection = db.tkinter_UCLATODO_locations
 
+frame = None
+
 class App:
   # Initialize unknown_locations to all locations
   # Only look at locations starting with a certain letter 
@@ -34,6 +36,7 @@ class App:
   lastLocation = {}
 
   def __init__(self, master):
+    global frame
     locations_cursor = unknown_locs_collection.find({}) #, {'_id': False})
     if locations_cursor.count() > 0:
       for loc in locations_cursor:
@@ -264,6 +267,8 @@ class App:
       "Hello! Thanks for your help checking whether or not these locations we scraped are even in UCLA/Westwood. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The location name is in UCLA, approve the location! Also triggered with the LEFT arrow key.\n\nWRONG: The location isn't in UCLA/Westwood, reject it! Also triggered with the RIGHT arrow key.\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
     )
 
+    self.focus()
+
   def quit(self, frame):
     print "Quitting tkinter thing..."
 
@@ -274,6 +279,7 @@ class App:
       frame.quit()
     else:
       print "Not done yet!"
+      self.focus()
 
   def changeText(self):
 
@@ -363,6 +369,8 @@ class App:
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
+    self.focus()
+
   def disable(self):
     # No more locations to process, disable everything but HELP/QUIT
     locationLabel.set("No more locations to check")
@@ -378,6 +386,11 @@ class App:
     self.wrong.config(state = "normal")
     self.skip.config(state = "normal")
     self.undo.config(state = "normal")
+
+  def focus(self):
+    global frame
+    frame.focus_set()
+
 
 # Stark tkinter and set geometry/position of display
 root = Tk()

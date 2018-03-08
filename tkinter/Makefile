@@ -1,13 +1,9 @@
-# Installs pip and selenium
-# TODO: reorg Makefile and add checks to see if pip/package already exists before trying to install
-tkinter-setup:
-	curl -O http://python-distribute.org/distribute_setup.py
-	python distribute_setup.py
-	curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-	python get-pip.py
-	rm distribute_setup.py get-pip.py
+# Need pip to be installed
+setup:
+	pip install -r requirements.txt
 
-	sudo pip install selenium
+sudo-setup:
+	sudo pip install -r requirements.txt
 
 # Check whether locations are in UCLA or not!
 ucla:
