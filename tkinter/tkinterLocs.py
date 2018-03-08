@@ -55,6 +55,8 @@ dr.set_window_position(x, y + 225);
 # Issues when I tried to use google/google maps, got "unknown error: $ is not defined"
 dr.get("https://stackoverflow.com/")
 
+frame = None
+
 class App:
   # Initialize unknown_locations to all locations
   # Only look at locations starting with a certain letter 
@@ -206,6 +208,7 @@ class App:
     else:
       print "Nothing changed, event is left unmodified..."
 
+    self.focus()
     # Move on to next location, update all displays
     self.changeText()
 
@@ -369,6 +372,8 @@ class App:
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
+    self.focus()
+
   def helpInstructions(self):
     print "Displaying instructions!"
 
@@ -377,6 +382,8 @@ class App:
       "Instructions",
       "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nUNDO: Undo last CORRECT/WRONG/FAIL action.\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
     )
+
+    self.focus()
 
   def quit(self, frame):
     # Prompts a yes/no responce
@@ -387,6 +394,7 @@ class App:
       frame.quit()
     else:
       print "Not done yet!"
+      self.focus()
 
   # Populates unknown_locations with all locations left to process
   def allLocations(self):
@@ -443,6 +451,10 @@ class App:
     alternate_namesLabel.set(alt_names)
 
     dr.get(self.unknown_locations[0]['db_loc']['map_url'])
+
+  def focus(self):
+    global frame
+    frame.focus_set()
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
