@@ -10,8 +10,8 @@ import os
 from operator import itemgetter
 import process
 
-# data = json.load(open('tokenizeData.json'))
-data = json.load(open('ucla.json'))
+data = json.load(open('sampleData.json'))
+# data = json.load(open('ucla.json'))
 
 Locations = Blueprint('Locations', __name__)
 
@@ -36,7 +36,7 @@ ml_events_collection = db.events_ml
 locations_collection = db.UCLA_locations
 unknown_locs_collection = db.tkinter_UCLA_locations
 tkinter_collection = db.tkinter_unknown_locations
-tkinter_TODO_collection = db.tkinter_TODO_collection
+tkinter_TODO_collection = db.tkinter_TODO_locations
 
 # Returns JSON of all past locations/venues
 @Locations.route('/api/locations', methods=['GET'])
@@ -338,44 +338,47 @@ def test_unknown_locations():
   num_unassigned = 0
   counter = 1
 
-  locs_cursor = unknown_locs_collection.find({}, {'_id': False})
+  locs_cursor = unknown_locs_collection.find({})
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
-      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
-      counter = counter + 1
-      if 'location_name' in loc_db:
-        loc_result = get_location_search_result(loc_db['location_name'])
-        if loc_result != "There were no results!":
-          print "Found a match!"
-          num_assigned = num_assigned + 1
-          tkinter_collection.insert_one({
-            "unknown_loc": {
-              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
-              "event_name": loc_db.get('event_name', "NO EVENT NAME")
-            },
-            "db_loc": {
-              "loc_name": loc_result['name'],
-              "loc_alt_names": loc_result['alternative_names'],
-              "loc_latitude": loc_result['latitude'],
-              "loc_longitude": loc_result['longitude'],
-              "map_url": "https://www.google.com/maps/place/" + str(loc_result['latitude']) + "," + str(loc_result['longitude'])
-            }
-          }) 
-        else:
-          print "Didn't find a location!"
-          num_unassigned = num_unassigned + 1
-          tkinter_TODO_collection.insert_one({
-            "unknown_loc": {
-              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
-              "event_name": loc_db.get('event_name', "NO EVENT NAME")
-            },
-            "db_loc": {}
-          }) 
+      if tkinter_collection.find_one({'_id': loc_db['_id']}):
+        print "Already in db"
+      else:
+        print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
+        counter = counter + 1
+        if 'location_name' in loc_db:
+          loc_result = get_location_search_result(loc_db['location_name'])
+          if loc_result != "There were no results!":
+            print "Found a match!"
+            num_assigned = num_assigned + 1
+            tkinter_collection.insert_one({
+              "unknown_loc": {
+                "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+                "event_name": loc_db.get('event_name', "NO EVENT NAME")
+              },
+              "db_loc": {
+                "loc_name": loc_result['name'],
+                "loc_alt_names": loc_result['alternative_names'],
+                "loc_latitude": loc_result['latitude'],
+                "loc_longitude": loc_result['longitude'],
+                "map_url": "https://www.google.com/maps/place/" + str(loc_result['latitude']) + "," + str(loc_result['longitude'])
+              }
+            }) 
+          else:
+            print "Didn't find a location!"
+            num_unassigned = num_unassigned + 1
+            tkinter_TODO_collection.insert_one({
+              "unknown_loc": {
+                "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+                "event_name": loc_db.get('event_name', "NO EVENT NAME")
+              },
+              "db_loc": {}
+            }) 
   else:
       print 'Cannot find any unknown locations!'
 
-  print "num_assigned: " + num_assigned
-  print "num_unassigned: " + num_unassigned
+  print "num_assigned: " + str(num_assigned)
+  print "num_unassigned: " + str(num_unassigned)
   return "Added unknown locations to database\n"
 
 # Go through ml_events_collection and search every location name. See if result

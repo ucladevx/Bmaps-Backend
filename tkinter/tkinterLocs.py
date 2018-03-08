@@ -67,6 +67,7 @@ class App:
   lastLocation = {}
 
   def __init__(self, master):
+    global frame
     self.allLocations()
 
     empty1 = Label(root, text="", font=("Open Sans", 10))
@@ -459,7 +460,7 @@ class App:
 # Stark tkinter and set geometry/position of display
 root = Tk()
 # root.geometry("+%d+%d" % (300, 0))
-root.geometry("+300+0")
+root.geometry("+200+0")
 
 locationLabel = StringVar()
 latitudeLabel = StringVar()
