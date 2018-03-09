@@ -38,4 +38,7 @@ map_users_collection = db.map_users
 # users.py
 # map_users_collection = db.map_users
 
+# test
+test_collection = db.test
+
 print "Got database collections..."
