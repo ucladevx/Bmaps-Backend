@@ -1,4 +1,7 @@
 from mappening.utils.database import *
+from mappening.utils import tokenize
+import location_utils
+
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -7,8 +10,6 @@ import re
 import json
 import os
 from operator import itemgetter
-import location_utils
-from mappening.utils import tokenize
 
 # Google API Key
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')

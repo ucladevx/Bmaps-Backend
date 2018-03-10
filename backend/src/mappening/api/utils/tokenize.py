@@ -6,12 +6,11 @@ nltk.download('nonbreaking_prefixes')
 nltk.download('stopwords')
 nltk.download('punkt')
 
-import re
-import string
-from tqdm import tqdm
 from nltk.tokenize.moses import MosesTokenizer, MosesDetokenizer
-
 from nltk.corpus import wordnet as wn
+from tqdm import tqdm
+import string
+import re
 
 tokenize = Blueprint('tokenize', __name__)
 

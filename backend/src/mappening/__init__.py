@@ -7,7 +7,7 @@ from flask_cors import CORS, cross_origin
 from mappening.api.events import events
 from mappening.api.pages import pages
 from mappening.api.locations import locations
-from mappening.auth.facebook import auth
+from mappening.auth.auth import auth
 from mappening.auth.users import users
 from mappening.utils.tokenize import tokenize
 

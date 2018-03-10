@@ -5,7 +5,6 @@ import json
 import time, datetime, dateutil.parser, pytz
 from dateutil.tz import tzlocal
 from pprint import pprint
-import json
 from tqdm import tqdm   # a progress bar, pretty
 
 # for sys.exit()
