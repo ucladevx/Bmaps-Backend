@@ -1,11 +1,12 @@
 from mappening.utils.database import *
-
-from flask import Flask, jsonify
-import re
-import time, datetime, dateutil.parser
 import event_caller
+
+
+from flask import jsonify
+import time, datetime, dateutil.parser
 import json
 import os
+import re
 
 def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
     output = []

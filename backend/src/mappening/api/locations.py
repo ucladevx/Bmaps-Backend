@@ -1,15 +1,13 @@
 # TODO MAJOR CLEANUP but I'm lazy
 from mappening.utils.database import *
+from mappening.utils import tokenize
+import location_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
-import requests
 import re
-import json
 import os
 from operator import itemgetter
-import location_utils
-from mappening.utils import tokenize
 
 # Must be on same level as app.py
 # data = json.load(open('sampleData.json'))

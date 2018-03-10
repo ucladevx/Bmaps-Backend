@@ -1,7 +1,7 @@
 from mappening.utils.database import *
+import event_caller
 
 from flask import Flask, jsonify, request, json, Blueprint
-import event_caller
 from tqdm import tqdm
 
 pages = Blueprint('pages', __name__)
