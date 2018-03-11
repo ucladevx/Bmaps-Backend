@@ -268,7 +268,7 @@ def get_event_categories(event_date):
 # DELETE
 
 # If needed, clean database of duplicate documents
-# NOT a public route
+# TODO: NOT a public route
 @events.route('/remove-duplicates', methods=['DELETE'])
 def remove_db_duplicates():
     total_dups = []

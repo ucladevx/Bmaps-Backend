@@ -1,4 +1,3 @@
-# Starter app.py that connects to mlab database
 from mappening import app
 from mappening.utils import scheduler
 
