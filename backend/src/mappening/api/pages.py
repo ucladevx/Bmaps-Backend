@@ -1,5 +1,5 @@
 from mappening.utils.database import *
-import event_caller
+from mappening.api.utils import event_caller
 
 from flask import Flask, jsonify, request, json, Blueprint
 from tqdm import tqdm

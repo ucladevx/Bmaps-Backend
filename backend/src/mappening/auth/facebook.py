@@ -1,8 +1,6 @@
-import os
-from flask_oauth import OAuth
+from mappening.utils.secrets import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
 
-FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
-FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
+from flask_oauth import OAuth
 
 # OAuth for authentication. Also supports Google Authentication.
 oauth = OAuth()

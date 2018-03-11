@@ -1,4 +1,5 @@
 from mappening.utils.database import *
+from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import requests
 import json
@@ -16,9 +17,6 @@ API_VERSION_STR = 'v2.10/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
-USER_ACCESS_TOKEN = os.getenv('FACEBOOK_USER_ACCESS_TOKEN')
-FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
-FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
 SEARCH_URL = BASE_URL + 'search'
@@ -69,7 +67,7 @@ def get_app_token():
 
     # don't use app access token for now, not allowed to search groups
     # but this needs to update every 60 days!
-    return USER_ACCESS_TOKEN
+    return FACEBOOK_USER_ACCESS_TOKEN
 
 
 def entity_in_right_location(loc_data):

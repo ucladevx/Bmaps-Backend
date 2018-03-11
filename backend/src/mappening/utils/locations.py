@@ -1,6 +1,5 @@
 from mappening.utils.database import *
-from mappening.utils import tokenize
-import location_utils
+from mappening.api.utils import location_utils, tokenize
 
 import requests
 import re

@@ -1,4 +1,5 @@
 from mappening.utils.database import *
+from mappening.utils.secrets import FACEBOOK_SECRET_KEY
 from mappening.api.models.user import User
 from mappening.api import users
 from facebook import facebook_oauth
@@ -14,9 +15,8 @@ auth = Blueprint('auth', __name__)
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 DEBUG = True
-SECRET_KEY = os.getenv('FACEBOOK_SECRET_KEY')
 auth.debug = DEBUG
-auth.secret_key = SECRET_KEY
+auth.secret_key = FACEBOOK_SECRET_KEY
 
 # Flask-Login - configure application for login
 login_manager = LoginManager()

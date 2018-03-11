@@ -1,4 +1,4 @@
-from mappening.auth.facebook import facebook
+from mappening.auth.facebook import facebook_oauth
 
 from flask import session
 from flask_login import UserMixin
@@ -33,6 +33,6 @@ class User(UserMixin):
     def is_authenticated(self):
         return True
 
-@facebook.tokengetter
+@facebook_oauth.tokengetter
 def get_facebook_oauth_token():
     return session.get("oauth_token")

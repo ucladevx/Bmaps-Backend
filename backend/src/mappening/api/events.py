@@ -89,15 +89,13 @@ API DOCS
 # Interacting with events collection in mlab
 
 from mappening.utils.database import *
-import event_caller
-import event_utils
+from mappening.api.utils import event_caller, event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests, urllib
 import time, datetime, dateutil.parser
 import json
-import os
 import re
 from tqdm import tqdm
 
