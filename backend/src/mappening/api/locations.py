@@ -1,7 +1,6 @@
 # TODO MAJOR CLEANUP but I'm lazy
 from mappening.utils.database import *
-from mappening.utils import tokenize
-import location_utils
+from mappening.api.utils import location_utils, tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -13,9 +12,6 @@ from operator import itemgetter
 # data = json.load(open('sampleData.json'))
 
 locations = Blueprint('locations', __name__)
-
-# Google API Key
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Returns JSON of all past locations/venues
 @locations.route('/', methods=['GET'])
@@ -138,6 +134,7 @@ def get_location_results(place_query, num_results):
       return jsonify({'Locations': output})
 
 # GOOGLE WRAPPER 
+# These routes are kinda long... /api/locations/google/?/<place_query>
 
 # Run Google Maps TextSearch on given query and print all results in JSON
 # Print all results in JSON, a wrapper for Google's API

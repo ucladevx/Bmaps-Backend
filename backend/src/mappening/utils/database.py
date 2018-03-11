@@ -1,10 +1,8 @@
-import os
+from mappening.utils.secrets import MLAB_USERNAME, MLAB_PASSWORD
+
 from pymongo import MongoClient
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-MLAB_USERNAME = os.getenv('MLAB_USERNAME')
-MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
-
 uri = 'mongodb://{0}:{1}@ds044709.mlab.com:44709/mappening_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connection.
@@ -33,7 +31,7 @@ tkinter_unknown_locations_collection = db.tkinter_unknown_locations
 tkinter_TODO_locations_collection = db.tkinter_TODO_locations
 
 # facebook.py
-map_users_collection = db.map_users
+users_collection = db.users
 
 # users.py
 # map_users_collection = db.map_users

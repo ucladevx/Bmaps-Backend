@@ -1,7 +1,5 @@
 from mappening.utils.database import *
-from mappening.utils import tokenize
-import location_utils
-
+from mappening.api.utils import tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -10,9 +8,6 @@ import re
 import json
 import os
 from operator import itemgetter
-
-# Google API Key
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Latitude and Longitude range from (-90, 90) and (-180, 180)
 INVALID_COORDINATE = 420
