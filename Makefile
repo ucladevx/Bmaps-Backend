@@ -9,7 +9,7 @@ ecr-login:
 
 # Build backend image
 build:
-	docker build ./python_app -t $(APP_NAME)
+	docker build ./src -t $(APP_NAME)
 
 # Login, build, and push latest image to AWS
 push: ecr-login build
@@ -20,14 +20,14 @@ push: ecr-login build
 
 # Build and run backend image
 dev: build
-	docker run --rm --name backend-dev -v $(shell pwd)/python_app:/app -p "5000:5000" -it $(APP_NAME)
+	docker run --rm --name backend-dev -v $(shell pwd)/src:/app -p "5000:5000" -it $(APP_NAME)
 
 # Stop running containers
 stop:
 	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
 
 
-# Minimal makefile for Sphinx documentation
+#######################       SPHINX DOCUMENTATION     ######################### 
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -36,21 +36,12 @@ SPHINXPROJ    = Mappening
 SOURCEDIR     = .
 BUILDDIR      = _build
 
-# Installs pip, sphinx, and checks success
-# TODO: reorg Makefile and add checks to see if pip/package already exists before trying to install
-sphinx-setup:
-	curl -O http://python-distribute.org/distribute_setup.py
-	python distribute_setup.py
-	curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-	python get-pip.py
-	rm distribute_setup.py get-pip.py
+# Need pip to be installed
+setup:
+	pip install -r ./src/requirements.txt
 
-	-pip uninstall dotenv
-	-pip uninstall python-dotenv
-	pip install python-dotenv
-
-	sudo pip install Sphinx==1.7.0
-	which sphinx-quickstart
+sudo-setup:
+	sudo pip install -r ./src/requirements.txt
 
 # Help for sphinx usage
 sphinx-help:

@@ -22,14 +22,15 @@ A single platform for events across campus. Mappening helps raise awareness of e
 
 ## Generating Documentation with Sphinx
 - Make sure required packages are installed
-  - `make sphinx-setup`
+  - If you have pip installed:
+    - `make setup` or `make sudo-setup`
+  - If this fails sorry
 - Read Sphinx help information
   - `make sphinx-help`
 - Generate Sphinx documentation
   - `make html`
   - TODO: Check this with Hannah. `make clean`?? 
 - Set up Sphinx Autobuild
-  - `sudo pip install sphinx-autobuild`
   - `sphinx-autobuild . ./_build/html` from Mappening-Backend
   - Navigate to `http://127.0.0.1:8000/`
   - `CTRL-C` to stop autobuilding

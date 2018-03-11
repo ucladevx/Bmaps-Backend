@@ -18,7 +18,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./python_app'))
+sys.path.insert(0, os.path.abspath('./src'))
 
 
 # -- General configuration ------------------------------------------------
@@ -26,6 +26,16 @@ sys.path.insert(0, os.path.abspath('./python_app'))
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
+
+# External dependencies are not met at build time and break the building process
+# http://www.sphinx-doc.org/en/stable/ext/autodoc.html#confval-autodoc_mock_imports
+autodoc_mock_imports = [
+    # events.rst
+    'mappening.utils.database',
+    'tqdm',
+    'nltk',
+    'flask_login'
+]
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

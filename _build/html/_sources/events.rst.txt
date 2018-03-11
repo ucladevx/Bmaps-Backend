@@ -1,5 +1,5 @@
 Events
 ======
 
-.. automodule:: events
+.. automodule:: mappening.api.events
    :members:

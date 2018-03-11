@@ -10,3 +10,5 @@ python-dotenv
 pytz
 tqdm
 nltk
+Sphinx==1.7.0
+sphinx-autobuild

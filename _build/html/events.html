@@ -62,8 +62,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-events">
-<span id="events"></span><h1>Events<a class="headerlink" href="#module-events" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-mappening.api.events">
+<span id="events"></span><h1>Events<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h1>
 <p>Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url <a class="reference external" href="http://api.ucladevx.com/events">api.ucladevx.com/events</a> and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.</p>
 <div class="section" id="event-object">
 <h2>Event Object<a class="headerlink" href="#event-object" title="Permalink to this headline">¶</a></h2>
@@ -76,7 +76,7 @@
 <p><strong>Mandatory Event Properties</strong></p>
 <p>These properties must have a valid value for every event.</p>
 <ul class="simple">
-<li>category: All the categories can be seen by dynamically calling /api/event-categories. About half of events have a category and the rest have &lt;NONE&gt;</li>
+<li>category: All the categories can be seen by dynamically calling /event-categories. About half of events have a category and the rest have &lt;NONE&gt;</li>
 <li>event_name: String of event’s name</li>
 <li>stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys ‘attending’, ‘noreply’, ‘interested’, and ‘maybe’ each with a integer value.</li>
 <li>start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800</li>
@@ -147,24 +147,87 @@
 <div class="section" id="api-docs">
 <h2>API DOCS<a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="events.add_page_to_database">
-<code class="descclassname">events.</code><code class="descname">add_page_to_database</code><span class="sig-paren">(</span><em>type</em><span class="sig-paren">)</span><a class="headerlink" href="#events.add_page_to_database" title="Permalink to this definition">¶</a></dt>
+<dt id="mappening.api.events.get_all_events">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_all_events" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/api/add-page</p>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a few miles of UCLA</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_by_id">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/id/&lt;event_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event ID</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> (<em>str</em>) – ID string to search database for exact match</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_by_name">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/name/&lt;event_name&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> (<em>str</em>) – case-insensitive name string to search database for exact match</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_categories">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/categories/&lt;event_date&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_events_by_category">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em>, <em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/category/&lt;event_category&gt;/&lt;event_date&gt;</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Find official page info from Graph API given search items, and add to or update the page collection on DB as needed.</p>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events of the given category. Can also find all events of a certain category that start on the given date as well.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>type</strong> – the type of page desired, either ‘page’, ‘place’, or ‘group’; defaults to ‘group’ if not specified.</li>
-<li><strong>exact-id</strong> – a completely unique identifier used to find a page, either a long number or a page’s unique string ID (found in its Facebook URL).
-Preferred method of search.</li>
-<li><strong>search-string</strong> – if ‘exact-id’ parameter is not available, set this to a search word / phrase as specific as possible.
-Will attempt to find closely matching pages on Facebook and save them to DB.</li>
+<li><strong>event_category</strong> (<em>str</em>) – case-insensitive category string to match with event categories (e.g. food, theater)</li>
+<li><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
 </ul>
 </td>
 </tr>
@@ -173,176 +236,40 @@ Will attempt to find closely matching pages on Facebook and save them to DB.</li
 </dd></dl>
 
 <dl class="function">
-<dt id="events.clean_collection">
-<code class="descclassname">events.</code><code class="descname">clean_collection</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#events.clean_collection" title="Permalink to this definition">¶</a></dt>
-<dd><p>simply save each unique document and delete any that have been found already</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_all_events">
-<code class="descclassname">events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_all_events" title="Permalink to this definition">¶</a></dt>
+<dt id="mappening.api.events.get_events_by_date">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/events</td>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/date/&lt;event_date&gt;</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a a few miles of UCLA</td>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of all events starting on given date</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_date</strong> (<em>str</em>) – case-insensitive date string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="events.get_event_by_id">
-<code class="descclassname">events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
+<dt id="mappening.api.events.search_events">
+<code class="descclassname">mappening.api.events.</code><code class="descname">search_events</code><span class="sig-paren">(</span><em>search_term</em>, <em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.search_events" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-id/&lt;event_id&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event id</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> – value to match with event id’s to find specific event</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_event_by_name">
-<code class="descclassname">events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-name/&lt;event_name&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of singular event by event name</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> – string to match with event names</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_event_categories">
-<code class="descclassname">events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_event_categories_by_date">
-<code class="descclassname">events.</code><code class="descname">get_event_categories_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_event_categories_by_date" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-categories-by-date/&lt;date&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Get cursor to all events on a certain day and get unique categories list for that day</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_events_by_category">
-<code class="descclassname">events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-category/&lt;event_category&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of currently existing event categories</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_category</strong> – string to match with event categories</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_events_by_category_and_date">
-<code class="descclassname">events.</code><code class="descname">get_events_by_category_and_date</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_category_and_date" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/events-by-category-and-date</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events by event category starting on passed in date</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_events_by_date">
-<code class="descclassname">events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/event-date/&lt;date&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all events starting on passed in date</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> – can search by date in multiple formats (ex. 22 January 2018)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_events_for_search">
-<code class="descclassname">events.</code><code class="descname">get_events_for_search</code><span class="sig-paren">(</span><em>search_term</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_for_search" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/api/search/&lt;search_term&gt;/&lt;date&gt;</p>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search/&lt;search_term&gt;/&lt;event_date&gt;</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns JSON of events on date that match search term in format that Mapbox likes</p>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events whose names contain the search term. Useful for a search bar. Can be used to search events on a particular day as well.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>search_term</strong> – a string to use to find events that contain that word</li>
-<li><strong>date</strong> – search in a certain date with raw date format or the following format -&gt; 22 January 2018</li>
+<li><strong>search_term</strong> (<em>str</em>) – a case-insensitive string that should be a substring of event names</li>
+<li><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
 </ul>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="events.get_events_today_for_search">
-<code class="descclassname">events.</code><code class="descname">get_events_today_for_search</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#events.get_events_today_for_search" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/api/search/&lt;search_term&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of events today that match search term in format that Mapbox likes</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> – a string to use to find events that contain that word</td>
 </tr>
 </tbody>
 </table>
