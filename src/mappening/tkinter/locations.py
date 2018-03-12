@@ -1,4 +1,4 @@
-from mappening.utils.database import *
+from mappening.utils.database import tkinter_UCLA_locations_collection, tkinter_unknown_locations_collection, tkinter_TODO_locations_collection, events_ml_collection, UCLA_locations_collection
 from mappening.api.utils import location_utils, tokenize
 
 import requests

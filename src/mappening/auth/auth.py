@@ -1,4 +1,3 @@
-from mappening.utils.database import *
 from mappening.utils.secrets import FACEBOOK_SECRET_KEY
 from mappening.api.models.user import User
 from mappening.api import users
@@ -11,6 +10,7 @@ from flask_oauth import OAuth
 from datetime import datetime
 import json
 
+# Route Prefix: /auth
 auth = Blueprint('auth', __name__)
 
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com

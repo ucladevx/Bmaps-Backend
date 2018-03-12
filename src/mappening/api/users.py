@@ -1,7 +1,7 @@
 # LMAO TODO FIX WOW SO MANY TODOS
 
 # Interacting with users collection in mlab
-from mappening.utils.database import *
+from mappening.utils.database import users_collection
 
 from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_cors import CORS, cross_origin

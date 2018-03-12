@@ -1,9 +1,10 @@
-from mappening.utils.database import *
+from mappening.utils.database import ucla_events_collection, events_ml_collection
 import event_caller
 
 
 from flask import jsonify
 import time, datetime, dateutil.parser
+from tqdm import tqdm   # a progress bar, pretty
 import json
 import os
 import re

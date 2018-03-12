@@ -88,7 +88,7 @@ API DOCS
 """
 # Interacting with events collection in mlab
 
-from mappening.utils.database import *
+from mappening.utils.database import ucla_events_collection, saved_pages_collection, events_ml_collection
 from mappening.api.utils import event_caller, event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -99,6 +99,7 @@ import json
 import re
 from tqdm import tqdm
 
+# Route Prefix: /api/events
 events = Blueprint('events', __name__)
 
 @events.route('/', methods=['GET'])
@@ -268,7 +269,7 @@ def get_event_categories(event_date):
 # DELETE
 
 # If needed, clean database of duplicate documents
-# TODO: NOT a public route
+# TODO: NOT a public route @Jason do you need this here or where or what
 @events.route('/remove-duplicates', methods=['DELETE'])
 def remove_db_duplicates():
     total_dups = []

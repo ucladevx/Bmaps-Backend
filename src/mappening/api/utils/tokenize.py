@@ -1,5 +1,3 @@
-from flask import Flask, jsonify, request, json, Blueprint
-
 import nltk
 nltk.download('perluniprops')
 nltk.download('nonbreaking_prefixes')
@@ -12,9 +10,6 @@ from tqdm import tqdm
 import string
 import re
 
-tokenize = Blueprint('tokenize', __name__)
-
-@tokenize.route('/<text>', methods=['GET'])
 def tokenize_text(text):
     # Tokenizers are basically an advanced split
     tokenizer = MosesTokenizer()
