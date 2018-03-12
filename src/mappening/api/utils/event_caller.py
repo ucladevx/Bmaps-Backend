@@ -1,4 +1,4 @@
-from mappening.utils.database import *
+from mappening.utils.database import saved_pages_collection, unknown_locations_collection, events_ml_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import requests

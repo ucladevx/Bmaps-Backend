@@ -1,5 +1,5 @@
 # TODO MAJOR CLEANUP but I'm lazy
-from mappening.utils.database import *
+from mappening.utils.database import UCLA_locations_collection
 from mappening.api.utils import location_utils, tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -8,9 +8,7 @@ import re
 import os
 from operator import itemgetter
 
-# Must be on same level as app.py
-# data = json.load(open('sampleData.json'))
-
+# Route Prefix: /api/locations
 locations = Blueprint('locations', __name__)
 
 # Returns JSON of all past locations/venues
@@ -34,7 +32,8 @@ def get_all_locations():
 # Add locations to database from given collection
 # Sample collection(s): events_ml_collection, ucla_events_collection
 # TODO: hook up so everytime we get new events we add their location data to db
-@locations.route('/add/<events_collection>', methods=['PUT'])
+# TODO remove route and move to some utils thing
+# @locations.route('/add/<events_collection>', methods=['PUT'])
 def add_locations_from_collection(events_collection):
     # Update locations or insert new locations from events in db
     updated_locations = []

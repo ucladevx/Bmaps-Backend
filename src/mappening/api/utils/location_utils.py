@@ -1,4 +1,6 @@
-from mappening.utils.database import *
+# TODO FIX THIS GROSSNESS
+
+from mappening.utils.database import ucla_events_collection, events_ml_collection, test_collection, UCLA_locations_collection
 from mappening.api.utils import tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
