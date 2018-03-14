@@ -1,0 +1,192 @@
+https://www.studiousapp.com/ucla/buildings
+https://www.studiousapp.com/ucla/labs
+https://www.studiousapp.com/ucla/womens-restrooms
+https://www.studiousapp.com/ucla/mens-restrooms
+https://www.studiousapp.com/ucla/bars
+https://www.studiousapp.com/ucla/parking
+https://www.studiousapp.com/ucla/study-space
+https://www.studiousapp.com/ucla/dorms
+https://www.studiousapp.com/ucla/vending-machines
+https://www.studiousapp.com/ucla/microwaves
+https://www.studiousapp.com/ucla/lecture-halls
+https://www.studiousapp.com/ucla/coffee
+https://www.studiousapp.com/ucla/student-services
+https://www.studiousapp.com/ucla/sport
+https://www.studiousapp.com/ucla/shops
+https://www.studiousapp.com/ucla/landmarks
+https://www.studiousapp.com/ucla/bus-stops
+https://www.studiousapp.com/ucla/water
+https://www.studiousapp.com/ucla/medical
+https://www.studiousapp.com/ucla/rooms
+https://www.studiousapp.com/ucla/food
+https://www.studiousapp.com/ucla/department-offices
+https://www.studiousapp.com/ucla/computers
+https://www.studiousapp.com/ucla/atms
+https://www.studiousapp.com/ucla/printing
+https://www.studiousapp.com/ucla/entrances
+https://www.studiousapp.com/ucla/secret-places
+https://www.studiousapp.com/ucla/library
+https://www.studiousapp.com/ucla/theaters
+
+# 160
+https://www.studiousapp.com/ucla/buildings?page=1
+https://www.studiousapp.com/ucla/buildings?page=2
+https://www.studiousapp.com/ucla/buildings?page=3
+https://www.studiousapp.com/ucla/buildings?page=4
+https://www.studiousapp.com/ucla/buildings?page=5
+https://www.studiousapp.com/ucla/buildings?page=6
+https://www.studiousapp.com/ucla/buildings?page=7
+https://www.studiousapp.com/ucla/buildings?page=8
+
+# 143
+https://www.studiousapp.com/ucla/labs?page=1
+https://www.studiousapp.com/ucla/labs?page=2
+https://www.studiousapp.com/ucla/labs?page=3
+https://www.studiousapp.com/ucla/labs?page=4
+https://www.studiousapp.com/ucla/labs?page=5
+https://www.studiousapp.com/ucla/labs?page=6
+https://www.studiousapp.com/ucla/labs?page=7
+https://www.studiousapp.com/ucla/labs?page=8
+
+# 229
+https://www.studiousapp.com/ucla/womens-restrooms?page=1
+https://www.studiousapp.com/ucla/womens-restrooms?page=2
+https://www.studiousapp.com/ucla/womens-restrooms?page=3
+https://www.studiousapp.com/ucla/womens-restrooms?page=4
+https://www.studiousapp.com/ucla/womens-restrooms?page=5
+https://www.studiousapp.com/ucla/womens-restrooms?page=6
+https://www.studiousapp.com/ucla/womens-restrooms?page=7
+https://www.studiousapp.com/ucla/womens-restrooms?page=8
+https://www.studiousapp.com/ucla/womens-restrooms?page=9
+https://www.studiousapp.com/ucla/womens-restrooms?page=10
+https://www.studiousapp.com/ucla/womens-restrooms?page=11
+https://www.studiousapp.com/ucla/womens-restrooms?page=12
+
+# 232
+https://www.studiousapp.com/ucla/mens-restrooms?page=1
+https://www.studiousapp.com/ucla/mens-restrooms?page=2
+https://www.studiousapp.com/ucla/mens-restrooms?page=3
+https://www.studiousapp.com/ucla/mens-restrooms?page=4
+https://www.studiousapp.com/ucla/mens-restrooms?page=5
+https://www.studiousapp.com/ucla/mens-restrooms?page=6
+https://www.studiousapp.com/ucla/mens-restrooms?page=7
+https://www.studiousapp.com/ucla/mens-restrooms?page=8
+https://www.studiousapp.com/ucla/mens-restrooms?page=9
+https://www.studiousapp.com/ucla/mens-restrooms?page=10
+https://www.studiousapp.com/ucla/mens-restrooms?page=11
+https://www.studiousapp.com/ucla/mens-restrooms?page=12
+
+# 1
+https://www.studiousapp.com/ucla/bars
+
+# 14
+https://www.studiousapp.com/ucla/parking
+
+# 113
+https://www.studiousapp.com/ucla/study-space?page=1
+https://www.studiousapp.com/ucla/study-space?page=2
+https://www.studiousapp.com/ucla/study-space?page=3
+https://www.studiousapp.com/ucla/study-space?page=4
+https://www.studiousapp.com/ucla/study-space?page=5
+https://www.studiousapp.com/ucla/study-space?page=6
+
+# 44
+https://www.studiousapp.com/ucla/dorms?page=1
+https://www.studiousapp.com/ucla/dorms?page=2
+https://www.studiousapp.com/ucla/dorms?page=3
+
+# 30
+https://www.studiousapp.com/ucla/vending-machines?page=1
+https://www.studiousapp.com/ucla/vending-machines?page=2
+
+# 20
+https://www.studiousapp.com/ucla/microwaves
+
+# 38
+https://www.studiousapp.com/ucla/lecture-halls?page=1
+https://www.studiousapp.com/ucla/lecture-halls?page=2
+
+# 12
+https://www.studiousapp.com/ucla/coffee
+
+# 139
+https://www.studiousapp.com/ucla/student-services?page=1
+https://www.studiousapp.com/ucla/student-services?page=2
+https://www.studiousapp.com/ucla/student-services?page=3
+https://www.studiousapp.com/ucla/student-services?page=4
+https://www.studiousapp.com/ucla/student-services?page=5
+https://www.studiousapp.com/ucla/student-services?page=6
+https://www.studiousapp.com/ucla/student-services?page=7
+
+# 31
+https://www.studiousapp.com/ucla/sport?page=1
+https://www.studiousapp.com/ucla/sport?page=2
+
+# 9
+https://www.studiousapp.com/ucla/shops
+
+# 51
+https://www.studiousapp.com/ucla/landmarks?page=1
+https://www.studiousapp.com/ucla/landmarks?page=2
+https://www.studiousapp.com/ucla/landmarks?page=3
+
+# 40
+https://www.studiousapp.com/ucla/bus-stops?page=1
+https://www.studiousapp.com/ucla/bus-stops?page=2
+
+# 255
+https://www.studiousapp.com/ucla/water?page=1
+https://www.studiousapp.com/ucla/water?page=2
+https://www.studiousapp.com/ucla/water?page=3
+https://www.studiousapp.com/ucla/water?page=4
+https://www.studiousapp.com/ucla/water?page=5
+https://www.studiousapp.com/ucla/water?page=6
+https://www.studiousapp.com/ucla/water?page=7
+https://www.studiousapp.com/ucla/water?page=8
+https://www.studiousapp.com/ucla/water?page=9
+https://www.studiousapp.com/ucla/water?page=10
+https://www.studiousapp.com/ucla/water?page=11
+https://www.studiousapp.com/ucla/water?page=12
+https://www.studiousapp.com/ucla/water?page=13
+
+# 17
+https://www.studiousapp.com/ucla/medical
+
+# 41
+https://www.studiousapp.com/ucla/food?page=1
+https://www.studiousapp.com/ucla/food?page=2
+https://www.studiousapp.com/ucla/food?page=3
+
+# 99
+https://www.studiousapp.com/ucla/department-offices?page=1
+https://www.studiousapp.com/ucla/department-offices?page=2
+https://www.studiousapp.com/ucla/department-offices?page=3
+https://www.studiousapp.com/ucla/department-offices?page=4
+https://www.studiousapp.com/ucla/department-offices?page=5
+
+# 20
+https://www.studiousapp.com/ucla/computers
+
+# 24
+https://www.studiousapp.com/ucla/atms?page=1
+https://www.studiousapp.com/ucla/atms?page=2
+
+# 4
+https://www.studiousapp.com/ucla/printing
+
+# 6
+https://www.studiousapp.com/ucla/entrances
+
+# 34
+https://www.studiousapp.com/ucla/secret-places?page=1
+https://www.studiousapp.com/ucla/secret-places?page=2
+
+# 16
+https://www.studiousapp.com/ucla/library
+
+# 9
+https://www.studiousapp.com/ucla/theaters
+
+# TODO 2207
+https://www.studiousapp.com/ucla/rooms?page=1
+https://www.studiousapp.com/ucla/rooms?page=111

@@ -9,7 +9,7 @@ ecr-login:
 
 # Build backend image
 build:
-	docker build ./python_app -t $(APP_NAME)
+	docker build ./src -t $(APP_NAME)
 
 # Login, build, and push latest image to AWS
 push: ecr-login build
@@ -20,7 +20,7 @@ push: ecr-login build
 
 # Build and run backend image
 dev: build
-	docker run --rm --name backend-dev -v $(shell pwd)/python_app:/app -p "5000:5000" -it $(APP_NAME)
+	docker run --rm --name backend-dev -v $(shell pwd)/src:/app -p "5000:5000" -it $(APP_NAME)
 
 # Stop running containers
 stop:

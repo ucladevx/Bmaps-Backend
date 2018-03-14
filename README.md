@@ -4,10 +4,16 @@
 A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising. 
 
 ## Built With
+- Python 2.7.14
 - Flask (Port 5000): Web microframework for Python
 - mLab: Database-as-a-Service cloud-hosted MongoDB
 - Pymongo: Database Connector between MongoDB and Flask
+- Facebook Graph API + Login/OAuth for getting event information and user authentication
+- Google Maps/Places API Web Service for getting place information
 - AWS EC2/Elastic Container Service for deployment
+- Sphinx to automatically generate documentation
+- Tkinter, Selenium, Google chromedriver for internal tools
+- Beautiful Soup for web scraping
 
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
@@ -34,3 +40,18 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Check out the [frontend](https://github.com/ucladevx/Mappening-Frontend) repository
 - Check out the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
   - Contains instructions for local development and production
+
+## Fun Stuff
+- tkinter GUIs in `tkinter/`
+- Autodocumentation in `docs/`
+- Beautiful Soup Scraping in `scraping/`
+
+## What's Next?
+- Locations
+  - Filter unknown locations using internal tkinter tools
+  - See how accurate locations API is
+  - Improve API accordingly
+  - Integrate locations API with events API
+  - Clean up/document!
+- Events
+  - Web Scraping!
