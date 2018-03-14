@@ -23,6 +23,8 @@ client = pymongo.MongoClient(uri)
 db = client['mappening_data'] 
 ml_collection = db.events_ml
 
+frame = None
+
 class App:
   # Initialize events to all events
   # Only look at events starting with a certain letter 
@@ -33,6 +35,7 @@ class App:
   lastEvent = {}
 
   def __init__(self, master):
+    global frame
     events_cursor = ml_collection.find({}) #, {'_id': False})
     if events_cursor.count() > 0:
       for event in events_cursor:
@@ -243,6 +246,8 @@ class App:
       "Hello! Thanks for your help checking whether or not these events have free food or not. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The event has free food! Also triggered with the LEFT arrow key.\n\nWRONG: The event doesn't have free food! How sad... Also triggered with the RIGHT arrow key.\n\nUNDO: Undoes the last CORRECT/WRONG you did!\n\nSKIP: Confused or don't know what to do with a particular event? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all events there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
     )
 
+    self.focus()
+
   def quit(self, frame):
     print "Quitting tkinter thing..."
 
@@ -253,6 +258,7 @@ class App:
       frame.quit()
     else:
       print "Not done yet!"
+      self.focus()
 
   def changeText(self):
     # Remove event we just processed from list
@@ -341,6 +347,8 @@ class App:
     else:
       print "No letter chosen for filtering, leaving unfiltered"
 
+    self.focus()
+
   def disable(self):
     # No more events to process, disable everything but HELP/QUIT
     eventLabel.set("No more events to check")
@@ -356,6 +364,10 @@ class App:
     self.wrong.config(state = "normal")
     self.skip.config(state = "normal")
     self.undo.config(state = "normal")
+
+  def focus(self):
+    global frame
+    frame.focus_set()
 
 # Stark tkinter and set geometry/position of display
 root = Tk()
