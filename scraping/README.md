@@ -16,3 +16,6 @@
   - `python studiousapp.py`
 - 29 different categories
   - See more information in `studiousLinks.txt`
+- Additional processing to do:
+  - Multiple tags removed from location_name
+  - Some entrances are just numbers
