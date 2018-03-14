@@ -64,36 +64,36 @@ class App:
 
     # Correct - location name belongs to a location within UCLA/Westwood
     # Tag location with `isUCLA = True` and keep in database
-    self.correct = Button(frame, text="YES!", command=self.isCorrect)
+    self.correct = Button(frame, text="YES!", command=self.isCorrect, padx=10)
     self.correct.pack(side=LEFT)
 
     # Wrong - location name does not belong to a location within UCLA/Westwood
     # Remove location from database, we don't need to worry about it
-    self.wrong = Button(frame, text="NO!", command=self.isWrong)
+    self.wrong = Button(frame, text="NO!", command=self.isWrong, padx=10)
     self.wrong.pack(side=LEFT)
 
     # Skip - don't know if in UCLA or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip, padx=10)
     self.skip.pack(side=LEFT)
 
     # Undo - only undoes last YES/NO action
-    self.undo = Button(frame, text="UNDO last YES/NO", command=self.undo)
+    self.undo = Button(frame, text="UNDO last YES/NO", command=self.undo, padx=10)
     self.undo.pack(side=LEFT)
     self.undo.config(state = DISABLED)
 
     # Filter Letter - if multiple people are working on this at same time
     # Filter by letter so everyone is wokring on something different
-    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter, padx=10)
     self.filter.pack(side=LEFT)
 
     # Help - displays instructions
-    self.help = Button(frame, text="HELP", command=self.helpInstructions)
+    self.help = Button(frame, text="HELP", command=self.helpInstructions, padx=10)
     self.help.pack(side=LEFT)
 
     # Quit - exit tkinter/displays
     # TODO: remove extra check to quit, let there in case we wanted to use similar code in future
-    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
+    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame), padx=10)
     self.button.pack(side=LEFT)
 
     # Define all the labels and strings used in the display

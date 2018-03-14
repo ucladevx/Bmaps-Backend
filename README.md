@@ -41,17 +41,8 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Check out the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
   - Contains instructions for local development and production
 
-## Fun Stuff
+## Repo Breakdown
+- Backend source code in `src/`
 - tkinter GUIs in `tkinter/`
 - Autodocumentation in `docs/`
 - Beautiful Soup Scraping in `scraping/`
-
-## What's Next?
-- Locations
-  - Filter unknown locations using internal tkinter tools
-  - See how accurate locations API is
-  - Improve API accordingly
-  - Integrate locations API with events API
-  - Clean up/document!
-- Events
-  - Web Scraping!
