@@ -85,42 +85,42 @@ class App:
 
     # Correct - location data matches location name
     # Will be removed from `unknown` database and added to `known` database
-    self.correct = Button(frame, text="CORRECT!", command=self.isCorrect)
+    self.correct = Button(frame, text="CORRECT!", command=self.isCorrect, padx=10)
     self.correct.pack(side=LEFT)
 
     # Wrong - location data does not match location name (e.g. the coordinates aren't right)
     # Prompts user to input correct coordinates and an additional name (1 max)
     # Keeps modified location in `unknown` database for secondary verification
-    self.wrong = Button(frame, text="WRONG Location Data!", command=self.isWrong)
+    self.wrong = Button(frame, text="WRONG Location Data!", command=self.isWrong, padx=10)
     self.wrong.pack(side=LEFT)
 
     # Fail - location name doesn't seem to match with the location data the locations api found
     # Add to a separate `TODO` database for manual processing
-    self.fail = Button(frame, text="Wrong location found!", command=self.isFail)
+    self.fail = Button(frame, text="Wrong location found!", command=self.isFail, padx=10)
     self.fail.pack(side=LEFT)
 
     # Skip - don't know if right or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip, padx=10)
     self.skip.pack(side=LEFT)
 
     # Undo - only undoes last CORRECT/WRONG action
-    self.undo = Button(frame, text="UNDO last CORRECT/WRONG/FAIL", command=self.undo)
+    self.undo = Button(frame, text="UNDO last CORRECT/WRONG/FAIL", command=self.undo, padx=10)
     self.undo.pack(side=LEFT)
     self.undo.config(state = DISABLED)
 
     # Filter Letter - if multiple people are working on this at same time
     # Filter by letter so everyone is wokring on something different
-    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter, padx=10)
     self.filter.pack(side=LEFT)
 
     # Help - displays instructions
-    self.help = Button(frame, text="HELP", command=self.helpInstructions)
+    self.help = Button(frame, text="HELP", command=self.helpInstructions, padx=10)
     self.help.pack(side=LEFT)
 
     # Quit - exit tkinter/displays
     # TODO: remove extra check to quit, let there in case we wanted to use similar code in future
-    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
+    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame), padx=10)
     self.button.pack(side=LEFT)
 
     # Define all the labels and strings used in the display
