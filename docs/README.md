@@ -1,5 +1,8 @@
 # Mappening-Backend Documentation
 
+## Overview
+Autodocumentation through Sphinx for Mappening's APIs
+
 ## Setting Up the Environment
 - Clone this repository 
   - `git clone https://github.com/ucladevx/Mappening-Backend.git`
