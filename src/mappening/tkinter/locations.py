@@ -20,44 +20,47 @@ def process_unknown_locations():
   num_unassigned = 0
   counter = 1
 
-  locs_cursor = tkinter_UCLA_locations_collection.find({}, {'_id': False})
+  locs_cursor = tkinter_UCLA_locations_collection.find({})
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
-      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
-      counter = counter + 1
-      if 'location_name' in loc_db:
-        loc_result = get_location_search_result(loc_db['location_name'])
-        if loc_result != "There were no results!":
-          print "Found a match!"
-          num_assigned = num_assigned + 1
-          tkinter_unknown_locations_collection.insert_one({
-            "unknown_loc": {
-              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
-              "event_name": loc_db.get('event_name', "NO EVENT NAME")
-            },
-            "db_loc": {
-              "loc_name": loc_result['name'],
-              "loc_alt_names": loc_result['alternative_names'],
-              "loc_latitude": loc_result['latitude'],
-              "loc_longitude": loc_result['longitude'],
-              "map_url": "https://www.google.com/maps/place/" + str(loc_result['latitude']) + "," + str(loc_result['longitude'])
-            }
-          }) 
-        else:
-          print "Didn't find a location!"
-          num_unassigned = num_unassigned + 1
-          tkinter_TODO_locations_collection.insert_one({
-            "unknown_loc": {
-              "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
-              "event_name": loc_db.get('event_name', "NO EVENT NAME")
-            },
-            "db_loc": {}
-          }) 
-  else:
-      print 'Cannot find any unknown locations!'
-
-  print "num_assigned: " + num_assigned
-  print "num_unassigned: " + num_unassigned
+      if tkinter_collection.find_one({'_id': loc_db['_id']}):
+        print "Already in db"
+      else:
+        print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
+        counter = counter + 1
+        if 'location_name' in loc_db:
+          loc_result = get_location_search_result(loc_db['location_name'])
+          if loc_result != "There were no results!":
+            print "Found a match!"
+            num_assigned = num_assigned + 1
+            tkinter_collection.insert_one({
+              "unknown_loc": {
+                "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+                "event_name": loc_db.get('event_name', "NO EVENT NAME")
+              },
+              "db_loc": {
+                "loc_name": loc_result['name'],
+                "loc_alt_names": loc_result['alternative_names'],
+                "loc_latitude": loc_result['latitude'],
+                "loc_longitude": loc_result['longitude'],
+                "map_url": "https://www.google.com/maps/place/" + str(loc_result['latitude']) + "," + str(loc_result['longitude'])
+              }
+            }) 
+          else:
+            print "Didn't find a location!"
+            num_unassigned = num_unassigned + 1
+            tkinter_TODO_collection.insert_one({
+              "unknown_loc": {
+                "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
+                "event_name": loc_db.get('event_name', "NO EVENT NAME")
+              },
+              "db_loc": {}
+            }) 
+   else:
+       print 'Cannot find any unknown locations!'
+ 
+  print "num_assigned: " + str(num_assigned)
+  print "num_unassigned: " + str(num_unassigned)
   return "Added unknown locations to database\n"
 
 # Go through events_ml_collection and run every location name through locations api
