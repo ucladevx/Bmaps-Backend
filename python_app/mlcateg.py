@@ -154,18 +154,27 @@ def predictList(vectorizer, classifier, x):
     y_pred = classifier.predict(x)
     print(y_pred)
 
-def giveProbPerCategory(vectorizer, classifier, x):
+def giveProbPerCategory(vectorizer, classifier, x, threshold=.15):
     print(x)
     x = vectorizer.transform(x)
     y_pred = classifier.predict_proba(x)
-#     for e_pref in y_pred:
-#         newDict = {}
-#         for i, y in enumerate(e_pref):
-#             category = classifier.classes_[i] 
-#             prob = y[i]
+
+    strongest_category = ''
+    highest_match = 0
+    above_threshold = []
+    for i in range(len(classifier.classes_)):
+        
+        if y_pred[0][i] > highest_match:
+            highest_match = y_pred[0][i]
+            strongest_category = classifier.classes_[i]
             
-    print(classifier.classes_)
-    print(y_pred)
+        if y_pred[0][i] > threshold:
+            above_threshold.append(classifier.classes_[i])
+    
+    if not above_threshold:
+        return [strongest_category]
+    else:
+        return above_threshold
 
 
 
@@ -188,16 +197,9 @@ X = vectorizer.fit_transform(skText)
 # print(vectorizer.vocabulary_)
 # print(vectorizer.idf_)
 
-nbModel2 = OneVsRestClassifier(MultinomialNB(alpha=0.05))
-# nbModel = train(nbModel, X, skTarget)
-
-# nbModel2.fit(X, skTarget)
-#predicted = nbModel2.predict(X[12:13])
+nbModel = OneVsRestClassifier(MultinomialNB(alpha=0.05))
 
 #predicted
-
-# for item, labels in zip(X, predicted):
-#     print '%s => %s' % (item, labels)
-    
-nbModel2 = train(nbModel2, X, skTarget)
+ 
+nbModel = train(nbModel, X, skTarget)
 ## AVG ACCURACY - 25 TRIALS: 0.72326055313 ## 
