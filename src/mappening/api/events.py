@@ -1,5 +1,5 @@
 """
-Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url `api.ucladevx.com/events <http://api.ucladevx.com/events>`_ and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.
+Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url `api.ucladevx.com/events <http://api.ucladevx.com/v2/events>`_ and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.
 
 -----------------
 Event Object
@@ -15,76 +15,60 @@ An *event* object is a GeoJSON which means it has the following keys:
 These properties must have a valid value for every event.
 
 * category: All the categories can be seen by dynamically calling /event-categories. About half of events have a category and the rest have <NONE>
-* event_name: String of event's name
+* name: String of event's name
 * stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
 * start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
 * is_cancelled: Boolean indicating event is cancelled
 
 **Potential Event Properties**
-
-If the actual event has no value, the value will be <NONE>. Make sure to check for none in your code to avoid errors.
-
+If these details aren't present, the JSON keys won't be present
 * description: String description
-* venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below
-* cover_picture: A url to a photo for the event
-* ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or <NONE>
+* place: JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential place details such as name can be seen in the example event below
+* hoster: string of the host name
+* ticket_uri: link to event ticketing
 * end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
 * free_food: If event has free food, currently just a strong NO
 
 **Sample Event**::
 
-    {
-      "geometry": {
-        "coordinates": [
-          -118.451994,
-          34.071474
-        ],
-        "type": "Point"
+{
+  geometry: {
+    coordinates: [-118.44681959102,
+      34.070367696979
+    ],
+    type: "Point"
+  },
+  id: "175752283196850",
+  properties: {
+    cover_picture: "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27021656_1621551394602436_6299488329760837839_o.jpg?oh=057a6b50a89f8a1fa3684c7c25563b86&oe=5B035F3D",
+    description: "LA Hacks is one of the biggest student-run hackathons on the West Coast, held every spring at UCLA’s iconic Pauley Pavilion. Over 1000 students from distinguished universities across the nation work together in teams to challenge themselves and create something beyond their comfort level - all in the span of 36 hours. Collaborate and build creative solutions to problems, while pushing the limits of your mind and body to make something amazing. From Evan Spiegel (CEO, Snapchat) and Sean Rad (CEO, Tinder), to 8 time gold medalist, Apolo Ohno, and a special pre-screening of HBO’s Silicon Valley, LA Hacks has welcomed many leaders and role models in tech. With industry mentors, technical workshops, and founder panels, LA Hacks works to broaden the scope of technology. EVENT DETAILS: Date: March 30th - April 1st, 2018 Location: Pauley Pavilion WHO WE ARE: LA Hacks epitomizes innovation, perseverance, and also pushing hackers to test their potential. We are UCLA students from many corners of campus, all united by one big goal: to give over 1000 college students the opportunity to come together and collaborate with industry leaders and innovative companies to develop impactful products with cutting-edge technologies.",
+    end_time: "2018-04-01T15:00:00-0700",
+    hoster: "LA Hacks",
+    is_canceled: false,
+    name: "LA Hacks 2018",
+    place: {
+      location: {
+        city: "Los Angeles",
+        country: "United States",
+        latitude: 34.070367696979,
+        longitude: -118.44681959102,
+        state: "CA",
+        street: "301 Westwood Plz",
+        zip: "90095"
       },
-      "id": "1766863560001661",
-      "properties": {
-        "category": "<NONE>",
-        "cover_picture": "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&oe=5B136061",
-        "description": "Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. As a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we'll be providing select hardware for hacking as well! LEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/ Sponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu",
-        "duplicate_occurrence": "NO",
-        "end_time": "Sat, 17 Feb 2018 23:30:00 GMT-0800",
-        "event_name": "ACM Hack | Hack on the Hill IV",
-        "free_food": "NO",
-        "hoster": {
-          "id": "369769286554402",
-          "name": "UCLA Class of 2020"
-        },
-        "is_cancelled": false,
-        "start_time": "Sat, 17 Feb 2018 08:30:00 GMT-0800",
-        "stats": {
-          "attending": 97,
-          "interested": 199,
-          "maybe": 199,
-          "noreply": 107
-        },
-        "ticketing": {
-          "ticket_uri": "https://hoth.splashthat.com/"
-        },
-        "venue": {
-          "id": "955967887795957",
-          "location": {
-            "city": "Los Angeles",
-            "country": "United States",
-            "latitude": 34.071474,
-            "longitude": -118.451994,
-            "state": "CA",
-            "street": "330 De Neve Dr Ste L-16",
-            "zip": "90024"
-          },
-          "name": "Carnesale Commons"
-        }
-      },
-      "type": "Feature"
-    }
-
------------------
-API DOCS
------------------
+      name: "Pauley Pavilion"
+    },
+    start_time: "2018-03-30T16:00:00-0700",
+    stats: {
+      attending: 179,
+      interested: 1473,
+      maybe: 1473,
+      noreply: 293
+    },
+    time_updated: "2018-03-25 19:10:07.585374"
+  },
+  type: "Feature"
+}
 """
 # Interacting with events collection in mlab
 
