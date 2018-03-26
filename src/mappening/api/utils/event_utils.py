@@ -51,7 +51,9 @@ def process_event_info(event):
     # Remove certain keys from dictionary
     entriesToRemove = ('_id', 'duplicate_occurrence')
     for k in entriesToRemove:
-        event.pop(k, None) # pop is basically get and remove
+        # pop is basically get and remove allowing removing without checking for key
+        event.pop(k, None)
+    event.get('place', {}).pop('id', None)
 
     # Clean up certain entries
     event['stats'] = {
@@ -60,9 +62,11 @@ def process_event_info(event):
         'interested': event.pop('interested_count', 0),
         'maybe': event.pop('maybe_count', 0)
     }
-    if 'source' in event.get('cover', {}): #default of {} so in and [] both work
+    # default of {} so in and [] both work
+    if 'source' in event.get('cover', {}):
         event['cover_picture'] = event.pop('cover', {})['source']
-
+    if 'name' in event.get('hoster', {}):
+        event['hoster'] = event.pop('hoster')['name']
     # Create GeoJSON
     formatted_info = {
         # will ALWAYS have an ID
@@ -80,6 +84,7 @@ def process_event_info(event):
     }
 
     return formatted_info
+
 
 #TODO: DELETE LEGACY CODE
 def legacy_process_event(event):
