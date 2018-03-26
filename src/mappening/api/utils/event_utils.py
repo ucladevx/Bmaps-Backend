@@ -38,54 +38,12 @@ def find_events_in_database(find_dict={}, one_result_expected=False, print_resul
             print('No events found with attributes:' + str(find_dict))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-#TODO: Remove all that NONE BULLSHIT
-def process_event_info_v2(event):
+def process_event_info(event):
     """
         :Description: Returns GeoJSON of singular event matching event name
 
         :param str event_name: case-insensitive name string to search database for exact match
     """
-    formatted_info = {
-        # will ALWAYS have an ID
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            # no coordinates? default to Bruin Bear
-            'coordinates': [
-                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
-                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event.get('name', '<NONE>'),
-            'description': event.get('description', '<NONE>'),
-            'hoster': event.get('hoster', '<MISSING HOST>'),
-            'start_time': processed_time(event.get('start_time', '<NONE>')),
-            'end_time': processed_time(event.get('end_time', '<NONE>')),
-            'venue': event['place'],
-            'stats': {
-                'attending': event['attending_count'],
-                'noreply': event['noreply_count'],
-                'interested': event['interested_count'],
-                'maybe': event['maybe_count']
-            },
-            # TODO: whenever category is checked, run Jorge's online ML algorithm
-            'category': event.get('category', '<NONE>'),
-            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
-            'is_cancelled': event.get('is_canceled', False),
-            'ticketing': {
-                'ticket_uri': event.get('ticket_uri', '<NONE>')
-            },
-            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
-            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
-            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
-        }
-    }
-    return formatted_info
-
-
-def process_event_info(event):
     formatted_info = {
         # will ALWAYS have an ID
         'id': event['id'],
