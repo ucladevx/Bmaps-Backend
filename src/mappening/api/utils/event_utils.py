@@ -9,7 +9,7 @@ import json
 import os
 import re
 
-def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
+def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
     output = []
 
     if one_result_expected:
@@ -26,7 +26,10 @@ def find_events_in_database(find_dict={}, one_result_expected=False, print_resul
         events_cursor = ucla_events_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                output.append(process_event_info(event))
+                if legacy:
+                    output.append(legacy_process_event(event))
+                else:
+                    output.append(process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
@@ -44,6 +47,42 @@ def process_event_info(event):
 
         :param str event_name: case-insensitive name string to search database for exact match
     """
+
+    # Remove certain keys from dictionary
+    entriesToRemove = ('_id', 'duplicate_occurrence')
+    for k in entriesToRemove:
+        event.pop(k, None) # pop is basically get and remove
+
+    # Clean up certain entries
+    event['stats'] = {
+        'attending': event.pop('attending_count', 0),
+        'noreply': event.pop('noreply_count', 0),
+        'interested': event.pop('interested_count', 0),
+        'maybe': event.pop('maybe_count', 0)
+    }
+    if 'source' in event.get('cover', {}): #default of {} so in and [] both work
+        event['cover_picture'] = event.pop('cover', {})['source']
+
+    # Create GeoJSON
+    formatted_info = {
+        # will ALWAYS have an ID
+        'id': event.pop('id'),
+        'type': 'Feature',
+        'geometry': {
+            # no coordinates? default to Bruin Bear
+            'coordinates': [
+                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+            ],
+            'type': 'Point'
+        },
+        'properties': event
+    }
+
+    return formatted_info
+
+#TODO: DELETE LEGACY CODE
+def legacy_process_event(event):
     formatted_info = {
         # will ALWAYS have an ID
         'id': event['id'],
