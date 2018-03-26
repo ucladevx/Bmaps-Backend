@@ -24,7 +24,7 @@ def get_all_events():
     :Description: Returns a GeoJSON of all events within a few miles of UCLA
 
     """
-    return event_utils.find_events_in_database(print_results=True)
+    return event_utils.find_events_in_database(print_results=True, legacy=True)
 
 # SEARCH
 
@@ -55,7 +55,7 @@ def search_events(search_term, event_date):
 
     if events_cursor.count() > 0:
         for event in events_cursor:
-          output.append(legacy_process_event(event))
+          output.append(event_utils.legacy_process_event(event))
     else:
         print("No event(s) matched '{}'".format(search_term))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
@@ -73,7 +73,7 @@ def get_event_by_name(event_name):
 
     """
     name_regex = re.compile(event_name, re.IGNORECASE)
-    return event_utils.find_events_in_database({'name': name_regex}, True)
+    return event_utils.find_events_in_database({'name': name_regex}, True, legacy=True)
 
 @eventsLegacy.route('/id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
@@ -85,7 +85,7 @@ def get_event_by_id(event_id):
     :param str event_id: ID string to search database for exact match
 
     """
-    return event_utils.find_events_in_database({'id': event_id}, True)
+    return event_utils.find_events_in_database({'id': event_id}, True, legacy=True)
 
 # MULTIPLE EVENTS
 
@@ -106,7 +106,7 @@ def get_events_by_date(event_date):
 
     """
     date_regex_obj = event_utils.construct_date_regex(event_date)
-    return event_utils.find_events_in_database('start_time', date_regex_obj)
+    return event_utils.find_events_in_database('start_time', date_regex_obj, legacy=True)
 
 @eventsLegacy.route('/category/<event_category>', defaults={'event_date': None}, methods=['GET'])
 @eventsLegacy.route('/category/<event_category>/<event_date>', methods=['GET'])
@@ -138,7 +138,7 @@ def get_events_by_category(event_category, event_date):
 
     if events_cursor.count() > 0:
         for event in events_cursor:
-            output.append(legacy_process_event(event))
+            output.append(event_utils.legacy_process_event(event))
     else:
         print("No event(s) matched '{}'".format(event_category))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
@@ -194,44 +194,3 @@ def remove_db_duplicates():
     total_dups.extend(event_utils.clean_collection(events_ml_collection))
 
     return jsonify(total_dups)
-
-
-def legacy_process_event(event):
-    formatted_info = {
-        # will ALWAYS have an ID
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            # no coordinates? default to Bruin Bear
-            'coordinates': [
-                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
-                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event.get('name', '<NONE>'),
-            'description': event.get('description', '<NONE>'),
-            'hoster': event.get('hoster', '<MISSING HOST>'),
-            'start_time': event_utils.processed_time(event.get('start_time', '<NONE>')),
-            'end_time': event_utils.processed_time(event.get('end_time', '<NONE>')),
-            'venue': event['place'],
-            'stats': {
-                'attending': event['attending_count'],
-                'noreply': event['noreply_count'],
-                'interested': event['interested_count'],
-                'maybe': event['maybe_count']
-            },
-            # TODO: whenever category is checked, run Jorge's online ML algorithm
-            'category': event.get('category', '<NONE>'),
-            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
-            'is_cancelled': event.get('is_canceled', False),
-            'ticketing': {
-                'ticket_uri': event.get('ticket_uri', '<NONE>')
-            },
-            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
-            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
-            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
-        }
-    }
-    return formatted_info
