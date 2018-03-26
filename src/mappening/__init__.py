@@ -12,11 +12,11 @@ from mappening.auth.auth import auth
 
 # Configure app and register blueprints
 app = Flask(__name__)
-app.register_blueprint(events, url_prefix='/api/events')
-app.register_blueprint(pages, url_prefix='/api/pages')
-app.register_blueprint(locations, url_prefix='/api/locations')
-# app.register_blueprint(users, url_prefix='/api/users')
-# app.register_blueprint(preferences, url_prefix='/api/preferences')
+app.register_blueprint(events, url_prefix='/api/v2/events')
+app.register_blueprint(pages, url_prefix='/api/v2/pages')
+app.register_blueprint(locations, url_prefix='/api/v2/locations')
+# app.register_blueprint(users, url_prefix='/api/v2/users')
+# app.register_blueprint(preferences, url_prefix='/api/v2/preferences')
 app.register_blueprint(auth, url_prefix='/auth')
 app.config['SECRET_KEY'] = APP_SECRET_KEY
 

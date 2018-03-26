@@ -104,50 +104,45 @@ events = Blueprint('events', __name__)
 
 @events.route('/', methods=['GET'])
 def get_all_events():
-    """ 
+    """
     :Route: /
 
-    :Description: Returns a GeoJSON of all events within a few miles of UCLA 
+    :Description: Returns a GeoJSON of all events within a few miles of UCLA
 
     """
     return event_utils.find_events_in_database(print_results=True)
 
 # SEARCH
-
-@events.route('/search/<search_term>', defaults={'event_date': None}, methods=['GET'])
-@events.route('/search/<search_term>/<event_date>', methods=['GET'])
-def search_events(search_term, event_date):
-    """ 
-    :Route: /search/<search_term>/<event_date>
-
-    :Description: Returns GeoJSON of all events whose names contain the search term. Useful for a search bar. Can be used to search events on a particular day as well.
-
-    :param str search_term: a case-insensitive string that should be a substring of event names
-
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
-
+@events.route('/search', methods=['GET'])
+def search_events():
     """
+    :Route: /search
+
+    :Description: Returns GeoJSON of all events filtered by date, search term, and category. The search term is case insensitive and searched for in the event name. Useful for a search bar.
+    """
+    term = request.args.get('term')
+    date = request.args.get('date')
+    category = request.args.get('category')
+
+    search_dict = {}
     output = []
-    search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
 
-    if event_date:
-        print "Using date parameter: " + event_date 
-        date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = ucla_events_collection.find({'name': search_regex, 'start_time': date_regex_obj})
-    else:
-        print "No date parameter given..."
-        events_cursor = ucla_events_collection.find({'name': search_regex})
+    # Add to search dict
+    if term:
+        term_regex = re.compile('.*' + term + '.*', re.IGNORECASE)
+        search_dict["$or"] = [ {"name":term_regex}, {"description":term_regex} ] # MongoDB's syntax for find name in name or description
+    if date:
+        date_regex = event_utils.construct_date_regex(date)
+        search_dict['start_time'] = date_regex
+    if category:
+        cat_regex_obj = re.compile('^{0}|{0}$'.format(category.upper()))
+        search_dict['category'] = cat_regex_obj
+        print(search_dict)
 
-    if events_cursor.count() > 0:
-        for event in events_cursor:
-          output.append(event_utils.process_event_info(event))
-    else:
-        print("No event(s) matched '{}'".format(search_term))
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
+    return event_utils.find_events_in_database(search_dict)
 
 # SINGLE EVENT
-
+#TODO: Combine into one
 @events.route('/name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
     """
@@ -159,7 +154,8 @@ def get_event_by_name(event_name):
 
     """
     name_regex = re.compile(event_name, re.IGNORECASE)
-    return event_utils.find_events_in_database('name', name_regex, True)
+    search_dict = {'name': name_regex}
+    return event_utils.find_events_in_database(search_dict, name_regex, True )
 
 @events.route('/id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
@@ -171,74 +167,22 @@ def get_event_by_id(event_id):
     :param str event_id: ID string to search database for exact match
 
     """
-    return event_utils.find_events_in_database('id', event_id, True)
+    search_dict = {'id': event_id}
+    return event_utils.find_events_in_database(search_dict, True)
 
 # MULTIPLE EVENTS
-
-# Get all events with free food
-# TODO: ml => free food 
-@events.route('/food', methods=['GET'])
-def get_free_food_events():
-    return get_events_by_category('food', None)
-
-@events.route('/date/<event_date>', methods=['GET'])
-def get_events_by_date(event_date):
-    """
-    :Route: /date/<event_date>
-    
-    :Description: Returns GeoJSON of all events starting on given date
-    
-    :param str event_date: case-insensitive date string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-
-    """
-    date_regex_obj = event_utils.construct_date_regex(event_date)
-    return event_utils.find_events_in_database('start_time', date_regex_obj)
-
-@events.route('/category/<event_category>', defaults={'event_date': None}, methods=['GET'])
-@events.route('/category/<event_category>/<event_date>', methods=['GET'])
-def get_events_by_category(event_category, event_date):
-    """
-    :Route: /category/<event_category>/<event_date>
-        
-    :Description: Returns GeoJSON of all events of the given category. Can also find all events of a certain category that start on the given date as well.
-    
-    :param str event_category: case-insensitive category string to match with event categories (e.g. food, theater)
-
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
-
-    """
-    output = []
-
-    # Handle event category
-    regex_str = '^{0}|{0}$'.format(event_category.upper())
-    cat_regex_obj = re.compile(regex_str)
-
-    if event_date:
-        print "Using date parameter: " + event_date 
-        date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = ucla_events_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
-    else:
-        print "No date parameter given..."
-        events_cursor = ucla_events_collection.find({"category": cat_regex_obj})
-
-    if events_cursor.count() > 0:
-        for event in events_cursor:
-            output.append(event_utils.process_event_info(event))
-    else:
-        print("No event(s) matched '{}'".format(event_category))
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
+#TODO: Allow all events to be returned on date not just those that start on that datetime
+#TODO: Change this to search for category list when you implement ml category model
 
 # CATEGORIES
-
 @events.route('/categories', defaults={'event_date': None}, methods=['GET'])
 @events.route('/categories/<event_date>', methods=['GET'])
 def get_event_categories(event_date):
     """
     :Route: /categories/<event_date>
-    
+
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
-    
+
     :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type event_date: str or None
 
@@ -249,7 +193,7 @@ def get_event_categories(event_date):
     output = []
 
     if event_date:
-        print "Using date parameter: " + event_date 
+        print "Using date parameter: " + event_date
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = ucla_events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
@@ -280,4 +224,3 @@ def remove_db_duplicates():
     total_dups.extend(event_utils.clean_collection(events_ml_collection))
 
     return jsonify(total_dups)
-

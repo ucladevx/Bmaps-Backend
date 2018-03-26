@@ -9,15 +9,11 @@ import json
 import os
 import re
 
-def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
+def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = []
-    # for getting all events, no search query needed (empty dict)
-    search_pair = {}
-    if find_key and find_value:
-        search_pair[find_key] = find_value
 
     if one_result_expected:
-        single_event = ucla_events_collection.find_one(search_pair)
+        single_event = ucla_events_collection.find_one(find_dict)
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
@@ -25,9 +21,9 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
         else:
             # careful: output is still empty here; make sure output list never set ANYWHERE else
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
-            print('No single event with attribute {0}: value {1}'.format(find_key, find_value))
+            print('No single event with attributes:' + str(find_dict))
     else:
-        events_cursor = ucla_events_collection.find(search_pair)
+        events_cursor = ucla_events_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
                 output.append(process_event_info(event))
@@ -39,8 +35,55 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
-            print('No events found with search pair {0}: {1}.'.format(find_key, find_value))
+            print('No events found with attributes:' + str(find_dict))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
+
+#TODO: Remove all that NONE BULLSHIT
+def process_event_info_v2(event):
+    """
+        :Description: Returns GeoJSON of singular event matching event name
+
+        :param str event_name: case-insensitive name string to search database for exact match
+    """
+    formatted_info = {
+        # will ALWAYS have an ID
+        'id': event['id'],
+        'type': 'Feature',
+        'geometry': {
+            # no coordinates? default to Bruin Bear
+            'coordinates': [
+                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+            ],
+            'type': 'Point'
+        },
+        'properties': {
+            'event_name': event.get('name', '<NONE>'),
+            'description': event.get('description', '<NONE>'),
+            'hoster': event.get('hoster', '<MISSING HOST>'),
+            'start_time': processed_time(event.get('start_time', '<NONE>')),
+            'end_time': processed_time(event.get('end_time', '<NONE>')),
+            'venue': event['place'],
+            'stats': {
+                'attending': event['attending_count'],
+                'noreply': event['noreply_count'],
+                'interested': event['interested_count'],
+                'maybe': event['maybe_count']
+            },
+            # TODO: whenever category is checked, run Jorge's online ML algorithm
+            'category': event.get('category', '<NONE>'),
+            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
+            'is_cancelled': event.get('is_canceled', False),
+            'ticketing': {
+                'ticket_uri': event.get('ticket_uri', '<NONE>')
+            },
+            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
+            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
+            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
+        }
+    }
+    return formatted_info
+
 
 def process_event_info(event):
     formatted_info = {
@@ -115,7 +158,7 @@ def clean_collection(collection):
     """
     simply save each unique document and delete any that have been found already
     """
-  
+
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -143,7 +186,7 @@ def call_populate_events_database():
     print(earlier_day_bound)
     return update_ucla_events_database(earlier_day_bound)
 
-    
+
 # Get all UCLA-related Facebook events and add to database
 def update_ucla_events_database(earlier_day_bound=0):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
@@ -203,4 +246,3 @@ def update_ucla_events_database(earlier_day_bound=0):
         events_ml_collection.insert_one(event)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
-
