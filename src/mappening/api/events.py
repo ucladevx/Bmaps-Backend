@@ -19,6 +19,7 @@ These properties must have a valid value for every event.
 * stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
 * start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
 * is_cancelled: Boolean indicating event is cancelled
+* duplicate_occurrence: Boolean indicating this is a single event taking place on multiple days i.e a weekly farmers market, not a multiday event like a hackathon
 
 **Potential Event Properties**
 If these details aren't present, the JSON keys won't be present

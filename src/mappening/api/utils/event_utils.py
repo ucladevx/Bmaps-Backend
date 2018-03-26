@@ -49,11 +49,9 @@ def process_event_info(event):
     """
 
     # Remove certain keys from dictionary
-    entriesToRemove = ('_id', 'duplicate_occurrence')
-    for k in entriesToRemove:
-        # pop is basically get and remove allowing removing without checking for key
-        event.pop(k, None)
-    event.get('place', {}).pop('id', None)
+    event.pop('_id', None) # pop is basically get and remove; pop(key, default)
+    event.get('place', {}).pop('id', None) # pop is basically used as if it exists, remove it
+    eId = event.pop('id')
 
     # Clean up certain entries
     event['stats'] = {
@@ -62,15 +60,17 @@ def process_event_info(event):
         'interested': event.pop('interested_count', 0),
         'maybe': event.pop('maybe_count', 0)
     }
-    # default of {} so in and [] both work
-    if 'source' in event.get('cover', {}):
-        event['cover_picture'] = event.pop('cover', {})['source']
+    if 'source' in event.get('cover', {}): #default of get `{}` so `in` works
+        cover_picture = event.pop('cover')['source']
+        event['cover_picture'] = cover_picture
     if 'name' in event.get('hoster', {}):
-        event['hoster'] = event.pop('hoster')['name']
+        host = event.pop('hoster')['name']
+        event['hoster'] = host
+
     # Create GeoJSON
     formatted_info = {
         # will ALWAYS have an ID
-        'id': event.pop('id'),
+        'id': eId,
         'type': 'Feature',
         'geometry': {
             # no coordinates? default to Bruin Bear
