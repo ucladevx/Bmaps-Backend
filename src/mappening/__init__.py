@@ -1,5 +1,3 @@
-from mappening.utils.secrets import APP_SECRET_KEY
-
 from flask import Flask
 from flask_cors import CORS, cross_origin
 
@@ -21,7 +19,6 @@ app.register_blueprint(locations, url_prefix='/api/v2/locations')
 # app.register_blueprint(users, url_prefix='/api/v2/users')
 # app.register_blueprint(preferences, url_prefix='/api/v2/preferences')
 app.register_blueprint(auth, url_prefix='/auth')
-app.config['SECRET_KEY'] = APP_SECRET_KEY
 
 # Enable Cross Origin Resource Sharing (CORS)
 cors = CORS(app)
