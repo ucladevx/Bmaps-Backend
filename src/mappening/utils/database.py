@@ -36,6 +36,10 @@ users_collection = db.users
 # users.py
 # map_users_collection = db.map_users
 
+# ml.py
+# events_ml_collection = db.events_ml
+# ucla_events_collection = db.ucla_events
+
 # test
 test_collection = db.test
 
