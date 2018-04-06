@@ -11,7 +11,7 @@ import json
 import re
 from tqdm import tqdm
 
-# Route Prefix: /api/events
+# Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
 
 @events.route('/', methods=['GET'])
@@ -121,18 +121,3 @@ def get_event_categories(event_date):
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
-
-# DELETE
-
-# If needed, clean database of duplicate documents
-# TODO: NOT a public route @Jason do you need this here or where or what
-@events.route('/remove-duplicates', methods=['DELETE'])
-def remove_db_duplicates():
-    total_dups = []
-
-    # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
-    total_dups.extend(event_utils.clean_collection(ucla_events_collection))
-    total_dups.extend(event_utils.clean_collection(saved_pages_collection))
-    total_dups.extend(event_utils.clean_collection(events_ml_collection))
-
-    return jsonify(total_dups)
