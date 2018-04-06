@@ -1,113 +1,132 @@
 Events
 ======
 
-Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url `api.ucladevx.com/events <http://api.ucladevx.com/v2/events>`_ and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.
+Welcome to the Mappening Events API! Through a RESTful interface, this API provides information on all the events happening around UCLA. The simplest way to access this data is to go to the url `whatsmappening.io/api/v1/events <https://whatsmappening.io/api/v1/events>`_ to get a comprehensive listing of all upcoming UCLA events. See the explanation of |event| objects below. The Events API offers various ways to search and filter the event data and also allows for independent processing and filtering.
 
------------------
-Event Object
------------------
-An ``Event Object`` is a GeoJSON with the following keys:
+Event
+-----
 
-.. class:: 'math'
+.. |event| replace:: `Event`_
 
-    Description here.
+An |event| object is a GeoJSON with the following keys:
 
-    :type: "Point"
-    :coordinates: ``latitude`` and ``longitude``
-    :Authors: - Me
-              - Myself
-              - I
+.. data:: geometry
 
-    .. class:: help
+    .. |geometry| replace:: :data:`geometry`
 
-    .. class:: math::help
+    The |geometry| object contains the coordinates for the |event| in the format required by Mapbox. The |geometry| data must be set according to the location information of the |event|. If no location information is provided or can be supplied through the locations API, the event pin cannot be displayed with Mapbox.
 
-    .. class:: math:help
+    .. code-block:: rest
+        :caption: |event| Object Structure:
 
-    .. class:: *type* math:help
+        geometry: { type: "Point", coordinates: [ ``latitude``, ``longitude`` ]}
 
+    .. attribute:: type
 
-.. |geometry| replace:: :class:`geometry`
+        The *type* of the |geometry| object. Should always be of value ``"Point"`` as |event| locations are treated as a point with a singular ``(latitude, longitude)`` pair.
 
-.. |keytoreplace| replace:: replacement *text*
+        .. note:: An |geometry|'s type will always be of value "Point".
 
-.. class:: geometry: { type: "Point", coordinates: [ ``latitude``, ``longitude`` ]}
+    .. attribute:: geometry.coordinates
 
-   The |geometry| manages an *optional* value. This value may be in either an
-   initialized state, or an uninitialized state. This value is guaranteed to be
-   allocated within the |geometry|. Instead of modelling a pointer, such as
-   ``std::unique_ptr<T>`` or ``std::shared_ptr<T>``, |geometry| models an
-   object, even though :func:`optional\<T>::operator->` and
-   :func:`optional\<T>::operator*` are provided.
+        The *coordinates* of the |geometry| object. Contains ``latitude`` and ``longitude`` Number values that correspond to the location of the |event|.
 
-   An |geometry| object is *engaged* when one of the following occurs:
+        :latitude: a Number value between the range ``(-90, 90)``
 
-    * The object is initialized with a value of type T
-    * The object is assigned an *engaged* |geometry|.
+        :longitude: a Number value between the range ``(-180, 180)``
 
-   .. function:: optional (optional const&)
+.. data:: id
 
-      Copies the contents of the incoming |geometry|. If the incoming
-      |geometry| is engaged, the contents of it are initialized into the
-      new |geometry| object.
+    .. |id| replace:: :data:`id`
 
-      .. warning:: An |geometry|'s :type:`value_type` *may not* be:
+    The |id| contains a unique *ID* for the |event| object.
 
-         * :class:`in_place_t`
-         * :class:`nullopt_t`
-         * ``std::nullptr_t``
-         * ``void``
-         * any type for which ``std::is_reference<T>::value`` is *true*.
-         * any type for which ``std::is_object<T>::value`` is *false*
+    .. note:: Each |id| is unique. This allows for searching for events by index.
 
-   .. function:: constexpr optional (nullopt_tr) noexcept
-                 constexpr optional () noexcept
+.. data:: properties
 
-      Constructs a new |geometry| in a disengaged state.
+    .. |properties| replace:: :data:`properties`
 
-   .. function:: constexpr optional (value_type const&)
-                 constexpr optional (value_type&&)
+    Contains all the |event| information and will be explored further below.
 
-      Constructs a new |geometry| into an *engaged* state with the contents of
-      the value_type.
+    .. code-block:: rest
+        :caption: |properties| Object Structure:
 
-      :noexcept: ``std::is_nothrow_move_constructible<value_type>``
+        properties: { 
+          category: "<NONE>", 
+          duplicate_occurence: false, 
+          is_cancelled: false, 
+          name: "Mappening Launch", 
+          start_time: "2018-08-21T04:20:00-0700", 
+          stats: { attending: #, interested: #, maybe: #, noreply: # }
+        }
+        
+    **Mandatory Event Properties**
 
-   .. function:: explicit constexpr optional (\
-                   in_place_t,\
-                   std::initializer_list<U>,\
-                   Args\
-                 )
-                 explicit constexpr optional (in_place_t, Args)
+        These properties must have a valid value for every event.
 
-      Constructs a new |geometry| into an *engaged* state by constructing a
-      :type:`value_type` in place with the variadic arguments *Args*.
+        .. attribute:: category
 
-* **geometry:** has ``type`` of "Point" and coordinates for ``latitude`` and ``longitude``
-* **id:** a unique id for this event
-* **properties:** contains all the event information and will be explored further below
+            The *category* of the |event|. All the categories can be seen by dynamically calling ``/categories``. About half of events have a category and the rest have <NONE>.
 
-**Mandatory Event Properties**
+        .. attribute:: name
 
-These properties must have a valid value for every event.
+            The String of the |event|'s name. A specific event can be searched by calling ``/name/<event_name>``.
 
-* **category:** All the categories can be seen by dynamically calling /event-categories. About half of events have a category and the rest have <NONE>
-* **name:** String of event's name
-* **stats:** JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys 'attending', 'noreply', 'interested', and 'maybe' each with a integer value.
-* **start_time:** String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
-* **is_cancelled:** Boolean indicating event is cancelled
-* **duplicate_occurrence:** Boolean indicating this is a single event taking place on multiple days i.e a weekly farmers market, not a multiday event like a hackathon
+        .. attribute:: stats
 
-**Potential Event Properties**
-If these details aren't present, the JSON keys won't be present
-* **description:** String description
-* **place:** JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential place details such as name can be seen in the example event below
-* **hoster:** string of the host name
-* **ticket_uri:** link to event ticketing
-* **end_time:** String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800
-* **free_food:** If event has free food, currently just a strong NO
+            The JSON for events from Facebook with attendance stats with a ~6 hour accuracy. Contains 4 keys: ``attending``, ``noreply``, ``interested``, and ``maybe``, each with an integer value.
 
-**Sample Event**::
+        .. attribute:: start_time
+
+            The String start time of the |event| in the format ``Sat, 17 Feb 2018 23:30:00 GMT-0800``.
+            
+        .. attribute:: is_cancelled
+
+            The Boolean indicating that the |event| is cancelled.
+            
+        .. attribute:: duplicate_occurrence
+
+            The Boolean indicating this is a single |event| taking place on multiple days i.e a weekly farmers market, not a multiday event like a hackathon.
+
+    **Potential Event Properties**
+
+        If these details/properties aren't present, the JSON keys won't be present.
+
+        .. attribute:: cover_picture
+
+            The String url to the cover picture associated with the |event|.
+
+        .. attribute:: time_updated
+
+            The time the |event| was last updated.
+
+        .. attribute:: description
+
+            The String of the |event|'s description.
+
+        .. attribute:: place
+
+            A JSON with a ``location`` key with a mandatory ``country``, ``city``, ``latitude``, and ``longitude``. Other potential place details such as ``name`` can be seen in the example event below.
+
+        .. attribute:: hoster
+
+            The String of the host name.
+
+        .. attribute:: ticket_uri
+
+            The link to the |event|'s ticketing.
+
+        .. attribute:: end_time
+
+            The String end time of the |event| in the format ``Sat, 17 Feb 2018 23:30:00 GMT-0800``.
+
+        .. attribute:: free_food
+
+            Whether or not the |event| has free food, currently just a strong NO.
+
+.. code-block:: rest
+    :caption: Sample |event| Object
 
     {
       geometry: {
@@ -118,11 +137,12 @@ If these details aren't present, the JSON keys won't be present
       },
       id: "175752283196850",
       properties: {
+        category: "Tech",
         cover_picture: "https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27021656_1621551394602436_6299488329760837839_o.jpg?oh=057a6b50a89f8a1fa3684c7c25563b86&oe=5B035F3D",
         description: "LA Hacks is one of the biggest student-run hackathons on the West Coast, held every spring at UCLA's iconic Pauley Pavilion. Over 1000 students from distinguished universities across the nation work together in teams to challenge themselves and create something beyond their comfort level - all in the span of 36 hours. Collaborate and build creative solutions to problems, while pushing the limits of your mind and body to make something amazing. From Evan Spiegel (CEO, Snapchat) and Sean Rad (CEO, Tinder), to 8 time gold medalist, Apolo Ohno, and a special pre-screening of HBO's Silicon Valley, LA Hacks has welcomed many leaders and role models in tech. With industry mentors, technical workshops, and founder panels, LA Hacks works to broaden the scope of technology. EVENT DETAILS: Date: March 30th - April 1st, 2018 Location: Pauley Pavilion WHO WE ARE: LA Hacks epitomizes innovation, perseverance, and also pushing hackers to test their potential. We are UCLA students from many corners of campus, all united by one big goal: to give over 1000 college students the opportunity to come together and collaborate with industry leaders and innovative companies to develop impactful products with cutting-edge technologies.",
         end_time: "2018-04-01T15:00:00-0700",
         hoster: "LA Hacks",
-        is_canceled: false,
+        is_cancelled: false,
         name: "LA Hacks 2018",
         place: {
           location: {
@@ -155,10 +175,3 @@ API DOCS
 .. automodule:: mappening.api.events
    :members:
 
-
-HC.class
-========
-
-::
-
-  class = require 'HC.class'
