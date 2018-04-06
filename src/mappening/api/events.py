@@ -14,6 +14,9 @@ from tqdm import tqdm
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
 
+# Enable Cross Origin Resource Sharing (CORS)
+# cors = CORS(events)
+
 @events.route('/', methods=['GET'])
 def get_all_events():
     """

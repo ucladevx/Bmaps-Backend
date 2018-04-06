@@ -16,6 +16,9 @@ from tqdm import tqdm
 # Route Prefix: /api/v1/events
 eventsLegacy = Blueprint('eventsLegacy', __name__)
 
+# Enable Cross Origin Resource Sharing (CORS)
+# cors = CORS(eventsLegacy)
+
 @eventsLegacy.route('/events', methods=['GET'])
 def get_all_events():
     return event_utils.find_events_in_database(print_results=True, legacy=True)
@@ -59,19 +62,19 @@ def get_event_by_id(event_id):
 # Get all events with free food
 @eventsLegacy.route('/event-food', methods=['GET'])
 def get_free_food_events():
-    return get_events_by_category('food', None)
+    return get_events_by_category('food')
 
 @eventsLegacy.route('/event-date/<event_date>', methods=['GET'])
 def get_events_by_date(event_date):
     date_regex_obj = event_utils.construct_date_regex(event_date)
-    return event_utils.find_events_in_database('start_time', date_regex_obj, legacy=True)
+    return event_utils.find_events_in_database({'start_time': date_regex_obj}, legacy=True)
 
 @eventsLegacy.route('/events-by-category-and-date', defaults={'event_category': None}, methods=['GET'])
 @eventsLegacy.route('/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
     event_date = request.args['date']
     if event_category == None:
-        event_category = request.args['event_category']
+        event_category = request.args['category']
 
     output = []
 
@@ -96,7 +99,7 @@ def get_events_by_category(event_category):
 
 # CATEGORIES
 
-@eventsLegacy.route('/event_categories', defaults={'event_date': None}, methods=['GET'])
+@eventsLegacy.route('/event-categories', defaults={'event_date': None}, methods=['GET'])
 @eventsLegacy.route('/event-categories-by-date/<event_date>', methods=['GET'])
 def get_event_categories(event_date):
     # Iterate through all events and get unique list of all categories
