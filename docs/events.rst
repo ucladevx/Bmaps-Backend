@@ -168,9 +168,8 @@ An |event| object is a GeoJSON with the following keys:
       type: "Feature"
     }
 
------------------
 API DOCS
------------------
+========
 
 .. automodule:: mappening.api.events
    :members:

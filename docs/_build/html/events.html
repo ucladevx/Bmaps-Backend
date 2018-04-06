@@ -1,151 +1,376 @@
 
 
-<!doctype html>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Events &mdash; Mappening 1.0.0 documentation</title>
+  
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Events &#8212; DevX 1.0.0 documentation</title>
-    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/bizstyle.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Welcome to DevX’s documentation!" href="index.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <!--[if lt IE 9]>
-    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
-    <![endif]-->
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to DevX’s documentation!"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">DevX 1.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to DevX’s documentation!</a></p>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Mappening 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="Welcome to DevX’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Mappening
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Events</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-mappening.api.events">API DOCS</a></li>
+</ul>
+
+            
+          
         </div>
       </div>
+    </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Mappening</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Events</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
             
-  <div class="section" id="module-mappening.api.events">
-<span id="events"></span><h1>Events<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h1>
-<p>Welcome to the Mappening Events API! Through this RESTful interface, we provide you with all the events happening around UCLA. The easiest way to use this is to simply go to the url <a class="reference external" href="http://api.ucladevx.com/events">api.ucladevx.com/events</a> and take all the events. See the explanation of events below. We offer many ways to search and filter these events through our api though you could do it yourself.</p>
-<div class="section" id="event-object">
-<h2>Event Object<a class="headerlink" href="#event-object" title="Permalink to this headline">¶</a></h2>
-<p>An <em>event</em> object is a GeoJSON which means it has the following keys:</p>
-<ul class="simple">
-<li>geometry: with a type of “Point” and coordinates for latitude and longitude</li>
-<li>id: a unique id for this event</li>
-<li>properties: this contains all the event information and will be explored below</li>
-</ul>
-<p><strong>Mandatory Event Properties</strong></p>
-<p>These properties must have a valid value for every event.</p>
-<ul class="simple">
-<li>category: All the categories can be seen by dynamically calling /event-categories. About half of events have a category and the rest have &lt;NONE&gt;</li>
-<li>event_name: String of event’s name</li>
-<li>stats: JSON for events from Facebook with attendance stats from at ~6 hour accuracy. Will have 4 keys ‘attending’, ‘noreply’, ‘interested’, and ‘maybe’ each with a integer value.</li>
-<li>start_time: String start time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800</li>
-<li>is_cancelled: Boolean indicating event is cancelled</li>
-</ul>
-<p><strong>Potential Event Properties</strong></p>
-<p>If the actual event has no value, the value will be &lt;NONE&gt;. Make sure to check for none in your code to avoid errors.</p>
-<ul class="simple">
-<li>description: String description</li>
-<li>venue: A JSON with a location key with a mandatory country, city, latitude, and longitude. Other potential venue details such as name can be seen in the example event below</li>
-<li>cover_picture: A url to a photo for the event</li>
-<li>ticketing: A JSON with a single ticket_uri element with a url to the ticketing site or &lt;NONE&gt;</li>
-<li>end_time: String end time of event in the format Sat, 17 Feb 2018 23:30:00 GMT-0800</li>
-<li>free_food: If event has free food, currently just a strong NO</li>
-</ul>
-<p><strong>Sample Event</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;coordinates&quot;</span><span class="p">:</span> <span class="p">[</span>
-      <span class="o">-</span><span class="mf">118.451994</span><span class="p">,</span>
-      <span class="mf">34.071474</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Point&quot;</span>
-  <span class="p">},</span>
-  <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;1766863560001661&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;NONE&gt;&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cover_picture&quot;</span><span class="p">:</span> <span class="s2">&quot;https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27356375_1972757046097696_6206118120755555565_o.jpg?oh=2240b43f536e76f9cf00410f602af386&amp;oe=5B136061&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Hack on the Hill IV (HOTH) is a 12 hour, beginner-friendly hackathon designed to give beginners a glimpse into what a real hackathon would be and feel like. During HOTH, there are workshops, mentors, and amazing prizes for the best hacks. As a sequel to HOTH III, HOTH IV features double the attendance and hacking tracks hosted by different ACM committees. We are also excited to announce that we&#39;ll be providing select hardware for hacking as well! LEARN MORE AND SIGN-UP HERE (applications close 2/10 at midnight): https://hoth.splashthat.com/ Sponsored by IS Associates, a UCLA-sponsored organization that provides an educational forum for the management and understanding of information technology. Learn more at: https://isassociates.ucla.edu&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;duplicate_occurrence&quot;</span><span class="p">:</span> <span class="s2">&quot;NO&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="s2">&quot;Sat, 17 Feb 2018 23:30:00 GMT-0800&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;event_name&quot;</span><span class="p">:</span> <span class="s2">&quot;ACM Hack | Hack on the Hill IV&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;free_food&quot;</span><span class="p">:</span> <span class="s2">&quot;NO&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hoster&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;369769286554402&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;UCLA Class of 2020&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;is_cancelled&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
-    <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="s2">&quot;Sat, 17 Feb 2018 08:30:00 GMT-0800&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;stats&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;attending&quot;</span><span class="p">:</span> <span class="mi">97</span><span class="p">,</span>
-      <span class="s2">&quot;interested&quot;</span><span class="p">:</span> <span class="mi">199</span><span class="p">,</span>
-      <span class="s2">&quot;maybe&quot;</span><span class="p">:</span> <span class="mi">199</span><span class="p">,</span>
-      <span class="s2">&quot;noreply&quot;</span><span class="p">:</span> <span class="mi">107</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;ticketing&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;ticket_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://hoth.splashthat.com/&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;venue&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;955967887795957&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="s2">&quot;Los Angeles&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;United States&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">34.071474</span><span class="p">,</span>
-        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">118.451994</span><span class="p">,</span>
-        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;CA&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;street&quot;</span><span class="p">:</span> <span class="s2">&quot;330 De Neve Dr Ste L-16&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;zip&quot;</span><span class="p">:</span> <span class="s2">&quot;90024&quot;</span>
-      <span class="p">},</span>
-      <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carnesale Commons&quot;</span>
-    <span class="p">}</span>
-  <span class="p">},</span>
-  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Feature&quot;</span>
-<span class="p">}</span>
+            <a href="_sources/events.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="events">
+<h1>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the Mappening Events API! Through a RESTful interface, this API provides information on all the events happening around UCLA. The simplest way to access this data is to go to the url <a class="reference external" href="https://whatsmappening.io/api/v1/events">whatsmappening.io/api/v1/events</a> to get a comprehensive listing of all upcoming UCLA events. See the explanation of <a class="reference internal" href="#event">Event</a> objects below. The Events API offers various ways to search and filter the event data and also allows for independent processing and filtering.</p>
+<div class="section" id="event">
+<h2>Event<a class="headerlink" href="#event" title="Permalink to this headline">¶</a></h2>
+<p>An <a class="reference internal" href="#event">Event</a> object is a GeoJSON with the following keys:</p>
+<dl class="data">
+<dt id="geometry">
+<code class="descname">geometry</code><a class="headerlink" href="#geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#geometry" title="geometry"><code class="xref py py-data docutils literal notranslate"><span class="pre">geometry</span></code></a> object contains the coordinates for the <a class="reference internal" href="#event">Event</a> in the format required by Mapbox. The <a class="reference internal" href="#geometry" title="geometry"><code class="xref py py-data docutils literal notranslate"><span class="pre">geometry</span></code></a> data must be set according to the location information of the <a class="reference internal" href="#event">Event</a>. If no location information is provided or can be supplied through the locations API, the event pin cannot be displayed with Mapbox.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text"><a class="reference internal" href="#event">Event</a> Object Structure:</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>geometry: { type: &quot;Point&quot;, coordinates: [ <span class="s">``latitude``</span>, <span class="s">``longitude``</span> ]}
 </pre></div>
 </div>
 </div>
-<div class="section" id="api-docs">
-<h2>API DOCS<a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h2>
+<dl class="attribute">
+<dt id="type">
+<code class="descname">type</code><a class="headerlink" href="#type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <em>type</em> of the <a class="reference internal" href="#geometry" title="geometry"><code class="xref py py-data docutils literal notranslate"><span class="pre">geometry</span></code></a> object. Should always be of value <code class="docutils literal notranslate"><span class="pre">&quot;Point&quot;</span></code> as <a class="reference internal" href="#event">Event</a> locations are treated as a point with a singular <code class="docutils literal notranslate"><span class="pre">(latitude,</span> <span class="pre">longitude)</span></code> pair.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">An <a class="reference internal" href="#geometry" title="geometry"><code class="xref py py-data docutils literal notranslate"><span class="pre">geometry</span></code></a>’s type will always be of value “Point”.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geometry.coordinates">
+<code class="descclassname">geometry.</code><code class="descname">coordinates</code><a class="headerlink" href="#geometry.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <em>coordinates</em> of the <a class="reference internal" href="#geometry" title="geometry"><code class="xref py py-data docutils literal notranslate"><span class="pre">geometry</span></code></a> object. Contains <code class="docutils literal notranslate"><span class="pre">latitude</span></code> and <code class="docutils literal notranslate"><span class="pre">longitude</span></code> Number values that correspond to the location of the <a class="reference internal" href="#event">Event</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Latitude:</th><td class="field-body">a Number value between the range <code class="docutils literal notranslate"><span class="pre">(-90,</span> <span class="pre">90)</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Longitude:</th><td class="field-body">a Number value between the range <code class="docutils literal notranslate"><span class="pre">(-180,</span> <span class="pre">180)</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="id">
+<code class="descname">id</code><a class="headerlink" href="#id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#id" title="id"><code class="xref py py-data docutils literal notranslate"><span class="pre">id</span></code></a> contains a unique <em>ID</em> for the <a class="reference internal" href="#event">Event</a> object.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Each <a class="reference internal" href="#id" title="id"><code class="xref py py-data docutils literal notranslate"><span class="pre">id</span></code></a> is unique. This allows for searching for events by index.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="properties">
+<code class="descname">properties</code><a class="headerlink" href="#properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all the <a class="reference internal" href="#event">Event</a> information and will be explored further below.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><a class="reference internal" href="#properties" title="properties"><code class="xref py py-data docutils literal notranslate"><span class="pre">properties</span></code></a> Object Structure:</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>properties: {
+  category: &quot;&lt;NONE&gt;&quot;,
+  duplicate_occurence: false,
+  is_cancelled: false,
+  name: &quot;Mappening Launch&quot;,
+  start_time: &quot;2018-08-21T04:20:00-0700&quot;,
+  stats: { attending: #, interested: #, maybe: #, noreply: # }
+}
+</pre></div>
+</div>
+</div>
+<p><strong>Mandatory Event Properties</strong></p>
+<blockquote>
+<div><p>These properties must have a valid value for every event.</p>
+<dl class="attribute">
+<dt id="category">
+<code class="descname">category</code><a class="headerlink" href="#category" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <em>category</em> of the <a class="reference internal" href="#event">Event</a>. All the categories can be seen by dynamically calling <code class="docutils literal notranslate"><span class="pre">/categories</span></code>. About half of events have a category and the rest have &lt;NONE&gt;.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="name">
+<code class="descname">name</code><a class="headerlink" href="#name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String of the <a class="reference internal" href="#event">Event</a>’s name. A specific event can be searched by calling <code class="docutils literal notranslate"><span class="pre">/name/&lt;event_name&gt;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stats">
+<code class="descname">stats</code><a class="headerlink" href="#stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>The JSON for events from Facebook with attendance stats with a ~6 hour accuracy. Contains 4 keys: <code class="docutils literal notranslate"><span class="pre">attending</span></code>, <code class="docutils literal notranslate"><span class="pre">noreply</span></code>, <code class="docutils literal notranslate"><span class="pre">interested</span></code>, and <code class="docutils literal notranslate"><span class="pre">maybe</span></code>, each with an integer value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="start_time">
+<code class="descname">start_time</code><a class="headerlink" href="#start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String start time of the <a class="reference internal" href="#event">Event</a> in the format <code class="docutils literal notranslate"><span class="pre">Sat,</span> <span class="pre">17</span> <span class="pre">Feb</span> <span class="pre">2018</span> <span class="pre">23:30:00</span> <span class="pre">GMT-0800</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="is_cancelled">
+<code class="descname">is_cancelled</code><a class="headerlink" href="#is_cancelled" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Boolean indicating that the <a class="reference internal" href="#event">Event</a> is cancelled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="duplicate_occurrence">
+<code class="descname">duplicate_occurrence</code><a class="headerlink" href="#duplicate_occurrence" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Boolean indicating this is a single <a class="reference internal" href="#event">Event</a> taking place on multiple days i.e a weekly farmers market, not a multiday event like a hackathon.</p>
+</dd></dl>
+
+</div></blockquote>
+<p><strong>Potential Event Properties</strong></p>
+<blockquote>
+<div><p>If these details/properties aren’t present, the JSON keys won’t be present.</p>
+<dl class="attribute">
+<dt id="cover_picture">
+<code class="descname">cover_picture</code><a class="headerlink" href="#cover_picture" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String url to the cover picture associated with the <a class="reference internal" href="#event">Event</a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="time_updated">
+<code class="descname">time_updated</code><a class="headerlink" href="#time_updated" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time the <a class="reference internal" href="#event">Event</a> was last updated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="description">
+<code class="descname">description</code><a class="headerlink" href="#description" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String of the <a class="reference internal" href="#event">Event</a>’s description.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="place">
+<code class="descname">place</code><a class="headerlink" href="#place" title="Permalink to this definition">¶</a></dt>
+<dd><p>A JSON with a <code class="docutils literal notranslate"><span class="pre">location</span></code> key with a mandatory <code class="docutils literal notranslate"><span class="pre">country</span></code>, <code class="docutils literal notranslate"><span class="pre">city</span></code>, <code class="docutils literal notranslate"><span class="pre">latitude</span></code>, and <code class="docutils literal notranslate"><span class="pre">longitude</span></code>. Other potential place details such as <code class="docutils literal notranslate"><span class="pre">name</span></code> can be seen in the example event below.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hoster">
+<code class="descname">hoster</code><a class="headerlink" href="#hoster" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String of the host name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ticket_uri">
+<code class="descname">ticket_uri</code><a class="headerlink" href="#ticket_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>The link to the <a class="reference internal" href="#event">Event</a>’s ticketing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="end_time">
+<code class="descname">end_time</code><a class="headerlink" href="#end_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The String end time of the <a class="reference internal" href="#event">Event</a> in the format <code class="docutils literal notranslate"><span class="pre">Sat,</span> <span class="pre">17</span> <span class="pre">Feb</span> <span class="pre">2018</span> <span class="pre">23:30:00</span> <span class="pre">GMT-0800</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="free_food">
+<code class="descname">free_food</code><a class="headerlink" href="#free_food" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether or not the <a class="reference internal" href="#event">Event</a> has free food, currently just a strong NO.</p>
+</dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Sample <a class="reference internal" href="#event">Event</a> Object</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>{
+  geometry: {
+    coordinates: [-118.44681959102,
+      34.070367696979
+    ],
+    type: &quot;Point&quot;
+  },
+  id: &quot;175752283196850&quot;,
+  properties: {
+    category: &quot;Tech&quot;,
+    cover_picture: &quot;https://scontent.xx.fbcdn.net/v/t31.0-8/s720x720/27021656_1621551394602436_6299488329760837839_o.jpg?oh=057a6b50a89f8a1fa3684c7c25563b86&amp;oe=5B035F3D&quot;,
+    description: &quot;LA Hacks is one of the biggest student-run hackathons on the West Coast, held every spring at UCLA&#39;s iconic Pauley Pavilion. Over 1000 students from distinguished universities across the nation work together in teams to challenge themselves and create something beyond their comfort level - all in the span of 36 hours. Collaborate and build creative solutions to problems, while pushing the limits of your mind and body to make something amazing. From Evan Spiegel (CEO, Snapchat) and Sean Rad (CEO, Tinder), to 8 time gold medalist, Apolo Ohno, and a special pre-screening of HBO&#39;s Silicon Valley, LA Hacks has welcomed many leaders and role models in tech. With industry mentors, technical workshops, and founder panels, LA Hacks works to broaden the scope of technology. EVENT DETAILS: Date: March 30th - April 1st, 2018 Location: Pauley Pavilion WHO WE ARE: LA Hacks epitomizes innovation, perseverance, and also pushing hackers to test their potential. We are UCLA students from many corners of campus, all united by one big goal: to give over 1000 college students the opportunity to come together and collaborate with industry leaders and innovative companies to develop impactful products with cutting-edge technologies.&quot;,
+    end_time: &quot;2018-04-01T15:00:00-0700&quot;,
+    hoster: &quot;LA Hacks&quot;,
+    is_cancelled: false,
+    name: &quot;LA Hacks 2018&quot;,
+    place: {
+      location: {
+        city: &quot;Los Angeles&quot;,
+        country: &quot;United States&quot;,
+        latitude: 34.070367696979,
+        longitude: -118.44681959102,
+        state: &quot;CA&quot;,
+        street: &quot;301 Westwood Plz&quot;,
+        zip: &quot;90095&quot;
+      },
+      name: &quot;Pauley Pavilion&quot;
+    },
+    start_time: &quot;2018-03-30T16:00:00-0700&quot;,
+    stats: {
+      attending: 179,
+      interested: 1473,
+      maybe: 1473,
+      noreply: 293
+    },
+    time_updated: &quot;2018-03-25 19:10:07.585374&quot;
+  },
+  type: &quot;Feature&quot;
+}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="module-mappening.api.events">
+<span id="api-docs"></span><h1>API DOCS<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="mappening.api.events.get_all_events">
 <code class="descclassname">mappening.api.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_all_events" title="Permalink to this definition">¶</a></dt>
@@ -213,95 +438,90 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="mappening.api.events.get_events_by_category">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_events_by_category</code><span class="sig-paren">(</span><em>event_category</em>, <em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_events_by_category" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/category/&lt;event_category&gt;/&lt;event_date&gt;</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events of the given category. Can also find all events of a certain category that start on the given date as well.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>event_category</strong> (<em>str</em>) – case-insensitive category string to match with event categories (e.g. food, theater)</li>
-<li><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="mappening.api.events.get_events_by_date">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_events_by_date</code><span class="sig-paren">(</span><em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_events_by_date" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/date/&lt;event_date&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of all events starting on given date</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_date</strong> (<em>str</em>) – case-insensitive date string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="mappening.api.events.search_events">
-<code class="descclassname">mappening.api.events.</code><code class="descname">search_events</code><span class="sig-paren">(</span><em>search_term</em>, <em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.search_events" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">mappening.api.events.</code><code class="descname">search_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.search_events" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search/&lt;search_term&gt;/&lt;event_date&gt;</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/search</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events whose names contain the search term. Useful for a search bar. Can be used to search events on a particular day as well.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>search_term</strong> (<em>str</em>) – a case-insensitive string that should be a substring of event names</li>
-<li><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
-</ul>
-</td>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of all events filtered by date, search term, and category. The search term is case insensitive and searched for in the event name. Useful for a search bar.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 </div>
-</div>
 
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to DevX’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Mappening.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to DevX’s documentation!"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">DevX 1.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2018, DevX.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.0.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
