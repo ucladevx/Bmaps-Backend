@@ -13,17 +13,11 @@ import json
 import re
 from tqdm import tqdm
 
-# Route Prefix: /api/events
+# Route Prefix: /api/v1/events
 eventsLegacy = Blueprint('eventsLegacy', __name__)
 
-@eventsLegacy.route('/', methods=['GET'])
+@eventsLegacy.route('/events', methods=['GET'])
 def get_all_events():
-    """
-    :Route: /
-
-    :Description: Returns a GeoJSON of all events within a few miles of UCLA
-
-    """
     return event_utils.find_events_in_database(print_results=True, legacy=True)
 
 # SEARCH
@@ -31,17 +25,6 @@ def get_all_events():
 @eventsLegacy.route('/search/<search_term>', defaults={'event_date': None}, methods=['GET'])
 @eventsLegacy.route('/search/<search_term>/<event_date>', methods=['GET'])
 def search_events(search_term, event_date):
-    """
-    :Route: /search/<search_term>/<event_date>
-
-    :Description: Returns GeoJSON of all events whose names contain the search term. Useful for a search bar. Can be used to search events on a particular day as well.
-
-    :param str search_term: a case-insensitive string that should be a substring of event names
-
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
-
-    """
     output = []
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
 
@@ -62,66 +45,34 @@ def search_events(search_term, event_date):
 
 # SINGLE EVENT
 
-@eventsLegacy.route('/name/<event_name>', methods=['GET'])
+@eventsLegacy.route('/event-name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
-    """
-    :Route: /name/<event_name>
-
-    :Description: Returns GeoJSON of singular event matching event name
-
-    :param str event_name: case-insensitive name string to search database for exact match
-
-    """
     name_regex = re.compile(event_name, re.IGNORECASE)
     return event_utils.find_events_in_database({'name': name_regex}, True, legacy=True)
 
-@eventsLegacy.route('/id/<event_id>', methods=['GET'])
+@eventsLegacy.route('/event-id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
-    """
-    :Route: /id/<event_id>
-
-    :Description: Returns GeoJSON of singular event matching event ID
-
-    :param str event_id: ID string to search database for exact match
-
-    """
     return event_utils.find_events_in_database({'id': event_id}, True, legacy=True)
 
 # MULTIPLE EVENTS
 
 # Get all events with free food
-# TODO: ml => free food
-@eventsLegacy.route('/food', methods=['GET'])
+@eventsLegacy.route('/event-food', methods=['GET'])
 def get_free_food_events():
     return get_events_by_category('food', None)
 
-@eventsLegacy.route('/date/<event_date>', methods=['GET'])
+@eventsLegacy.route('/event-date/<event_date>', methods=['GET'])
 def get_events_by_date(event_date):
-    """
-    :Route: /date/<event_date>
-
-    :Description: Returns GeoJSON of all events starting on given date
-
-    :param str event_date: case-insensitive date string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-
-    """
     date_regex_obj = event_utils.construct_date_regex(event_date)
     return event_utils.find_events_in_database('start_time', date_regex_obj, legacy=True)
 
-@eventsLegacy.route('/category/<event_category>', defaults={'event_date': None}, methods=['GET'])
-@eventsLegacy.route('/category/<event_category>/<event_date>', methods=['GET'])
-def get_events_by_category(event_category, event_date):
-    """
-    :Route: /category/<event_category>/<event_date>
+@eventsLegacy.route('/events-by-category-and-date', defaults={'event_category': None}, methods=['GET'])
+@eventsLegacy.route('/event-category/<event_category>', methods=['GET'])
+def get_events_by_category(event_category):
+    event_date = request.args['date']
+    if event_category == None:
+        event_category = request.args['event_category']
 
-    :Description: Returns GeoJSON of all events of the given category. Can also find all events of a certain category that start on the given date as well.
-
-    :param str event_category: case-insensitive category string to match with event categories (e.g. food, theater)
-
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
-
-    """
     output = []
 
     # Handle event category
@@ -145,18 +96,9 @@ def get_events_by_category(event_category, event_date):
 
 # CATEGORIES
 
-@eventsLegacy.route('/categories', defaults={'event_date': None}, methods=['GET'])
-@eventsLegacy.route('/categories/<event_date>', methods=['GET'])
+@eventsLegacy.route('/event_categories', defaults={'event_date': None}, methods=['GET'])
+@eventsLegacy.route('/event-categories-by-date/<event_date>', methods=['GET'])
 def get_event_categories(event_date):
-    """
-    :Route: /categories/<event_date>
-
-    :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
-
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
-
-    """
     # Iterate through all events and get unique list of all categories
     # If date was passed in, only check events starting on that date
     uniqueList = []
@@ -179,18 +121,3 @@ def get_event_categories(event_date):
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': output})
-
-# DELETE
-
-# If needed, clean database of duplicate documents
-# TODO: NOT a public route @Jason do you need this here or where or what
-@eventsLegacy.route('/remove-duplicates', methods=['DELETE'])
-def remove_db_duplicates():
-    total_dups = []
-
-    # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
-    total_dups.extend(event_utils.clean_collection(ucla_events_collection))
-    total_dups.extend(event_utils.clean_collection(saved_pages_collection))
-    total_dups.extend(event_utils.clean_collection(events_ml_collection))
-
-    return jsonify(total_dups)

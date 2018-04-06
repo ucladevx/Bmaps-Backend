@@ -9,6 +9,17 @@ import json
 import os
 import re
 
+# If needed, clean database of duplicate documents
+def remove_db_duplicates():
+    total_dups = []
+
+    # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
+    total_dups.extend(event_utils.clean_collection(ucla_events_collection))
+    total_dups.extend(event_utils.clean_collection(saved_pages_collection))
+    total_dups.extend(event_utils.clean_collection(events_ml_collection))
+
+    return jsonify(total_dups)
+
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
     output = []
 
