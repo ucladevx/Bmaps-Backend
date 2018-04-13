@@ -88,7 +88,7 @@ API DOCS
 """
 # Interacting with events collection in mlab
 
-from mappening.utils.database import ucla_events_collection, saved_pages_collection, events_ml_collection
+from mappening.utils.database import events_current_collection, pages_saved_collection, events_ml_collection
 from mappening.api.utils import event_caller, event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -104,10 +104,10 @@ events = Blueprint('events', __name__)
 
 @events.route('/', methods=['GET'])
 def get_all_events():
-    """ 
+    """
     :Route: /
 
-    :Description: Returns a GeoJSON of all events within a few miles of UCLA 
+    :Description: Returns a GeoJSON of all events within a few miles of UCLA
 
     """
     return event_utils.find_events_in_database(print_results=True)
@@ -117,7 +117,7 @@ def get_all_events():
 @events.route('/search/<search_term>', defaults={'event_date': None}, methods=['GET'])
 @events.route('/search/<search_term>/<event_date>', methods=['GET'])
 def search_events(search_term, event_date):
-    """ 
+    """
     :Route: /search/<search_term>/<event_date>
 
     :Description: Returns GeoJSON of all events whose names contain the search term. Useful for a search bar. Can be used to search events on a particular day as well.
@@ -132,12 +132,12 @@ def search_events(search_term, event_date):
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
 
     if event_date:
-        print "Using date parameter: " + event_date 
+        print "Using date parameter: " + event_date
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = ucla_events_collection.find({'name': search_regex, 'start_time': date_regex_obj})
+        events_cursor = events_current_collection.find({'name': search_regex, 'start_time': date_regex_obj})
     else:
         print "No date parameter given..."
-        events_cursor = ucla_events_collection.find({'name': search_regex})
+        events_cursor = events_current_collection.find({'name': search_regex})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -176,7 +176,7 @@ def get_event_by_id(event_id):
 # MULTIPLE EVENTS
 
 # Get all events with free food
-# TODO: ml => free food 
+# TODO: ml => free food
 @events.route('/food', methods=['GET'])
 def get_free_food_events():
     return get_events_by_category('food', None)
@@ -185,9 +185,9 @@ def get_free_food_events():
 def get_events_by_date(event_date):
     """
     :Route: /date/<event_date>
-    
+
     :Description: Returns GeoJSON of all events starting on given date
-    
+
     :param str event_date: case-insensitive date string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
 
     """
@@ -199,9 +199,9 @@ def get_events_by_date(event_date):
 def get_events_by_category(event_category, event_date):
     """
     :Route: /category/<event_category>/<event_date>
-        
+
     :Description: Returns GeoJSON of all events of the given category. Can also find all events of a certain category that start on the given date as well.
-    
+
     :param str event_category: case-insensitive category string to match with event categories (e.g. food, theater)
 
     :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
@@ -215,12 +215,12 @@ def get_events_by_category(event_category, event_date):
     cat_regex_obj = re.compile(regex_str)
 
     if event_date:
-        print "Using date parameter: " + event_date 
+        print "Using date parameter: " + event_date
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = ucla_events_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
+        events_cursor = events_current_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
     else:
         print "No date parameter given..."
-        events_cursor = ucla_events_collection.find({"category": cat_regex_obj})
+        events_cursor = events_current_collection.find({"category": cat_regex_obj})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -236,9 +236,9 @@ def get_events_by_category(event_category, event_date):
 def get_event_categories(event_date):
     """
     :Route: /categories/<event_date>
-    
+
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
-    
+
     :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type event_date: str or None
 
@@ -249,12 +249,12 @@ def get_event_categories(event_date):
     output = []
 
     if event_date:
-        print "Using date parameter: " + event_date 
+        print "Using date parameter: " + event_date
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = ucla_events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+        events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print "No date parameter given..."
-        events_cursor = ucla_events_collection.find({"category": {"$exists": True}})
+        events_cursor = events_current_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -275,9 +275,8 @@ def remove_db_duplicates():
     total_dups = []
 
     # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
-    total_dups.extend(event_utils.clean_collection(ucla_events_collection))
-    total_dups.extend(event_utils.clean_collection(saved_pages_collection))
+    total_dups.extend(event_utils.clean_collection(events_current_collection))
+    total_dups.extend(event_utils.clean_collection(pages_saved_collection))
     total_dups.extend(event_utils.clean_collection(events_ml_collection))
 
     return jsonify(total_dups)
-
