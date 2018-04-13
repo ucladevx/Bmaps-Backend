@@ -23,14 +23,14 @@ def get_all_locations():
     else:
         print 'Cannot find any locations!'
 
-    # Output typically contains name, city, country, latitude, longitude, state, 
+    # Output typically contains name, city, country, latitude, longitude, state,
     # street, and zip for each location
     return jsonify({'locations': output})
 
 # UPDATE DATABASE
 
 # Add locations to database from given collection
-# Sample collection(s): events_ml_collection, ucla_events_collection
+# Sample collection(s): events_ml_collection, events_current_collection
 # TODO: hook up so everytime we get new events we add their location data to db
 # TODO remove route and move to some utils thing
 # @locations.route('/add/<events_collection>', methods=['PUT'])
@@ -50,10 +50,10 @@ def add_locations_from_collection(events_collection):
     INVALID_COORDINATE = 420
 
     print new_locations
-    
+
     # For every location from events db
     for new_loc in new_locations:
-      # Tokenize and remove unnecessary/common words 
+      # Tokenize and remove unnecessary/common words
       place_name = re.sub(r'\bUCLA-\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
       place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
       place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
@@ -98,10 +98,10 @@ def add_locations_from_collection(events_collection):
           print "Updated: " + old_loc['location']['name']
           # Replace document with updated info
           if is_name:
-            UCLA_locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)  
+            UCLA_locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)
           else:
             UCLA_locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
-                    
+
       else:
         # No pre-existing location so insert new location to db
         # Also add stripped version of name to location info
@@ -125,14 +125,14 @@ def get_location_results(place_query, num_results):
     if not search_results:
       return "There were no results!"
     elif not num_results or num_results <= 0:
-      return jsonify({"Locations": search_results}) 
+      return jsonify({"Locations": search_results})
     else:
       output = []
       for i in range(0, num_results):
         output.append(search_results[i])
       return jsonify({'Locations': output})
 
-# GOOGLE WRAPPER 
+# GOOGLE WRAPPER
 # These routes are kinda long... /api/locations/google/?/<place_query>
 
 # Run Google Maps TextSearch on given query and print all results in JSON
