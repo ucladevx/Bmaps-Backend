@@ -1,8 +1,6 @@
 # Mappening
 id_rsa_mappening.pem
-
-# Debug Output
-*.json
+scraping/data/
 
 # Mac Stuff
 .DS_Store
@@ -73,7 +71,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+# docs/_build/
 
 # PyBuilder
 target/
