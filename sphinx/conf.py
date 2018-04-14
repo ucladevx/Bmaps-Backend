@@ -109,6 +109,9 @@ html_theme_options = {}
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Relative path to the image file used for the favicon
+html_favicon = '_static/favicon.ico'
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
