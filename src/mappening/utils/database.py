@@ -14,12 +14,12 @@ print "Connected to database!"
 # Get all the collections
 
 # events.py
-events_current_collection = db.events_current
-pages_saved_collection = db.pages_saved
+ucla_events_collection = db.ucla_events
+saved_pages_collection = db.saved_pages
 events_ml_collection = db.events_ml
 
 # event_caller.py
-# pages_saved_collection = db.saved_pages
+# saved_pages_collection = db.saved_pages
 # events_ml_collection = db.events_ml
 unknown_locations_collection = db.unknown_locations
 

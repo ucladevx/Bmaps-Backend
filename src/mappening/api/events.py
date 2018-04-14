@@ -1,6 +1,6 @@
 # Interacting with events collection in mlab
 
-from mappening.utils.database import events_current_collection, pages_saved_collection, events_ml_collection
+from mappening.utils.database import ucla_events_collection, saved_pages_collection, events_ml_collection
 from mappening.api.utils import event_caller, event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -120,10 +120,10 @@ def get_event_categories(event_date):
     if event_date:
         print "Using date parameter: " + event_date
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+        events_cursor = ucla_events_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print "No date parameter given..."
-        events_cursor = events_current_collection.find({"category": {"$exists": True}})
+        events_cursor = ucla_events_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:
         for event in events_cursor:

@@ -72,9 +72,16 @@ def get_events_by_date(event_date):
 @eventsLegacy.route('/events-by-category-and-date', defaults={'event_category': None}, methods=['GET'])
 @eventsLegacy.route('/event-category/<event_category>', methods=['GET'])
 def get_events_by_category(event_category):
-    event_date = request.args['date']
-    if event_category == None:
-        event_category = request.args['category']
+    event_date = None
+    if 'date' in request.args:
+        event_date = request.args['date']
+
+    if not event_category:
+        if 'category' in request.args:
+            event_category = request.args['category']
+        else:
+            print("No event category supplied")
+            return jsonify({'features': [], 'type': 'FeatureCollection'})
 
     output = []
 
