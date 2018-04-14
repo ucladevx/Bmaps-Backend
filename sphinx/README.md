@@ -1,7 +1,7 @@
 # Mappening-Backend Documentation
 
 ## Overview
-Autodocumentation through Sphinx for Mappening's APIs. Hosted on GitHub Pages
+Autodocumentation through Sphinx for Mappening's APIs. Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
 
 ## Setting Up the Environment
 - Clone this repository 

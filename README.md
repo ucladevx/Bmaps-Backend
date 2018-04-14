@@ -3,6 +3,9 @@
 ## Overview
 A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising.
 
+## Documentation
+Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
+
 ## Built With
 - Python 2.7.14
 - Flask (Port 5000): Web microframework for Python
