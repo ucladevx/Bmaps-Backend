@@ -1,7 +1,7 @@
 # Mappening-Backend
 
 ## Overview
-A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising. 
+A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising.
 
 ## Built With
 - Python 2.7.14
@@ -16,10 +16,10 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Beautiful Soup for web scraping
 
 ## Setting Up the Environment
-- Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
-- Clone this repository 
+- Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.
+- Clone this repository
   - `git clone https://github.com/ucladevx/Mappening-Backend.git`
-- Get the `.env` file which contains sensitive information from a dev and add it to python_app/
+- Get the `.env` file which contains sensitive information from a dev and add it to src/mappening/utils/
 
 ## How to Push Image to AWS ECS
 - Enter the repository

@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to DevX's documentation!
+Welcome to Mappening's documentation!
 =====================================
 *Here we are supposed to talk about the function of the project
 and usefulness of API.*
@@ -21,7 +21,7 @@ Classes Documented
    events
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
