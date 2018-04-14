@@ -1,7 +1,7 @@
 # Mappening-Backend Documentation
 
 ## Overview
-Autodocumentation through Sphinx for Mappening's APIs
+Autodocumentation through Sphinx for Mappening's APIs. Hosted on GitHub Pages
 
 ## Setting Up the Environment
 - Clone this repository 
@@ -20,6 +20,7 @@ Autodocumentation through Sphinx for Mappening's APIs
 - Single-time generation of documentation
   - `make html`
   - Overwrites current `_build/` folder
+  - To update GitHub Pages documentation do `make docs`
 - Sphinx Autobuild for continuous building of documentation
   - `sphinx-autobuild . ./_build/html` from `Mappening-Backend/docs/`
   - Navigate to `http://127.0.0.1:8000/`
@@ -28,6 +29,5 @@ Autodocumentation through Sphinx for Mappening's APIs
 ## Static Files
 - `_static/` folder contains the minified css/js/static files for v1.7.0
   - Overwrites auto-generated static files so we don't add 30k lines of css/js
-  - Manual Changes with [reST](http://www.sphinx-doc.org/en/stable/rest.html):
-    - Removed div.body max and min width in `basic.css`
-    - Added min-width to .field-name in `basic.css`
+  - Manual Changes with [reST](http://www.sphinx-doc.org/en/stable/rest.html)
+  - Moved `<script type="text/javascript" src="_static/jquery.js"></script>` to header in index.html as it didn't seem to load
