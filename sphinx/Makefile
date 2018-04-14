@@ -26,4 +26,5 @@ sphinx-help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 docs: html
-	cp -r _build/html/* ../docs
+	rm -r ../docs
+	cp -r _build/html/ ../docs
