@@ -67,7 +67,7 @@ An |event| object is a GeoJSON with the following keys:
 
         .. attribute:: category
 
-            The *category* of the |event|. All the categories can be seen by dynamically calling ``/categories``. About half of events have a category and the rest have <NONE>.
+            The *category* of the |event|. All the categories can be seen by dynamically calling ``/categories``. About half of events have a category and the rest have <NONE>. TODO is this mandatory because I see events where it is missing.
 
         .. attribute:: name
 
