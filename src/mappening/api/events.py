@@ -31,9 +31,19 @@ def get_all_events():
 @events.route('/search', methods=['GET'])
 def search_events():
     """
-    :Route: /search
+    :Route: /search?term=str&date=str&category=str
 
-    :Description: Returns GeoJSON of all events filtered by date, search term, and category. The search term is case insensitive and searched for in the event name. Useful for a search bar.
+    :Description: Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.
+
+    :param term: An optional query component/parameter for the search term to filter by
+    :type term: str or None
+
+    :param date: A query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :type date: str or None
+
+    :param category: A query component/parameter for the event category to filter by
+    :type category: str or None
+
     """
     term = request.args.get('term')
     date = request.args.get('date')
@@ -98,7 +108,7 @@ def get_event_categories(event_date):
 
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
 
-    :param event_date: an optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :param event_date: An optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type event_date: str or None
 
     """
