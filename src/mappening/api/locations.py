@@ -113,7 +113,6 @@ def add_locations_from_collection(events_collection):
         added_locations.append(new_loc)
         print "Added: " + new_loc['location']['name']
         locations_collection.insert_one(new_loc.copy())
-
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
 # LOCATIONS SEARCH
