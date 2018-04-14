@@ -1,5 +1,5 @@
 # TODO MAJOR CLEANUP but I'm lazy
-from mappening.utils.database import UCLA_locations_collection
+from mappening.utils.database import locations_collection
 from mappening.api.utils import location_utils, tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -8,15 +8,18 @@ import re
 import os
 from operator import itemgetter
 
-# Route Prefix: /api/locations
+# Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)
+
+# Enable Cross Origin Resource Sharing (CORS)
+# cors = CORS(locations)
 
 # Returns JSON of all past locations/venues
 @locations.route('/', methods=['GET'])
 def get_all_locations():
     output = []
 
-    locations_cursor = UCLA_locations_collection.find({}, {'_id': False})
+    locations_cursor = locations_collection.find({}, {'_id': False})
     if locations_cursor.count() > 0:
       for loc in locations_cursor:
         output.append({"location": loc})
@@ -61,8 +64,8 @@ def add_locations_from_collection(events_collection):
       processed_place = re.compile(place_name, re.IGNORECASE)
 
       # Find location of same coordinates/name
-      coord_loc = UCLA_locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      alt_name_loc = UCLA_locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
+      coord_loc = locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
+      alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
 
       # If there exists a pre-existing location with matching coordinates/name
       if coord_loc or alt_name_loc:
@@ -98,9 +101,9 @@ def add_locations_from_collection(events_collection):
           print "Updated: " + old_loc['location']['name']
           # Replace document with updated info
           if is_name:
-            UCLA_locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)
+            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)
           else:
-            UCLA_locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
+            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
 
       else:
         # No pre-existing location so insert new location to db
@@ -109,8 +112,7 @@ def add_locations_from_collection(events_collection):
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
         print "Added: " + new_loc['location']['name']
-        UCLA_locations_collection.insert_one(new_loc.copy())
-
+        locations_collection.insert_one(new_loc.copy())
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
 # LOCATIONS SEARCH

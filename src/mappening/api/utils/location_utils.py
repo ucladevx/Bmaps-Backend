@@ -1,6 +1,6 @@
 # TODO FIX THIS GROSSNESS
 
-from mappening.utils.database import events_current_collection, events_ml_collection, test_collection, UCLA_locations_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, locations_collection
 from mappening.api.utils import tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -33,13 +33,13 @@ def get_locations_from_collection(events_collection):
       events_cursor = events_current_collection.find({"place": {"$exists": True}})
     elif events_collection == "events_ml":
       events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    else: # events_collection == "test":
-      events_cursor = test_collection.find({"place": {"$exists": True}})
+    else:
+      events_cursor = None
     
     # Every time there are new events, check location info and update db if necessary
     # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
     # events_cursor = events_collection.find({"place": {"$exists": True}})
-    if events_cursor.count() > 0:
+    if events_cursor and events_cursor.count() > 0:
       for event in events_cursor:
         # Add location info to place dict
         if 'location' in event['place']:
@@ -141,7 +141,7 @@ def search_locations(place_query):
     print "Regex place query: " + place_regex
 
     place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
-    places_cursor = UCLA_locations_collection.find({'location.alternative_names': place_regex})
+    places_cursor = locations_collection.find({'location.alternative_names': place_regex})
     
     # Places that match the name are appended to output
     if places_cursor.count() > 0:
@@ -176,7 +176,7 @@ def search_locations(place_query):
     # Default stop words for english language, case insensitive
     # Sort by score (based on number of occurances of query words in alternate names)
     # Can limit numer of results as well
-    places_cursor = UCLA_locations_collection.find( 
+    places_cursor = locations_collection.find( 
       { '$text': { '$search': processed_place, '$language': 'english', '$caseSensitive': False } },
       { 'score': { '$meta': 'textScore' } }
     ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)

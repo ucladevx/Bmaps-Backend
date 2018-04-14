@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection
 import event_caller
 
 
@@ -9,15 +9,22 @@ import json
 import os
 import re
 
-def find_events_in_database(find_key='', find_value='', one_result_expected=False, print_results=False):
+# If needed, clean database of duplicate documents
+def remove_db_duplicates():
+    total_dups = []
+
+    # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
+    total_dups.extend(event_utils.clean_collection(events_current_collection))
+    total_dups.extend(event_utils.clean_collection(pages_saved_collection))
+    total_dups.extend(event_utils.clean_collection(events_ml_collection))
+
+    return jsonify(total_dups)
+
+def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
     output = []
-    # for getting all events, no search query needed (empty dict)
-    search_pair = {}
-    if find_key and find_value:
-        search_pair[find_key] = find_value
 
     if one_result_expected:
-        single_event = events_current_collection.find_one(search_pair)
+        single_event = events_current_collection.find_one(find_dict)
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
@@ -25,12 +32,15 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
         else:
             # careful: output is still empty here; make sure output list never set ANYWHERE else
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
-            print('No single event with attribute {0}: value {1}'.format(find_key, find_value))
+            print('No single event with attributes:' + str(find_dict))
     else:
-        events_cursor = events_current_collection.find(search_pair)
+        events_cursor = events_current_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                output.append(process_event_info(event))
+                if legacy:
+                    output.append(legacy_process_event(event))
+                else:
+                    output.append(process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
@@ -39,10 +49,56 @@ def find_events_in_database(find_key='', find_value='', one_result_expected=Fals
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
-            print('No events found with search pair {0}: {1}.'.format(find_key, find_value))
+            print('No events found with attributes:' + str(find_dict))
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
 def process_event_info(event):
+    """
+        :Description: Returns GeoJSON of singular event matching event name
+
+        :param str event_name: case-insensitive name string to search database for exact match
+    """
+
+    # Remove certain keys from dictionary
+    event.pop('_id', None) # pop is basically get and remove; pop(key, default)
+    event.get('place', {}).pop('id', None) # pop is basically used as if it exists, remove it
+    eId = event.pop('id')
+
+    # Clean up certain entries
+    event['stats'] = {
+        'attending': event.pop('attending_count', 0),
+        'noreply': event.pop('noreply_count', 0),
+        'interested': event.pop('interested_count', 0),
+        'maybe': event.pop('maybe_count', 0)
+    }
+    if 'source' in event.get('cover', {}): #default of get `{}` so `in` works
+        cover_picture = event.pop('cover')['source']
+        event['cover_picture'] = cover_picture
+    if 'name' in event.get('hoster', {}):
+        host = event.pop('hoster')['name']
+        event['hoster'] = host
+
+    # Create GeoJSON
+    formatted_info = {
+        # will ALWAYS have an ID
+        'id': eId,
+        'type': 'Feature',
+        'geometry': {
+            # no coordinates? default to Bruin Bear
+            'coordinates': [
+                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
+                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+            ],
+            'type': 'Point'
+        },
+        'properties': event
+    }
+
+    return formatted_info
+
+
+#TODO: DELETE LEGACY CODE
+def legacy_process_event(event):
     formatted_info = {
         # will ALWAYS have an ID
         'id': event['id'],
@@ -115,7 +171,6 @@ def clean_collection(collection):
     """
     simply save each unique document and delete any that have been found already
     """
-  
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -143,7 +198,6 @@ def call_populate_events_database():
     print(earlier_day_bound)
     return update_ucla_events_database(earlier_day_bound)
 
-    
 # Get all UCLA-related Facebook events and add to database
 def update_ucla_events_database(earlier_day_bound=0):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
@@ -203,4 +257,3 @@ def update_ucla_events_database(earlier_day_bound=0):
         events_ml_collection.insert_one(event)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
-

@@ -4,7 +4,7 @@ from mappening.api.utils import event_caller
 from flask import Flask, jsonify, request, json, Blueprint
 from tqdm import tqdm
 
-# Route Prefix: /api/pages
+# Route Prefix: /api/v2/pages
 pages = Blueprint('pages', __name__)
 
 # TODO: new endpoint to manually add Facebook page to DB
