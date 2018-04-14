@@ -8,8 +8,11 @@ import re
 import os
 from operator import itemgetter
 
-# Route Prefix: /api/locations
+# Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)
+
+# Enable Cross Origin Resource Sharing (CORS)
+# cors = CORS(locations)
 
 # Returns JSON of all past locations/venues
 @locations.route('/', methods=['GET'])
