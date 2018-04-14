@@ -1,6 +1,6 @@
 # TODO FIX THIS GROSSNESS
 
-from mappening.utils.database import ucla_events_collection, events_ml_collection, test_collection, UCLA_locations_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, test_collection, UCLA_locations_collection
 from mappening.api.utils import tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -30,7 +30,7 @@ def get_locations_from_collection(events_collection):
     place = {}
 
     if events_collection == "ucla_events":
-      events_cursor = ucla_events_collection.find({"place": {"$exists": True}})
+      events_cursor = events_current_collection.find({"place": {"$exists": True}})
     elif events_collection == "events_ml":
       events_cursor = events_ml_collection.find({"place": {"$exists": True}})
     else: # events_collection == "test":
