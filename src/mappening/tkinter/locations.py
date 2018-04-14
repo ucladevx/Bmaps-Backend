@@ -1,4 +1,4 @@
-from mappening.utils.database import tkinter_UCLA_locations_collection, tkinter_unknown_locations_collection, tkinter_TODO_locations_collection, events_ml_collection, UCLA_locations_collection
+from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, events_ml_collection, locations_collection
 from mappening.api.utils import location_utils, tokenize
 
 import requests
@@ -20,10 +20,10 @@ def process_unknown_locations():
   num_unassigned = 0
   counter = 1
 
-  locs_cursor = tkinter_UCLA_locations_collection.find({})
+  locs_cursor = unknown_locations_collection.find({})
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
-      if tkinter_collection.find_one({'_id': loc_db['_id']}):
+      if API_unknown_locations_collection.find_one({'_id': loc_db['_id']}):
         print "Already in db"
       else:
         print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
@@ -33,7 +33,7 @@ def process_unknown_locations():
           if loc_result != "There were no results!":
             print "Found a match!"
             num_assigned = num_assigned + 1
-            tkinter_collection.insert_one({
+            API_unknown_locations_collection.insert_one({
               "unknown_loc": {
                 "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
                 "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -49,7 +49,7 @@ def process_unknown_locations():
           else:
             print "Didn't find a location!"
             num_unassigned = num_unassigned + 1
-            tkinter_TODO_collection.insert_one({
+            API_TODO_locations_collection.insert_one({
               "unknown_loc": {
                 "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
                 "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -172,7 +172,7 @@ def remove_ucla_from_names():
 # See sample format in ./sampleData.json
 # TODO: don't add duplicates
 def insert_locations_from_json():
-  UCLA_locations_collection.insert_many(data['locations'])
+  locations_collection.insert_many(data['locations'])
   return "Successfully inserted location documents to db!"
 
 # Given JSON, fill out any missing location data using the Google Places API
