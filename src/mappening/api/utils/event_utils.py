@@ -171,7 +171,6 @@ def clean_collection(collection):
     """
     simply save each unique document and delete any that have been found already
     """
-
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -198,7 +197,6 @@ def call_populate_events_database():
     earlier_day_bound = request.args.get('days', default=0, type=int)
     print(earlier_day_bound)
     return update_ucla_events_database(earlier_day_bound)
-
 
 # Get all UCLA-related Facebook events and add to database
 def update_ucla_events_database(earlier_day_bound=0):
