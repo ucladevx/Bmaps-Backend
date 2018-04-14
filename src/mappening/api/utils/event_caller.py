@@ -1,4 +1,4 @@
-from mappening.utils.database import pages_saved_collection, unknown_locations_collection, events_ml_collection
+from mappening.utils.database import saved_pages_collection, unknown_locations_collection, events_ml_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import requests
@@ -191,9 +191,9 @@ def add_pages_from_json(filename):
             page_list.append(abridged_info)
 
     for page in tqdm(page_list):
-        if pages_saved_collection.find_one({'id': page['id']}):
-            pages_saved_collection.delete_one({'id': page['id']})
-        pages_saved_collection.insert_one(page)
+        if saved_pages_collection.find_one({'id': page['id']}):
+            saved_pages_collection.delete_one({'id': page['id']})
+        saved_pages_collection.insert_one(page)
 
 
 # TODO: add facebook page by exact name that appears in URL, or ID
@@ -521,7 +521,7 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     search for UCLA-associated places and groups, using existing list on DB
     """
     pages_by_id = {}
-    for page in pages_saved_collection.find():
+    for page in saved_pages_collection.find():
         pages_by_id[page['id']] = page['name']
 
     # turn event ID dict to array of their values

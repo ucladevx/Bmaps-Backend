@@ -1,4 +1,4 @@
-from mappening.utils.database import pages_saved_collection
+from mappening.utils.database import saved_pages_collection
 from mappening.api.utils import event_caller
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -31,7 +31,7 @@ def add_page_from_id(page_id, page_type):
     if 'error' in page_result:
         return page_result['error']
 
-    found_same_page = pages_saved_collection.find_one({'id': page_result['id']})
+    found_same_page = saved_pages_collection.find_one({'id': page_result['id']})
 
     return page_result
 
@@ -55,7 +55,7 @@ def add_page_from_search(search_string, page_type):
     if 'error' in page_result:
         return page_result['error']
 
-    found_same_page = pages_saved_collection.find_one({'id': page_result['id']})
+    found_same_page = saved_pages_collection.find_one({'id': page_result['id']})
 
     return page_result
 
@@ -68,7 +68,7 @@ def refresh_page_database():
 
     # update just like accumulated events list
     # remember: find() just returns a cursor, not whole data structure
-    # saved_pages = pages_saved_collection.find()
+    # saved_pages = saved_pages_collection.find()
     # returns a dict of IDs to names
     raw_page_data = event_caller.find_ucla_entities()
     print('Found them.')
@@ -76,17 +76,17 @@ def refresh_page_database():
 
     new_page_count = 0
     updated_page_count = 0
-    # in contrast to raw_page_data, pages_saved_collection is list of {"id": <id>, "name": <name>}
+    # in contrast to raw_page_data, saved_pages_collection is list of {"id": <id>, "name": <name>}
     for page_id, page_name in tqdm(raw_page_data.iteritems()):
         # See if event already existed
-        update_page = pages_saved_collection.find_one({'id': page_id})
+        update_page = saved_pages_collection.find_one({'id': page_id})
 
         # If it existed then delete it, new event gets inserted in both cases
         if update_page:
-            pages_saved_collection.delete_one({'id': page_id})
+            saved_pages_collection.delete_one({'id': page_id})
             updated_page_count += 1
             new_page_count -= 1
-        pages_saved_collection.insert_one({'id': page_id, 'name': page_name})
+        saved_pages_collection.insert_one({'id': page_id, 'name': page_name})
         new_page_count += 1
 
     return 'Refreshed database pages: {0} new, {1} updated.'.format(new_page_count, updated_page_count)
