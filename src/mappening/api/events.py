@@ -118,11 +118,11 @@ def get_event_categories(event_date):
     output = []
 
     if event_date:
-        print "Using date parameter: " + event_date
+        print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
-        print "No date parameter given..."
+        print("No date parameter given...")
         events_cursor = events_current_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:

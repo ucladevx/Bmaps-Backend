@@ -151,6 +151,9 @@ def processed_time(old_time_str):
     return res_time_str
 
 def construct_date_regex(raw_date):
+    if not raw_date:
+        return None
+
     # Try to parse date
     try:
         # Use dateutil parser to get time zone

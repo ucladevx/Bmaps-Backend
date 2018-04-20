@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-print "Opening the secret door..."
+print("Opening the secret door...")
 
 FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
@@ -20,4 +20,4 @@ APP_SECRET_KEY = os.getenv('APP_SECRET_KEY')
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
-print "Got the .env secrets..."
+print("Got the .env secrets...")

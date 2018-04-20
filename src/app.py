@@ -17,7 +17,7 @@ if __name__ == "__main__":
     code_update_date = "2/15/18"
     print("Updated on: {0}".format(code_update_date))
 
-    print "Mappening is happening!"
+    print('Mappening is happening!')
 
     # Flask defaults to port 5000
     # If debug is true, runs 2 instances at once (so two copies of all threads)
