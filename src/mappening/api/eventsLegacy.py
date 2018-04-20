@@ -32,11 +32,11 @@ def search_events(search_term, event_date):
     search_regex = re.compile('.*' + search_term + '.*', re.IGNORECASE)
 
     if event_date:
-        print "Using date parameter: " + event_date
+        print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_collection.find({'name': search_regex, 'start_time': date_regex_obj})
     else:
-        print "No date parameter given..."
+        print("No date parameter given...")
         events_cursor = events_current_collection.find({'name': search_regex})
 
     if events_cursor.count() > 0:
@@ -90,11 +90,11 @@ def get_events_by_category(event_category):
     cat_regex_obj = re.compile(regex_str)
 
     if event_date:
-        print "Using date parameter: " + event_date
+        print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
     else:
-        print "No date parameter given..."
+        print("No date parameter given...")
         events_cursor = events_current_collection.find({"category": cat_regex_obj})
 
     if events_cursor.count() > 0:
@@ -115,11 +115,11 @@ def get_event_categories(event_date):
     output = []
 
     if event_date:
-        print "Using date parameter: " + event_date
+        print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
-        print "No date parameter given..."
+        print("No date parameter given...")
         events_cursor = events_current_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:

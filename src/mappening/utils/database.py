@@ -21,7 +21,7 @@ users_db = users_client['users']
 tkinter_client = MongoClient(tkinter_uri)
 tkinter_db = tkinter_client['tkinter'] 
 
-print "Connected to database!"
+print("Connected to database!")
 
 # Get all the collections
 
@@ -51,4 +51,4 @@ API_unknown_locations_collection = tkinter_db.API_unknown_locations
 API_known_locations_collection = tkinter_db.API_known_locations
 API_TODO_locations_collection = tkinter_db.API_TODO_locations
 
-print "Got database collections..."
+print("Got database collections...")

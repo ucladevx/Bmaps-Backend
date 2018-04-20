@@ -124,7 +124,7 @@ def search_locations(place_query):
     output_places = []
 
     # Supplied string such as "Boelter Hall" for a location
-    print "Original place query: " + place_query
+    print("Original place query: " + place_query)
     # Remove leading/trailing white space
     place_query = place_query.strip()
 
@@ -138,7 +138,7 @@ def search_locations(place_query):
     place_regex = re.sub(r'\(', '', place_regex, flags=re.IGNORECASE)
     place_regex = re.sub(r'\)', '', place_regex, flags=re.IGNORECASE)
     place_regex = place_regex.strip()
-    print "Regex place query: " + place_regex
+    print("Regex place query: " + place_regex)
 
     place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
     places_cursor = locations_collection.find({'location.alternative_names': place_regex})
@@ -159,17 +159,17 @@ def search_locations(place_query):
         })
         output_places.append(place['location'].get('name', "NO NAME"))
 
-      print "Found exact match!"
+      print("Found exact match!")
       return output
 
-    print "Doing text search..."
+    print("Doing text search...")
 
     # Tokenize and remove unnecessary/common words 
     place_name = re.sub(r'\bUCLA-\s?', '', place_query, flags=re.IGNORECASE)
     place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
     place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
     processed_place = tokenize.tokenize_text(place_name)
-    print "Processed place query: " + processed_place
+    print("Processed place query: " + processed_place)
 
     # Locations db has text search index on alternate_locations field
     # Search for locations that match words in processed place query
