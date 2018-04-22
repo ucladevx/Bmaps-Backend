@@ -21,6 +21,10 @@ def remove_db_duplicates():
     return jsonify(total_dups)
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
+    output = get_events_in_database(find_dict, one_result_expected, print_results, legacy)
+    return jsonify({'features': output, 'type': 'FeatureCollection'})
+
+def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
     output = []
 
     if one_result_expected:
@@ -50,7 +54,8 @@ def find_events_in_database(find_dict={}, one_result_expected=False, print_resul
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
             print('No events found with attributes:' + str(find_dict))
-    return jsonify({'features': output, 'type': 'FeatureCollection'})
+
+    return output
 
 def process_event_info(event):
     """

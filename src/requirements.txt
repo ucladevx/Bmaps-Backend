@@ -10,3 +10,4 @@ python-dotenv
 pytz
 tqdm
 nltk
+shapely
