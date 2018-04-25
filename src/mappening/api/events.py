@@ -85,6 +85,12 @@ def filter_events():
     :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a TODO radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `day` may be specified or will return all events in database matching specified location parameters.
     :type where: str or None
 
+    :param latitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
+    :type latitude: str or None
+
+    :param longitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
+    :type longitude: str or None
+
     :param popular: An optional query component/parameter that returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes. A `day` must be specified or will return results using all events in the database.
     :type popular: boolean or None
 
@@ -99,6 +105,8 @@ def filter_events():
     time = request.args.getlist('time')
     day = request.args.get('day')
     where = request.args.get('where')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
     popular = request.args.get('popular')
     popular_threshold = request.args.get('popular_threshold')
     food = request.args.get('food')
@@ -108,6 +116,8 @@ def filter_events():
 
     # today = datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
     # today = datetime.strftime(today, '%Y-%m-%d')
+
+    # TODO: mutiple filters, can't just return results
 
     # Add to search dict 
     # Time filtering
@@ -129,7 +139,10 @@ def filter_events():
     # Location filtering
     if where:
       if where == 'nearby':
-        event_filters.filter_by_nearby(search_dict)
+        if latitude and longitude and event_filters.is_float(latitude) and event_filters.is_float(longitude):
+            return event_filters.filter_by_nearby(search_dict, float(latitude), float(longitude), day)
+        else:
+            return 'Expected valid coordinates to be passed!'
       elif where == 'oncampus':
         return event_filters.filter_by_oncampus(day)
       elif where == 'offcampus':

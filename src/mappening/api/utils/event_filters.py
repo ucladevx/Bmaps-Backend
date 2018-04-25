@@ -11,6 +11,7 @@ from pytz import timezone
 from dateutil.tz import tzlocal
 from shapely.geometry import shape, Point
 import os
+from haversine import haversine
 
 # Get current time and get all events whose start time <= current time < end time
 def filter_by_happening_now(search_dict):
@@ -200,13 +201,45 @@ def filter_by_offcampus(day):
 
   return jsonify({'features': offcampus_events, 'type': 'FeatureCollection'})
 
-# Get current location of user and get all events whose coordinates are within
-# a TODO radius of the user
-def filter_by_nearby(search_dict):
+# Get current location of user and get all events whose coordinates are within a certain radius of the user
+# TODO JORGE for frontend implementation? Or however he gets current location
+def filter_by_nearby(search_dict, latitude, longitude, day):
   print("filter_by_nearby")
-  # TODO JORGE
+
+  # Get all events on the given day
+  # If day is specified look only at events on given day
+  # Or consider all events in database
+  nearby_events = []
+  search_dict = {}
+  
+  if day:
+    date_regex = event_utils.construct_date_regex(day)
+    search_dict['start_time'] = date_regex
+  events = event_utils.get_events_in_database(search_dict)
+
+  user_location = (latitude, longitude)
+
+  for event in events:
+    event_longitude = event['properties']['place']['location']['longitude']
+    event_latitude = event['properties']['place']['location']['latitude']
+
+    # Construct point based on event coordinates
+    event_location = (event_latitude, event_longitude)
+
+    # Within ~1000 feet or 0.3 km
+    if haversine(user_location, event_location) < 0.3: 
+      nearby_events.append(event)
+
+  return jsonify({'features': nearby_events, 'type': 'FeatureCollection'})
 
 # Get all events that have free food
 def filter_by_free_food(search_dict):
   print("filter_by_free_food")
-  # TODO JORGE
+  # TODO JORGE ml
+
+def is_float(value):
+  try:
+    float(value)
+    return True
+  except:
+    return False
