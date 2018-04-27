@@ -13,6 +13,11 @@ from shapely.geometry import shape, Point
 import os
 from haversine import haversine
 
+# Get the day's events
+def get_day_events(search_dict, day):
+  date_regex = event_utils.construct_date_regex(day)
+  search_dict['start_time'] = date_regex
+
 # Get current time and get all events whose start time <= current time < end time
 def filter_by_happening_now(search_dict):
   print("filter_by_happening_now")
@@ -34,18 +39,8 @@ def filter_by_upcoming(search_dict):
 # Morning = events whose start time is >= 3 am and < 12 pm
 # Afternoon = events whose start time is >= 12 pm and < 5 pm
 # Night = events whose start time is >= 5 pm and < 3 am
-def filter_by_time(time_period, day):
+def filter_by_time(unfiltered_events, time_period):
   print("filter_by_time")
-
-  # Get all events on the given day
-  search_dict = {}
-
-  # If day is specified run only on events from specified day
-  # Otherwise look at all events in database
-  if day:
-    date_regex = event_utils.construct_date_regex(day)
-    search_dict['start_time'] = date_regex
-  day_events = event_utils.get_events_in_database(search_dict)
 
   # Set bools for what events to filter for
   is_morning = False
@@ -65,7 +60,7 @@ def filter_by_time(time_period, day):
   # Extract all events of matching time periods and return results
   filtered_events = []
 
-  for event in day_events:
+  for event in unfiltered_events:
     start_time = event['properties']['start_time']
 
     # Try to parse date
@@ -97,22 +92,15 @@ def filter_by_time(time_period, day):
     if should_append:
       filtered_events.append(event)
 
-  return jsonify({'features': filtered_events, 'type': 'FeatureCollection'})
+  return filtered_events
 
 # Using Facebook event statistics, sort by the number of people interested.
 # Enable specification of top # of events to return or a threshold
-# If (interested || going > 100) then popular
-def filter_by_popular(day, use_threshold=False):
+# If (interested || going > 50) then popular
+def filter_by_popular(search_dict, use_threshold=False):
   # Sort events by # of interested
-  # Get all events on the given day
-  # If day is specified look only at events on given day
-  # Or consider all events in database
   sorted_events = []
-  if day:
-    date_regex = event_utils.construct_date_regex(day)
-    events_cursor = events_current_collection.find({'start_time': date_regex}).sort('interested_count', -1)
-  else:
-    events_cursor = events_current_collection.find({}).sort('interested_count', -1)
+  events_cursor = events_current_collection.find(search_dict).sort('interested_count', -1)
 
   if events_cursor.count() > 0:
     for event in events_cursor:
@@ -127,11 +115,11 @@ def filter_by_popular(day, use_threshold=False):
   else:
     print('No events found with attributes: {\'start_time\': date_regex}')
 
-  return jsonify({'features': sorted_events, 'type': 'FeatureCollection'})
+  return sorted_events
 
 # Get event location and check whether coordinates are within the UCLA boundary
 # as specified by ucla_border.geojson
-def filter_by_oncampus(day):
+def filter_by_oncampus(unfiltered_events):
   print("filter_by_oncampus")
 
   # Load GeoJSON file containing Polygon coordinates of UCLA
@@ -142,18 +130,9 @@ def filter_by_oncampus(day):
   # Create polygon shape from coordinates of UCLA's boundary
   polygon = shape(js['features'][0]['geometry'])
 
-  # Get all events on the given day
-  # If day is specified look only at events on given day
-  # Or consider all events in database
   oncampus_events = []
-  search_dict = {}
 
-  if day:
-    date_regex = event_utils.construct_date_regex(day)
-    search_dict['start_time'] = date_regex
-  events = event_utils.get_events_in_database(search_dict)
-
-  for event in events:
+  for event in unfiltered_events:
     longitude = event['properties']['place']['location']['longitude']
     latitude = event['properties']['place']['location']['latitude']
 
@@ -167,7 +146,7 @@ def filter_by_oncampus(day):
 
 # Get event location and check whether coordinates are within the UCLA boundary
 # as specified by ucla_border.geojson. If NOT, then use.
-def filter_by_offcampus(day):
+def filter_by_offcampus(unfiltered_events):
   print("filter_by_offcampus")
 
   # Load GeoJSON file containing Polygon coordinates of UCLA
@@ -178,18 +157,9 @@ def filter_by_offcampus(day):
   # Create polygon shape from coordinates of UCLA's boundary
   polygon = shape(js['features'][0]['geometry'])
 
-  # Get all events on the given day
-  # If day is specified look only at events on given day
-  # Or consider all events in database
   offcampus_events = []
-  search_dict = {}
-  
-  if day:
-    date_regex = event_utils.construct_date_regex(day)
-    search_dict['start_time'] = date_regex
-  events = event_utils.get_events_in_database(search_dict)
 
-  for event in events:
+  for event in unfiltered_events:
     longitude = event['properties']['place']['location']['longitude']
     latitude = event['properties']['place']['location']['latitude']
 
@@ -203,23 +173,13 @@ def filter_by_offcampus(day):
 
 # Get current location of user and get all events whose coordinates are within a certain radius of the user
 # TODO JORGE for frontend implementation? Or however he gets current location
-def filter_by_nearby(search_dict, latitude, longitude, day):
+def filter_by_nearby(unfiltered_events, latitude, longitude):
   print("filter_by_nearby")
 
-  # Get all events on the given day
-  # If day is specified look only at events on given day
-  # Or consider all events in database
   nearby_events = []
-  search_dict = {}
-  
-  if day:
-    date_regex = event_utils.construct_date_regex(day)
-    search_dict['start_time'] = date_regex
-  events = event_utils.get_events_in_database(search_dict)
-
   user_location = (latitude, longitude)
 
-  for event in events:
+  for event in unfiltered_events:
     event_longitude = event['properties']['place']['location']['longitude']
     event_latitude = event['properties']['place']['location']['latitude']
 
@@ -233,8 +193,8 @@ def filter_by_nearby(search_dict, latitude, longitude, day):
   return jsonify({'features': nearby_events, 'type': 'FeatureCollection'})
 
 # Get all events that have free food
-def filter_by_free_food(search_dict):
-  print("filter_by_free_food")
+# def filter_by_free_food(search_dict):
+#   print("filter_by_free_food")
   # TODO JORGE ml
 
 def is_float(value):
