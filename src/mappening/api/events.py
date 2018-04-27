@@ -125,7 +125,7 @@ def filter_events():
       elif when == 'upcoming':
         event_filters.filter_by_upcoming(search_dict)
     elif day:
-        event_filters.get_day_events(search_dict, day)
+      event_filters.get_day_events(search_dict, day)
 
     # Use current search dict and get events depending on whether or not
     # popularity filtering is occuring.
@@ -134,8 +134,8 @@ def filter_events():
         unfiltered_events = event_filters.filter_by_popular(search_dict, True)
       else:
         unfiltered_events = event_filters.filter_by_popular(search_dict)
-    else
-      unfiltered_events = event_utils.find_events_in_database(search_dict)
+    else:
+      unfiltered_events = event_utils.get_events_in_database(search_dict)
 
     # Add to search dict 
     # Time filtering
