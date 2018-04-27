@@ -36,9 +36,9 @@ def filter_by_upcoming(search_dict):
 
   search_dict['start_time'] = {"$lte": in_two_hours}
 
-# Morning = events whose start time is >= 3 am and < 12 pm
-# Afternoon = events whose start time is >= 12 pm and < 5 pm
-# Night = events whose start time is >= 5 pm and < 3 am
+# Morning = events whose start/end time is >= 3 am and < 12 pm
+# Afternoon = events whose start/end time is >= 12 pm and < 5 pm
+# Night = events whose start/end time is >= 5 pm and < 3 am
 def filter_by_time(unfiltered_events, time_period):
   print("filter_by_time")
 
@@ -62,29 +62,32 @@ def filter_by_time(unfiltered_events, time_period):
 
   for event in unfiltered_events:
     start_time = event['properties']['start_time']
+    end_time = event['properties']['start_time']
 
     # Try to parse date
     try:
         # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(start_time)
+        start_time_obj = dateutil.parser.parse(start_time)
+        end_time_obj = dateutil.parser.parse(end_time)
     except ValueError:
         # Got invalid date string
         print('Invalid date string, cannot be parsed!')
         return None
 
     # Get the date string by YYYY-MM-DD format
-    start_hour = datetime.strftime(time_obj, '%H')
+    start_hour = datetime.strftime(start_time_obj, '%H')
+    end_hour = datetime.strftime(end_time_obj, '%H')
     # print "Start hour is " + start_hour
 
     # Check whether the event start time falls under the time period
     should_append = False
-    if is_morning and start_hour >= '03' and start_hour < '12':
+    if is_morning and ((start_hour >= '03' and start_hour < '12') or (end_hour >= '03' and end_hour < '12')):
       # print('wow morning')
       should_append = True
-    if is_afternoon and start_hour >= '12' and start_hour < '17':
+    if is_afternoon and ((start_hour >= '12' and start_hour < '17') or (end_hour >= '12' and end_hour < '17')):
       # print('wow afternoon')
       should_append = True
-    if is_night and (start_hour >= '17' and start_hour <= '24') or (start_hour >= '00' and start_hour < '03'):
+    if is_night and (((start_hour >= '17' and start_hour <= '24') or (start_hour >= '00' and start_hour < '03')) or ((end_hour >= '17' and end_hour <= '24') or (end_hour >= '00' and end_hour < '03'))):
       # print('wow night')
       should_append = True
 
