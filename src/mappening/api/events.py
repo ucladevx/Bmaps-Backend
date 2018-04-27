@@ -79,10 +79,10 @@ def filter_events():
     :param time: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `day` must be specified or will return all events in database in the specified time periods.
     :type time: str or None
 
-    :param day: An optional query component/parameter. Used with parameters `time`, `where`, and `popular`. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 20 April 2018)
+    :param day: An optional query component/parameter to specify what day to filter on. Does not work with `upcoming` or `now`. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 20 April 2018)
     :type day: str or None
 
-    :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a TODO radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `day` may be specified or will return all events in database matching specified location parameters.
+    :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a ~1000 ft (0.3 km) radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `day` may be specified or will return all events in database matching specified location parameters. For `nearby`, a `latitude` and `longitude` must be specified.
     :type where: str or None
 
     :param latitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
@@ -94,7 +94,7 @@ def filter_events():
     :param popular: An optional query component/parameter that returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes. A `day` must be specified or will return results using all events in the database.
     :type popular: boolean or None
 
-    :param popular_threshold: An optional query component/parameter that only returns events that meet the following threshold: # interested || # going > 100. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
+    :param popular_threshold: An optional query component/parameter that only returns events that meet the following threshold: # interested || # going > 50. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
     :type popular_threshold: boolean or None
 
     :param food: An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.
@@ -112,25 +112,40 @@ def filter_events():
     food = request.args.get('food')
 
     search_dict = {}
+    unfiltered_events = []
     output = []
 
-    # today = datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
-    # today = datetime.strftime(today, '%Y-%m-%d')
+    # Get events as appropriate to use for filtering
+    # Happening now, upcoming, and popular have custom mongo find parameters
 
-    # TODO: mutiple filters, can't just return results
-
-    # Add to search dict 
-    # Time filtering
-    if when:
+    # Sets search dict to appropriate parameters for date
+    if when and (when == 'now' or when == 'upcoming'):
       if when == 'now':
         event_filters.filter_by_happening_now(search_dict)
       elif when == 'upcoming':
         event_filters.filter_by_upcoming(search_dict)
+    elif day:
+        event_filters.get_day_events(search_dict, day)
+
+    # Use current search dict and get events depending on whether or not
+    # popularity filtering is occuring.
+    if popular and popular.lower() == "true":
+      if popular_threshold and popular_threshold.lower() == "true":
+        unfiltered_events = event_filters.filter_by_popular(search_dict, True)
+      else:
+        unfiltered_events = event_filters.filter_by_popular(search_dict)
+    else
+      unfiltered_events = event_utils.find_events_in_database(search_dict)
+
+    # Add to search dict 
+    # Time filtering
+    if when:
+      if when == 'now' or when == 'upcoming':
+        print('Filtering by now/when')
       elif when == 'time':
         if time:
-          # Does not use search_dict
-          return event_filters.filter_by_time(time, day)
-          # return jsonify({'time': time})
+          # Updates events to be filtered by time period
+          unfiltered_events = event_filters.filter_by_time(unfiltered_events, time)
         else:
           return 'Expected time period to be set!'
       else:
@@ -140,29 +155,24 @@ def filter_events():
     if where:
       if where == 'nearby':
         if latitude and longitude and event_filters.is_float(latitude) and event_filters.is_float(longitude):
-            return event_filters.filter_by_nearby(search_dict, float(latitude), float(longitude), day)
+          unfiltered_events = event_filters.filter_by_nearby(unfiltered_events, float(latitude), float(longitude))
         else:
-            return 'Expected valid coordinates to be passed!'
+          return 'Expected valid coordinates to be passed!'
       elif where == 'oncampus':
-        return event_filters.filter_by_oncampus(day)
+        unfiltered_events = event_filters.filter_by_oncampus(unfiltered_events)
       elif where == 'offcampus':
-        return event_filters.filter_by_offcampus(day)
+        unfiltered_events = event_filters.filter_by_offcampus(unfiltered_events)
       else:
         return 'Invalid value passed to `where` parameter.'
 
     # Other filters
-    if popular and popular.lower() == "true":
-      if popular_threshold and popular_threshold.lower() == "true":
-        return event_filters.filter_by_popular(day, True)
-      else:
-        return event_filters.filter_by_popular(day)
-
-    if food and food.lower() == "true":
-      event_filters.filter_by_free_food(search_dict)
+    # TODO JORGE IMPLEMENT ML
+    # if food and food.lower() == "true":
+    #   event_filters.filter_by_free_food(search_dict)
       
     # return 'Success!'
 
-    return event_utils.find_events_in_database(search_dict)
+    return jsonify({'features': unfiltered_events, 'type': 'FeatureCollection'})
 
 # SINGLE EVENT
 #TODO: Combine into one
