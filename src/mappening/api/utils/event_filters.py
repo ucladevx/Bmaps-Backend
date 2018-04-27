@@ -62,34 +62,53 @@ def filter_by_time(unfiltered_events, time_period):
 
   for event in unfiltered_events:
     start_time = event['properties']['start_time']
-    end_time = event['properties']['start_time']
+    end_time = event['properties'].get('end_time')
 
     # Try to parse date
+    end_time_obj = None
     try:
         # Use dateutil parser to get time zone
         start_time_obj = dateutil.parser.parse(start_time)
-        end_time_obj = dateutil.parser.parse(end_time)
+        if end_time:
+          end_time_obj = dateutil.parser.parse(end_time)
     except ValueError:
         # Got invalid date string
         print('Invalid date string, cannot be parsed!')
         return None
 
-    # Get the date string by YYYY-MM-DD format
-    start_hour = datetime.strftime(start_time_obj, '%H')
-    end_hour = datetime.strftime(end_time_obj, '%H')
-    # print "Start hour is " + start_hour
-
     # Check whether the event start time falls under the time period
+    # Check for any kind of overlap of event and time period
+    morning_start_obj = start_time_obj.replace(hour=3, minute=0)
+    morning_end_obj = start_time_obj.replace(hour=11, minute=59)
+
+    afternoon_start_obj = start_time_obj.replace(hour=12, minute=0)
+    afternoon_end_obj = start_time_obj.replace(hour=16, minute=59)
+
+    night_start_obj = start_time_obj.replace(hour=17, minute=0)
+    night_end_obj = start_time_obj.replace(hour=2, minute=59)
+    night_end_obj += timedelta(days=1)
+
+    night_am_start_obj = start_time_obj.replace(hour=0, minute=0)
+    night_am_end_obj = start_time_obj.replace(hour=2, minute=59)
+
     should_append = False
-    if is_morning and ((start_hour >= '03' and start_hour < '12') or (end_hour >= '03' and end_hour < '12')):
-      # print('wow morning')
-      should_append = True
-    if is_afternoon and ((start_hour >= '12' and start_hour < '17') or (end_hour >= '12' and end_hour < '17')):
-      # print('wow afternoon')
-      should_append = True
-    if is_night and (((start_hour >= '17' and start_hour <= '24') or (start_hour >= '00' and start_hour < '03')) or ((end_hour >= '17' and end_hour <= '24') or (end_hour >= '00' and end_hour < '03'))):
-      # print('wow night')
-      should_append = True
+
+    # If no end time is supplied, just make sure that the start time falls under the time period
+    # TODO someone aka Jason should check over this logic lmao
+    if end_time:
+      if is_morning and ((morning_start_obj <= start_time_obj <= morning_end_obj) or (start_time_obj <= morning_start_obj < end_time_obj)):
+        should_append = True
+      if is_afternoon and ((afternoon_start_obj <= start_time_obj <= afternoon_end_obj) or (start_time_obj <= afternoon_start_obj < end_time_obj)):
+        should_append = True
+      if is_night and ((night_start_obj <= start_time_obj <= night_end_obj) or (start_time_obj <= night_start_obj < end_time_obj) or (start_time_obj < night_am_end_obj and night_am_start_obj < end_time_obj)):
+        should_append = True
+    else:
+      if is_morning and (morning_start_obj <= start_time_obj <= morning_end_obj):
+        should_append = True
+      if is_afternoon and (afternoon_start_obj <= start_time_obj <= afternoon_end_obj):
+        should_append = True
+      if is_night and ((night_start_obj <= start_time_obj <= night_end_obj) or (night_am_start_obj <= start_time_obj <= night_am_end_obj)):
+        should_append = True
 
     # Make sure the event is only appended once
     if should_append:
@@ -145,7 +164,7 @@ def filter_by_oncampus(unfiltered_events):
     if polygon.contains(point):
       oncampus_events.append(event)
 
-  return jsonify({'features': oncampus_events, 'type': 'FeatureCollection'})
+  return oncampus_events
 
 # Get event location and check whether coordinates are within the UCLA boundary
 # as specified by ucla_border.geojson. If NOT, then use.
@@ -172,7 +191,7 @@ def filter_by_offcampus(unfiltered_events):
     if not polygon.contains(point):
       offcampus_events.append(event)
 
-  return jsonify({'features': offcampus_events, 'type': 'FeatureCollection'})
+  return offcampus_events
 
 # Get current location of user and get all events whose coordinates are within a certain radius of the user
 # TODO JORGE for frontend implementation? Or however he gets current location
@@ -193,7 +212,7 @@ def filter_by_nearby(unfiltered_events, latitude, longitude):
     if haversine(user_location, event_location) < 0.3: 
       nearby_events.append(event)
 
-  return jsonify({'features': nearby_events, 'type': 'FeatureCollection'})
+  return nearby_events
 
 # Get all events that have free food
 # def filter_by_free_food(search_dict):
