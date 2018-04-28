@@ -73,13 +73,13 @@ def filter_events():
 
     :Description: Returns GeoJSON of all events filtered by the specified filters. Filtering options include filtering by time, location, popularity, and whether or not an event has free food.
 
-    :param when: An optional query component/parameter that specifies whether an event is happening now (event start time <= current time < event end time), is an upcoming event (event start time <= current time + 2 hours), or allows you to specify a time period with the `time` parameter. The parameter values can be `now`, `upcoming`, or `time`. 
+    :param when: An optional query component/parameter that specifies whether an event is happening now (event start time <= current time < event end time), is an upcoming event (event start time <= current time + 2 hours), or allows you to specify a time period with the `period` parameter. The parameter values can be `now`, `upcoming`, or `period`. 
     :type when: str or None
 
-    :param time: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `day` must be specified or will return all events in database in the specified time periods.
+    :param time_period: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `day` must be specified or will return all events in database in the specified time periods.
     :type time: str or None
 
-    :param day: An optional query component/parameter to specify what day to filter on. Does not work with `upcoming` or `now`. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 20 April 2018)
+    :param date: An optional query component/parameter to specify what day to filter on. Does not work with `upcoming` or `now`. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 20 April 2018)
     :type day: str or None
 
     :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a ~1000 ft (0.3 km) radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `day` may be specified or will return all events in database matching specified location parameters. For `nearby`, a `latitude` and `longitude` must be specified.
@@ -91,10 +91,7 @@ def filter_events():
     :param longitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
     :type longitude: str or None
 
-    :param popular: An optional query component/parameter that returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes. A `day` must be specified or will return results using all events in the database.
-    :type popular: boolean or None
-
-    :param popular_threshold: An optional query component/parameter that only returns events that meet the following threshold: # interested || # going > 50. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
+    :param popularity: An optional query component/parameter that only returns events that meet the following threshold: # interested || # going > 50. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
     :type popular_threshold: boolean or None
 
     :param food: An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.
@@ -102,13 +99,12 @@ def filter_events():
 
     """
     when = request.args.get('when')
-    time = request.args.getlist('time')
-    day = request.args.get('day')
+    time_period = request.args.getlist('time_period')
+    date = request.args.get('date')
     where = request.args.get('where')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
-    popular = request.args.get('popular')
-    popular_threshold = request.args.get('popular_threshold')
+    popularity = request.args.get('popularity') # popular, popular_threshold gone
     food = request.args.get('food')
 
     search_dict = {}
@@ -124,16 +120,16 @@ def filter_events():
         event_filters.filter_by_happening_now(search_dict)
       elif when == 'upcoming':
         event_filters.filter_by_upcoming(search_dict)
-    elif day:
-      event_filters.get_day_events(search_dict, day)
+    elif date:
+      event_filters.get_day_events(search_dict, date)
 
     # Use current search dict and get events depending on whether or not
     # popularity filtering is occuring.
-    if popular and popular.lower() == "true":
-      if popular_threshold and popular_threshold.lower() == "true":
-        unfiltered_events = event_filters.filter_by_popular(search_dict, True)
-      else:
-        unfiltered_events = event_filters.filter_by_popular(search_dict)
+    if popularity:
+        try:
+          unfiltered_events = event_filters.filter_by_popular(search_dict, int(popularity))
+        except:
+          return 'Invalid popularity, needs to be integer!'
     else:
       unfiltered_events = event_utils.get_events_in_database(search_dict)
 
@@ -142,10 +138,10 @@ def filter_events():
     if when:
       if when == 'now' or when == 'upcoming':
         print('Filtering by now/when')
-      elif when == 'time':
-        if time:
+      elif when == 'period':
+        if time_period:
           # Updates events to be filtered by time period
-          unfiltered_events = event_filters.filter_by_time(unfiltered_events, time)
+          unfiltered_events = event_filters.filter_by_time(unfiltered_events, time_period)
         else:
           return 'Expected time period to be set!'
       else:
@@ -154,7 +150,7 @@ def filter_events():
     # Location filtering
     if where:
       if where == 'nearby':
-        if latitude and longitude and event_filters.is_float(latitude) and event_filters.is_float(longitude):
+        if latitude and longitude and event_filters.is_valid_coords(latitude, longitude):
           unfiltered_events = event_filters.filter_by_nearby(unfiltered_events, float(latitude), float(longitude))
         else:
           return 'Expected valid coordinates to be passed!'
@@ -226,11 +222,11 @@ def get_event_categories(event_date):
     output = []
 
     if event_date:
-        print "Using date parameter: " + event_date
+        print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
-        print "No date parameter given..."
+        print("No date parameter given...")
         events_cursor = events_current_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:

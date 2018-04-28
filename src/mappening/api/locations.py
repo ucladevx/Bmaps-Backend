@@ -24,7 +24,7 @@ def get_all_locations():
       for loc in locations_cursor:
         output.append({"location": loc})
     else:
-        print 'Cannot find any locations!'
+        print('Cannot find any locations!')
 
     # Output typically contains name, city, country, latitude, longitude, state,
     # street, and zip for each location
@@ -52,7 +52,7 @@ def add_locations_from_collection(events_collection):
     # Latitude and Longitude range from (-90, 90) and (-180, 180)
     INVALID_COORDINATE = 420
 
-    print new_locations
+    print(new_locations)
 
     # For every location from events db
     for new_loc in new_locations:
@@ -98,7 +98,7 @@ def add_locations_from_collection(events_collection):
         if updated:
           updated = False
           updated_locations.append(old_loc)
-          print "Updated: " + old_loc['location']['name']
+          print("Updated: " + old_loc['location']['name'])
           # Replace document with updated info
           if is_name:
             locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)
@@ -111,9 +111,8 @@ def add_locations_from_collection(events_collection):
         if place_name != new_loc['location']['name'].lower():
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
-        print "Added: " + new_loc['location']['name']
+        print("Added: " + new_loc['location']['name'])
         locations_collection.insert_one(new_loc.copy())
-
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
 # LOCATIONS SEARCH

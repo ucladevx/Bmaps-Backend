@@ -30,7 +30,7 @@ def on_load(state):
     login_manager.init_app(state.app)
     # login_manager.session_protection = "strong" 
 
-    print "Login manager set up with auth Blueprint!"
+    print("Login manager set up with auth Blueprint!")
 
 # Can use user ID as remember token
 # Must change user's ID to invalidate login sessions
@@ -68,7 +68,7 @@ def facebook_authorized(resp):
             )
     session['oauth_token'] = (resp['access_token'], '')
     session['expires'] = resp['expires_in']
-    print "Token expires in " + str(resp['expires_in'])
+    print("Token expires in " + str(resp['expires_in']))
 
     # me = facebook_oauth.get("/me")
     # return str(me.data)

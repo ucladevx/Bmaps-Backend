@@ -45,7 +45,7 @@ class App:
           self.events.append({ 'name': event.get('name', "NO EVENT NAME"), 'description': event.get('description', "NO EVENT DESCRIPTION"), 'id': event['_id'] })
           self.counter += 1
     else:
-        print 'Cannot find any events in database!'
+        print('Cannot find any events in database!')
         quit()
 
     empty1 = Label(root, text="", font=("Open Sans", 10))
@@ -125,15 +125,15 @@ class App:
       self.skip.config(state = DISABLED)
 
   def left(self, event):
-    # print "Left key pressed"
+    # print("Left key pressed")
     self.isCorrect()
 
   def right(self, event):
-    # print "Right key pressed"
+    # print("Right key pressed")
     self.isWrong()
 
   def isCorrect(self):
-    print "Event has free food!                                                 " + self.events[0]['name']
+    print("Event has free food!                                                 " + self.events[0]['name'])
     self.undo.config(state = "normal")
 
     # Find event with matching id and tag it as free food
@@ -148,7 +148,7 @@ class App:
       ml_collection.replace_one({'_id': event['_id']}, event.copy()) 
 
     else:
-      print "No such event found in db to replace, moving on...                   " + self.events[0]['name']
+      print("No such event found in db to replace, moving on...                   " + self.events[0]['name'])
 
       self.lastAction = "NOT FOUND"
       self.lastEvent = self.events[0]
@@ -157,7 +157,7 @@ class App:
     self.changeText()
 
   def isWrong(self):
-    print "Event does not have free food!                                       " + self.events[0]['name']
+    print("Event does not have free food!                                       " + self.events[0]['name'])
     self.undo.config(state = "normal")
 
     # Find event with matching id and tag it as no free food
@@ -172,7 +172,7 @@ class App:
       ml_collection.replace_one({'_id': event['_id']}, event.copy()) 
 
     else:
-      print "No such event found in db to replace, moving on...                   " + self.events[0]['name']
+      print("No such event found in db to replace, moving on...                   " + self.events[0]['name'])
 
       self.lastAction = "NOT FOUND"
       self.lastEvent = self.events[0]
@@ -181,12 +181,12 @@ class App:
     self.changeText()
 
   def undo(self):
-    print "Undoing last yes/no!"
+    print("Undoing last yes/no!")
 
     self.enable()
 
     if self.lastAction == "NOT FOUND":
-      print "Adding previous event back to the list of events..."
+      print("Adding previous event back to the list of events...")
       # Only skipped/moved past event
       # Add to beginning of events list
       self.events.insert(0, self.lastEvent)
@@ -197,7 +197,7 @@ class App:
       descriptionLabel.set(self.events[0]['description'])
       counterLabel.set("Events Remaining: " + str(self.counter))
     elif self.lastAction == "free food":
-      print "Unmarking event and adding back to the list of events..."
+      print("Unmarking event and adding back to the list of events...")
       # Marked as free_food = true/false
       # Find event with matching id and remove free_food tag
       event = ml_collection.find_one({'_id': self.lastEvent['_id']})
@@ -217,10 +217,10 @@ class App:
         descriptionLabel.set(self.events[0]['description'])
         counterLabel.set("Events Remaining: " + str(self.counter))
       else:
-        print "Didn't find an event to remove label from!"
+        print("Didn't find an event to remove label from!")
     else:
       # Not undoing last action as it wasn't a YES/NO
-      print "Nothing to undo!"
+      print("Nothing to undo!")
 
 
     self.lastAction = "none"
@@ -228,7 +228,7 @@ class App:
     self.undo.config(state = DISABLED)
 
   def skip(self):
-    print "Skipping this event, idk what to do with it...                       " + self.events[0]['name']
+    print("Skipping this event, idk what to do with it...                       " + self.events[0]['name'])
 
     self.lastAction = "none"
     self.lastEvent = {}
@@ -238,7 +238,7 @@ class App:
     self.changeText()
 
   def helpInstructions(self):
-    print "Displaying instructions!"
+    print("Displaying instructions!")
 
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
@@ -249,7 +249,7 @@ class App:
     self.focus()
 
   def quit(self, frame):
-    print "Quitting tkinter thing..."
+    print("Quitting tkinter thing...")
 
     # Prompt a yes/no response
     choice = tkMessageBox.askquestion("Ready to quit?", "Thanks for your help!", icon='warning')
@@ -257,7 +257,7 @@ class App:
     if choice == 'yes':
       frame.quit()
     else:
-      print "Not done yet!"
+      print("Not done yet!")
       self.focus()
 
   def changeText(self):
@@ -280,8 +280,8 @@ class App:
     self.lastAction = "none"
     self.lastEvent = {}
 
-    print "Filter what events we're looking at by letter..."
-    print "Do this if multiple people are doing this at the same time"
+    print("Filter what events we're looking at by letter...")
+    print("Do this if multiple people are doing this at the same time")
 
     self.enable()
     self.undo.config(state = DISABLED)
@@ -308,14 +308,14 @@ class App:
             descriptionLabel.set(self.events[0]['description'])
             counterLabel.set("Events Remaining: " + str(self.counter))
           else:
-            print 'Cannot find any events in database!'
+            print('Cannot find any events in database!')
             quit()
         else:
-          print 'Cannot find any events in database!'
+          print('Cannot find any events in database!')
           quit()
       else:
         FILTER_LETTER = chr(ord('a') + letter_num - 1)
-        print "Looking at events starting with letter " + FILTER_LETTER
+        print("Looking at events starting with letter " + FILTER_LETTER)
 
         # Get all the events that start with the letter
         filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
@@ -337,15 +337,15 @@ class App:
             descriptionLabel.set(self.events[0]['description'])
             counterLabel.set("Events Remaining: " + str(self.counter))
           else:
-            print 'Cannot find any events in database starting with letter ' + FILTER_LETTER
+            print('Cannot find any events in database starting with letter ' + FILTER_LETTER)
             counterLabel.set("Events Remaining: " + str(self.counter))
             self.disable()
         else:
-          print 'Cannot find any events in database starting with letter ' + FILTER_LETTER
+          print('Cannot find any events in database starting with letter ' + FILTER_LETTER)
           counterLabel.set("Events Remaining: " + str(self.counter))
           self.disable()
     else:
-      print "No letter chosen for filtering, leaving unfiltered"
+      print("No letter chosen for filtering, leaving unfiltered")
 
     self.focus()
 

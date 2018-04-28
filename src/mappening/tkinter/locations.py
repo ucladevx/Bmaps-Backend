@@ -24,14 +24,14 @@ def process_unknown_locations():
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
       if API_unknown_locations_collection.find_one({'_id': loc_db['_id']}):
-        print "Already in db"
+        print("Already in db")
       else:
-        print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
+        print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned))
         counter = counter + 1
         if 'location_name' in loc_db:
           loc_result = get_location_search_result(loc_db['location_name'])
           if loc_result != "There were no results!":
-            print "Found a match!"
+            print("Found a match!")
             num_assigned = num_assigned + 1
             API_unknown_locations_collection.insert_one({
               "unknown_loc": {
@@ -47,7 +47,7 @@ def process_unknown_locations():
               }
             }) 
           else:
-            print "Didn't find a location!"
+            print("Didn't find a location!")
             num_unassigned = num_unassigned + 1
             API_TODO_locations_collection.insert_one({
               "unknown_loc": {
@@ -57,10 +57,10 @@ def process_unknown_locations():
               "db_loc": {}
             }) 
    else:
-       print 'Cannot find any unknown locations!'
+       print('Cannot find any unknown locations!')
  
-  print "num_assigned: " + str(num_assigned)
-  print "num_unassigned: " + str(num_unassigned)
+  print("num_assigned: " + str(num_assigned))
+  print("num_unassigned: " + str(num_unassigned))
   return "Added unknown locations to database\n"
 
 # Go through events_ml_collection and run every location name through locations api
@@ -76,7 +76,7 @@ def test_location_search():
   events_cursor = events_ml_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
-      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong)
+      print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong))
       counter = counter + 1
       if 'place' in event and 'location' in event['place']:
         loc = get_location_search_result(event['place']['name'])
@@ -87,10 +87,10 @@ def test_location_search():
           lat_diff = abs(loc['latitude'] - event_lat)
           long_diff = abs(loc['longitude'] - event_long)
           if lat_diff < 0.0015 and long_diff < 0.0015:
-            print "Correct"
+            print("Correct")
             num_correct = num_correct + 1
           else:
-            print "Wrong"
+            print("Wrong")
             num_wrong = num_wrong + 1
             wrong_locs.append({
               "event": {
@@ -106,7 +106,7 @@ def test_location_search():
               }
             }) 
         else:
-          print "Invalid Loc"
+          print("Invalid Loc")
           num_invalid = num_invalid + 1
           wrong_locs.append({
               "event": {
@@ -117,7 +117,7 @@ def test_location_search():
               "loc": "NONE"
             }) 
   else:
-      print 'Cannot find any events!'
+      print('Cannot find any events!')
 
   # Output typically contains name, city, country, latitude, longitude, state, 
   # street, and zip for each location
