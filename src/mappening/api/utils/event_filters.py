@@ -39,10 +39,10 @@ def filter_by_upcoming(search_dict):
 # checks if the event overlaps the time period at all
 # all arguments are datetime objects (can be compared and subtracted)
 def in_time_range(event_start, event_end, period_start, period_end):
-  if period_start <= event_start <= period_end:
+  if period_start <= event_start < period_end:
     return True
   if event_end:
-    if event_start <= period_end and event_end > period_start:
+    if event_start < period_end and event_end >= period_start:
       return True
   return False
 
