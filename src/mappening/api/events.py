@@ -86,13 +86,13 @@ def filter_events():
     :type where: str or None
 
     :param latitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
-    :type latitude: str or None
+    :type latitude: float or None
 
     :param longitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
-    :type longitude: str or None
+    :type longitude: float or None
 
     :param popularity: An optional query component/parameter that only returns events that meet a specified integer threshold: # interested || # going > this parameter value. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
-    :type popularity: str or None
+    :type popularity: int or None
 
     :param food: An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.
     :type food: boolean or None
