@@ -1,4 +1,4 @@
-from mappening.utils.database import pages_saved_collection, unknown_locations_collection, events_ml_collection
+from mappening.utils.database import pages_saved_collection, pages_ignored_collection, unknown_locations_collection, events_ml_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import requests
@@ -69,6 +69,37 @@ def get_app_token():
     # but this needs to update every 60 days!
     return FACEBOOK_USER_ACCESS_TOKEN
 
+def refresh_page_database():
+    # separately run from refreshing events, also check for new pages under set of search terms
+    print('Refreshing pages...')
+
+    # update just like accumulated events list
+    # remember: find() just returns a cursor, not whole data structure
+    # saved_pages = pages_saved_collection.find()
+    # returns a dict of IDs to names
+    raw_page_data = find_ucla_entities()
+    print('Found them.')
+    # raw_page_data = {"test_id": "test_name"}
+
+    new_page_count = 0
+    updated_page_count = 0
+    # in contrast to raw_page_data, pages_saved_collection is list of {"id": <id>, "name": <name>}
+    for page_id, page_name in tqdm(raw_page_data.iteritems()):
+        # See if page already existed, and if it's even allowed to be inserted (check blacklist)
+        unwanted_page = pages_ignored_collection.find_one({'id': page_id})
+        if unwanted_page:
+            continue
+
+        update_page = pages_saved_collection.find_one({'id': page_id})
+        # If it existed then delete it, new event gets inserted in both cases
+        if update_page:
+            pages_saved_collection.delete_one({'id': page_id})
+            updated_page_count += 1
+            new_page_count -= 1
+        pages_saved_collection.insert_one({'id': page_id, 'name': page_name})
+        new_page_count += 1
+
+    return 'Refreshed database pages: {0} new, {1} updated.'.format(new_page_count, updated_page_count)
 
 def entity_in_right_location(loc_data):
     """
@@ -177,77 +208,6 @@ def find_ucla_entities():
 
     # a dictionary, to keep only unique pages
     return ucla_entities
-
-# json file expected to be a bunch of dicts, each for 1 page, with page_id and name
-# one time usage, basically
-def add_pages_from_json(filename):
-    page_list = []
-    with open(filename) as infile:
-        for line in tqdm(infile):
-            # takes each line as a dict and from each, takes out only 2 key-values, id and name
-            abridged_info = {k: json.loads(line).get(k, None) for k in ('page_id', 'name')}
-            # change key name to id
-            abridged_info['id'] = abridged_info.pop('page_id')
-            page_list.append(abridged_info)
-
-    for page in tqdm(page_list):
-        if pages_saved_collection.find_one({'id': page['id']}):
-            pages_saved_collection.delete_one({'id': page['id']})
-        pages_saved_collection.insert_one(page)
-
-
-# TODO: add facebook page by exact name that appears in URL, or ID
-# TODO: JASON maybe make a pages_utils.py or something rather than sticking it all in events? idk how related they are
-
-def add_facebook_page_from_id(page_id, page_type):
-    """
-    RULES TO INSERT:
-    In General: to GUARANTEE the ID, Inspect Element
-    --> under <head> tag, find <meta property=... content="fb://group OR page/?id=<id>">
-    ** may need some scrolling
-    Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
-    Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
-    Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
-    """
-    app_access_token = get_app_token()
-    
-    # if ID given, always use that
-    # call API directly with just the ID, should work
-    if page_id:
-        return {}
-
-# TODO: add facebook page by exact name that appears in URL, or ID
-
-def add_facebook_page_from_search(search_string, page_type):
-    """
-    RULES TO INSERT:
-    In General: to GUARANTEE the ID, Inspect Element
-    --> under <head> tag, find <meta property=... content="fb://group OR page/?id=<id>">
-    ** may need some scrolling
-    Pages: can directly use their alias from the URL, in this format: https://www.facebook.com/<page_id>
-    Groups: try to use Inspect Element, but if lazy, input the EXACT group title, and this will search and use the first result
-    Places: ONLY use Inspect Element, will appear in HTML meta tag as page, search will NOT work
-    """
-    app_access_token = get_app_token()
-    
-    search_args = {
-        'limit': '3',   # want small limit, since only expecting 1 page anyway
-        'fields': 'name',
-        'access_token': app_access_token
-    }
-
-    # by here, must have a name to search
-    if page_type == 'page':
-        # try call API directly, but if not alias, will give error
-        # in that case, need to search, try both pages and places
-        return {}
-    elif page_type == 'group':
-        search_args['type'] = 'group'
-        return {}
-    elif page_type == 'place':
-        search_args['type'] = 'place'
-        return {}
-    return {}
 
 def get_events_from_pages(pages_by_id, days_before, page_debug_mode=False):
     # pages_by_id = {'676162139187001': 'UCLACAC'}
@@ -547,7 +507,4 @@ if __name__ == '__main__':
     pprint(res['events'][:3])
     
     # find_many_events()
-
-    # add_pages_from_json('holy_groups.json')
-    # add_pages_from_json('holy_pages.json')
 
