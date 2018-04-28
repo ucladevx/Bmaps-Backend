@@ -69,30 +69,30 @@ def search_events():
 @events.route('/filter', methods=['GET'])
 def filter_events():
     """
-    :Route: /filter?when=time&time=morning&time=afternoon&day=April 20 2018&where=offcampus&popular=False&popular_threshold=False&food=True
+    :Route: /filter?when=period&time_period=morning&time_period=afternoon&date=April 20 2018&where=offcampus&popularity=50&food=True
 
     :Description: Returns GeoJSON of all events filtered by the specified filters. Filtering options include filtering by time, location, popularity, and whether or not an event has free food.
 
     :param when: An optional query component/parameter that specifies whether an event is happening now (event start time <= current time < event end time), is an upcoming event (event start time <= current time + 2 hours), or allows you to specify a time period with the `period` parameter. The parameter values can be `now`, `upcoming`, or `period`. 
     :type when: str or None
 
-    :param time_period: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `day` must be specified or will return all events in database in the specified time periods.
-    :type time: str or None
+    :param time_period: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time_period`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `date` must be specified or will return all events in database in the specified time periods.
+    :type time_period: str or None
 
     :param date: An optional query component/parameter to specify what day to filter on. Does not work with `upcoming` or `now`. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 20 April 2018)
-    :type day: str or None
+    :type date: str or None
 
-    :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a ~1000 ft (0.3 km) radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `day` may be specified or will return all events in database matching specified location parameters. For `nearby`, a `latitude` and `longitude` must be specified.
+    :param where: An optional query component/parameter that specifies a location filter for events. The parameter values can be `nearby`, `oncampus`, or `offcampus` where `nearby` filters for events within a ~1000 ft (0.3 km) radius, `oncampus` gets locations within the UCLA boundary, and `offcampus` gets locations in Westwood and outside of the UCLA boundaries. A `date` may be specified or will return all events in database matching specified location parameters. For `nearby`, a `latitude` and `longitude` must be specified.
     :type where: str or None
 
     :param latitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
-    :type latitude: str or None
+    :type latitude: float or None
 
     :param longitude: An optional query component/parameter used with the `nearby` filter. Must be passed in order to find events near the supplied coordinates.
-    :type longitude: str or None
+    :type longitude: float or None
 
     :param popularity: An optional query component/parameter that only returns events that meet a specified integer threshold: # interested || # going > this parameter value. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.
-    :type popular_threshold: boolean or None
+    :type popularity: int or None
 
     :param food: An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.
     :type food: boolean or None
