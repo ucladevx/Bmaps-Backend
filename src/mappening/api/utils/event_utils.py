@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection, events_test_collection
 import event_caller
 
 
@@ -10,15 +10,16 @@ import os
 import re
 
 # If needed, clean database of duplicate documents
-def remove_db_duplicates():
+def remove_db_duplicates(changed_collection):
     total_dups = []
 
-    # Difference between append and extend: extend flattens out lists to add elements, append adds 1 element
-    total_dups.extend(event_utils.clean_collection(events_current_collection))
-    total_dups.extend(event_utils.clean_collection(pages_saved_collection))
-    total_dups.extend(event_utils.clean_collection(events_ml_collection))
+    # Difference between append and extend: extend flattens out lists to add multiple elements, append adds 1 element
+    total_dups.extend(clean_collection(changed_collection))
+    total_dups.extend(clean_collection(pages_saved_collection))
+    total_dups.extend(clean_collection(events_ml_collection))
 
-    return jsonify(total_dups)
+    print('Removed {0} duplicates.'.format(len(total_dups)))
+    return total_dups
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
     output = get_events_in_database(find_dict, one_result_expected, print_results, legacy)
@@ -156,6 +157,9 @@ def processed_time(old_time_str):
     return res_time_str
 
 def construct_date_regex(raw_date):
+    if not raw_date:
+        return None
+
     # Try to parse date
     try:
         # Use dateutil parser to get time zone
@@ -176,7 +180,6 @@ def clean_collection(collection):
     """
     simply save each unique document and delete any that have been found already
     """
-
     # a set, not a dict
     unique_ids = set()
     dups = []
@@ -191,43 +194,35 @@ def clean_collection(collection):
             unique_ids.add(curr_id)
     return dups
 
-def call_populate_events_database():
-    # boolean doesn't work here: if clear parameter has any value, it is a string
-    # all non-empty strings are true, so just take it as a string
-    clear_old_db = request.args.get('clear', default='False', type=str)
-    print(clear_old_db, type(clear_old_db))
-    # could do .lower(), but only works for ASCII in Python 2...
-    if clear_old_db == 'True' or clear_old_db == 'true':
-        events_current_collection.delete_many({})
-
-    earlier_day_bound = request.args.get('days', default=0, type=int)
-    print(earlier_day_bound)
-    return update_ucla_events_database(earlier_day_bound)
-
-
 # Get all UCLA-related Facebook events and add to database
-def update_ucla_events_database(earlier_day_bound=0):
+def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False, refresh_pages=False):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
-    # Location of Bruin Bear
-    # current_events = get_facebook_events(34.070964, -118.444757)
+    
+    changed_collection = events_current_collection
+    if use_test:
+        changed_collection = events_test_collection
+
+    if clear_old_db:
+        changed_collection.delete_many({})
+
     # take out all current events from DB, put into list, check for updates
-    processed_db_events = event_caller.update_current_events(list(events_current_collection.find()), earlier_day_bound)
+    processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
 
     # actually update all in database, but without mass deletion (for safety)
-    for old_event in tqdm(events_current_collection.find()):
+    for old_event in tqdm(changed_collection.find()):
         event_id = old_event['id']
         updated_event = processed_db_events.get(event_id)
         # if event should be kept and updated
         if updated_event:
-            events_current_collection.delete_one({'id': event_id})
-            events_current_collection.insert_one(updated_event)
+            changed_collection.delete_one({'id': event_id})
+            changed_collection.insert_one(updated_event)
         # event's time has passed, according to update_current_events
         else:
-            events_current_collection.delete_one({'id': event_id})
+            changed_collection.delete_one({'id': event_id})
 
-    new_events_data = event_caller.get_facebook_events(earlier_day_bound)
+    new_events_data = event_caller.get_facebook_events(days_back_in_time)
     # debugging events output
     # with open('events_out.json', 'w') as outfile:
     #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
@@ -249,7 +244,7 @@ def update_ucla_events_database(earlier_day_bound=0):
         # don't need to do anything if event found previously, since updated in update_current_events()
         if existing_event:
             continue
-        events_current_collection.insert_one(event)
+        changed_collection.insert_one(event)
         new_count += 1
 
         # below = UPDATE: pymongo only allows update of specifically listed attributes in a dictionary...
@@ -262,5 +257,7 @@ def update_ucla_events_database(earlier_day_bound=0):
         if update_event:
             events_ml_collection.delete_one({'id': curr_id})
         events_ml_collection.insert_one(event)
+
+    remove_db_duplicates(changed_collection)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
