@@ -1,6 +1,6 @@
 # TODO FIX THIS GROSSNESS
 
-from mappening.utils.database import ucla_events_collection, events_ml_collection, test_collection, UCLA_locations_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, locations_collection
 from mappening.api.utils import tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -30,16 +30,16 @@ def get_locations_from_collection(events_collection):
     place = {}
 
     if events_collection == "ucla_events":
-      events_cursor = ucla_events_collection.find({"place": {"$exists": True}})
+      events_cursor = events_current_collection.find({"place": {"$exists": True}})
     elif events_collection == "events_ml":
       events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    else: # events_collection == "test":
-      events_cursor = test_collection.find({"place": {"$exists": True}})
+    else:
+      events_cursor = None
     
     # Every time there are new events, check location info and update db if necessary
     # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
     # events_cursor = events_collection.find({"place": {"$exists": True}})
-    if events_cursor.count() > 0:
+    if events_cursor and events_cursor.count() > 0:
       for event in events_cursor:
         # Add location info to place dict
         if 'location' in event['place']:
@@ -124,7 +124,7 @@ def search_locations(place_query):
     output_places = []
 
     # Supplied string such as "Boelter Hall" for a location
-    print "Original place query: " + place_query
+    print("Original place query: " + place_query)
     # Remove leading/trailing white space
     place_query = place_query.strip()
 
@@ -138,10 +138,10 @@ def search_locations(place_query):
     place_regex = re.sub(r'\(', '', place_regex, flags=re.IGNORECASE)
     place_regex = re.sub(r'\)', '', place_regex, flags=re.IGNORECASE)
     place_regex = place_regex.strip()
-    print "Regex place query: " + place_regex
+    print("Regex place query: " + place_regex)
 
     place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
-    places_cursor = UCLA_locations_collection.find({'location.alternative_names': place_regex})
+    places_cursor = locations_collection.find({'location.alternative_names': place_regex})
     
     # Places that match the name are appended to output
     if places_cursor.count() > 0:
@@ -159,24 +159,24 @@ def search_locations(place_query):
         })
         output_places.append(place['location'].get('name', "NO NAME"))
 
-      print "Found exact match!"
+      print("Found exact match!")
       return output
 
-    print "Doing text search..."
+    print("Doing text search...")
 
     # Tokenize and remove unnecessary/common words 
     place_name = re.sub(r'\bUCLA-\s?', '', place_query, flags=re.IGNORECASE)
     place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
     place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
     processed_place = tokenize.tokenize_text(place_name)
-    print "Processed place query: " + processed_place
+    print("Processed place query: " + processed_place)
 
     # Locations db has text search index on alternate_locations field
     # Search for locations that match words in processed place query
     # Default stop words for english language, case insensitive
     # Sort by score (based on number of occurances of query words in alternate names)
     # Can limit numer of results as well
-    places_cursor = UCLA_locations_collection.find( 
+    places_cursor = locations_collection.find( 
       { '$text': { '$search': processed_place, '$language': 'english', '$caseSensitive': False } },
       { 'score': { '$meta': 'textScore' } }
     ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)

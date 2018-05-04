@@ -1,5 +1,8 @@
 # Scraping
 
+## Overview
+Scrape websites for location/event information
+
 ## [happenings.ucla.edu](http://feeds.feedburner.com/uclahappenings-all-alldays)
 - View page source
 - Get all the event links
