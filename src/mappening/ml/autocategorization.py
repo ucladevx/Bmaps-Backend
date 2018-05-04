@@ -94,6 +94,7 @@ def categorizeAllCurrentEvents():
     allEvents = [e for e in events_current_collection.find()]
     allEvents = categorizeEvents(allEvents)
     events_curcategorized_collection.insert_many(allEvents)
+    print("Created new categorized event collection: events_curcategorized")
 
 if __name__ == "__main__":
     categorizeAllCurrentEvents()
