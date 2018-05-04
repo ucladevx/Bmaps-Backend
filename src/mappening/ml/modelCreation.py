@@ -80,5 +80,7 @@ def trainModels():
     with open(r"detailVectorizer.pickle", "wb") as output_file:
         pickle.dump(detailVectorizer, output_file)
 
+    print("Successfully trained and saved categorization models")
+
 if __name__ == "__main__":
     trainModels()

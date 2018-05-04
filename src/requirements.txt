@@ -12,3 +12,9 @@ tqdm
 nltk
 shapely
 haversine
+
+# Machine Learning
+scikit-learn
+numpy
+scipy
+pandas
