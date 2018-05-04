@@ -1,4 +1,4 @@
-from mappening.utils.database import tkinter_UCLA_locations_collection, tkinter_unknown_locations_collection, tkinter_TODO_locations_collection, events_ml_collection, UCLA_locations_collection
+from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, events_ml_collection, locations_collection
 from mappening.api.utils import location_utils, tokenize
 
 import requests
@@ -20,20 +20,20 @@ def process_unknown_locations():
   num_unassigned = 0
   counter = 1
 
-  locs_cursor = tkinter_UCLA_locations_collection.find({})
+  locs_cursor = unknown_locations_collection.find({})
   if locs_cursor.count() > 0:
     for loc_db in locs_cursor:
-      if tkinter_collection.find_one({'_id': loc_db['_id']}):
-        print "Already in db"
+      if API_unknown_locations_collection.find_one({'_id': loc_db['_id']}):
+        print("Already in db")
       else:
-        print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned)
+        print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_unassigned))
         counter = counter + 1
         if 'location_name' in loc_db:
           loc_result = get_location_search_result(loc_db['location_name'])
           if loc_result != "There were no results!":
-            print "Found a match!"
+            print("Found a match!")
             num_assigned = num_assigned + 1
-            tkinter_collection.insert_one({
+            API_unknown_locations_collection.insert_one({
               "unknown_loc": {
                 "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
                 "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -47,9 +47,9 @@ def process_unknown_locations():
               }
             }) 
           else:
-            print "Didn't find a location!"
+            print("Didn't find a location!")
             num_unassigned = num_unassigned + 1
-            tkinter_TODO_collection.insert_one({
+            API_TODO_locations_collection.insert_one({
               "unknown_loc": {
                 "loc_name": loc_db.get('location_name', "NO LOCATION NAME"),
                 "event_name": loc_db.get('event_name', "NO EVENT NAME")
@@ -57,10 +57,10 @@ def process_unknown_locations():
               "db_loc": {}
             }) 
    else:
-       print 'Cannot find any unknown locations!'
+       print('Cannot find any unknown locations!')
  
-  print "num_assigned: " + str(num_assigned)
-  print "num_unassigned: " + str(num_unassigned)
+  print("num_assigned: " + str(num_assigned))
+  print("num_unassigned: " + str(num_unassigned))
   return "Added unknown locations to database\n"
 
 # Go through events_ml_collection and run every location name through locations api
@@ -76,7 +76,7 @@ def test_location_search():
   events_cursor = events_ml_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
-      print "~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong)
+      print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong))
       counter = counter + 1
       if 'place' in event and 'location' in event['place']:
         loc = get_location_search_result(event['place']['name'])
@@ -87,10 +87,10 @@ def test_location_search():
           lat_diff = abs(loc['latitude'] - event_lat)
           long_diff = abs(loc['longitude'] - event_long)
           if lat_diff < 0.0015 and long_diff < 0.0015:
-            print "Correct"
+            print("Correct")
             num_correct = num_correct + 1
           else:
-            print "Wrong"
+            print("Wrong")
             num_wrong = num_wrong + 1
             wrong_locs.append({
               "event": {
@@ -106,7 +106,7 @@ def test_location_search():
               }
             }) 
         else:
-          print "Invalid Loc"
+          print("Invalid Loc")
           num_invalid = num_invalid + 1
           wrong_locs.append({
               "event": {
@@ -117,7 +117,7 @@ def test_location_search():
               "loc": "NONE"
             }) 
   else:
-      print 'Cannot find any events!'
+      print('Cannot find any events!')
 
   # Output typically contains name, city, country, latitude, longitude, state, 
   # street, and zip for each location
@@ -172,7 +172,7 @@ def remove_ucla_from_names():
 # See sample format in ./sampleData.json
 # TODO: don't add duplicates
 def insert_locations_from_json():
-  UCLA_locations_collection.insert_many(data['locations'])
+  locations_collection.insert_many(data['locations'])
   return "Successfully inserted location documents to db!"
 
 # Given JSON, fill out any missing location data using the Google Places API

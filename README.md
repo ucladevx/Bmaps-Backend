@@ -1,7 +1,10 @@
 # Mappening-Backend
 
 ## Overview
-A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising. 
+A single platform for events across campus. Mappening helps raise awareness of events by aggregating event information from various sources of advertising.
+
+## Documentation
+Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
 
 ## Built With
 - Python 2.7.14
@@ -16,10 +19,10 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Beautiful Soup for web scraping
 
 ## Setting Up the Environment
-- Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.  
-- Clone this repository 
+- Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.
+- Clone this repository
   - `git clone https://github.com/ucladevx/Mappening-Backend.git`
-- Get the `.env` file which contains sensitive information from a dev and add it to python_app/
+- Get the `.env` file which contains sensitive information from a dev and add it to src/mappening/utils/
 
 ## How to Push Image to AWS ECS
 - Enter the repository
@@ -41,17 +44,8 @@ A single platform for events across campus. Mappening helps raise awareness of e
 - Check out the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
   - Contains instructions for local development and production
 
-## Fun Stuff
+## Repo Breakdown
+- Backend source code in `src/`
 - tkinter GUIs in `tkinter/`
 - Autodocumentation in `docs/`
 - Beautiful Soup Scraping in `scraping/`
-
-## What's Next?
-- Locations
-  - Filter unknown locations using internal tkinter tools
-  - See how accurate locations API is
-  - Improve API accordingly
-  - Integrate locations API with events API
-  - Clean up/document!
-- Events
-  - Web Scraping!

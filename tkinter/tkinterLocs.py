@@ -85,42 +85,42 @@ class App:
 
     # Correct - location data matches location name
     # Will be removed from `unknown` database and added to `known` database
-    self.correct = Button(frame, text="CORRECT!", command=self.isCorrect)
+    self.correct = Button(frame, text="CORRECT!", command=self.isCorrect, padx=10)
     self.correct.pack(side=LEFT)
 
     # Wrong - location data does not match location name (e.g. the coordinates aren't right)
     # Prompts user to input correct coordinates and an additional name (1 max)
     # Keeps modified location in `unknown` database for secondary verification
-    self.wrong = Button(frame, text="WRONG Location Data!", command=self.isWrong)
+    self.wrong = Button(frame, text="WRONG Location Data!", command=self.isWrong, padx=10)
     self.wrong.pack(side=LEFT)
 
     # Fail - location name doesn't seem to match with the location data the locations api found
     # Add to a separate `TODO` database for manual processing
-    self.fail = Button(frame, text="Wrong location found!", command=self.isFail)
+    self.fail = Button(frame, text="Wrong location found!", command=self.isFail, padx=10)
     self.fail.pack(side=LEFT)
 
     # Skip - don't know if right or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip, padx=10)
     self.skip.pack(side=LEFT)
 
     # Undo - only undoes last CORRECT/WRONG action
-    self.undo = Button(frame, text="UNDO last CORRECT/WRONG/FAIL", command=self.undo)
+    self.undo = Button(frame, text="UNDO last CORRECT/WRONG/FAIL", command=self.undo, padx=10)
     self.undo.pack(side=LEFT)
     self.undo.config(state = DISABLED)
 
     # Filter Letter - if multiple people are working on this at same time
     # Filter by letter so everyone is wokring on something different
-    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter, padx=10)
     self.filter.pack(side=LEFT)
 
     # Help - displays instructions
-    self.help = Button(frame, text="HELP", command=self.helpInstructions)
+    self.help = Button(frame, text="HELP", command=self.helpInstructions, padx=10)
     self.help.pack(side=LEFT)
 
     # Quit - exit tkinter/displays
     # TODO: remove extra check to quit, let there in case we wanted to use similar code in future
-    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
+    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame), padx=10)
     self.button.pack(side=LEFT)
 
     # Define all the labels and strings used in the display
@@ -151,16 +151,16 @@ class App:
       self.disableLabels()
 
   def left(self, event):
-    # print "Left key pressed"
+    # print("Left key pressed")
     self.isCorrect()
 
   def right(self, event):
-    # print "Right key pressed"
+    # print("Right key pressed")
     self.isWrong()
 
   def isCorrect(self):
-    print "Coordinates are correct!                                             " + self.unknown_locations[0]['unknown_loc']['loc_name']
-    print "Adding to different database and remove from test database"
+    print("Coordinates are correct!                                             " + self.unknown_locations[0]['unknown_loc']['loc_name'])
+    print("Adding to different database and remove from test database")
 
     self.undo.config(state = "normal")
     self.lastAction = "CORRECT"
@@ -174,8 +174,8 @@ class App:
     self.changeText()
 
   def isWrong(self):
-    print "Coordinates are wrong, enter correct location data:                  " + self.unknown_locations[0]['unknown_loc']['loc_name']
-    print "Leaving location in database for secondary verification"
+    print("Coordinates are wrong, enter correct location data:                  " + self.unknown_locations[0]['unknown_loc']['loc_name'])
+    print("Leaving location in database for secondary verification")
 
     self.undo.config(state = "normal")
     self.lastAction = "WRONG"
@@ -190,32 +190,32 @@ class App:
     # If any changes were made then update original location object
     updated = False
     if latitude and latitude != self.unknown_locations[0]['db_loc']['loc_latitude']:
-      print "New latitude: " + str(latitude)
+      print("New latitude: " + str(latitude))
       self.unknown_locations[0]['db_loc']['loc_latitude'] = latitude
       updated = True
     if longitude and longitude != self.unknown_locations[0]['db_loc']['loc_longitude']:
-      print "New longitude: " + str(longitude)
+      print("New longitude: " + str(longitude))
       self.unknown_locations[0]['db_loc']['loc_longitude'] = longitude
       updated = True
     if name and name.lower() not in (alt.lower() for alt in self.unknown_locations[0]['db_loc']['loc_alt_names']):
-      print "New name: " + name
+      print("New name: " + name)
       self.unknown_locations[0]['db_loc']['loc_alt_names'].append(name)
       updated = True
 
     # If updated, update location in database
     if updated:
-      print "Updating location in database..."
+      print("Updating location in database...")
       tkinter_unknown_collection.replace_one({'_id': self.unknown_locations[0]['_id']}, self.unknown_locations[0]) 
     else:
-      print "Nothing changed, event is left unmodified..."
+      print("Nothing changed, event is left unmodified...")
 
     self.focus()
     # Move on to next location, update all displays
     self.changeText()
 
   def isFail(self):
-    print "Locations API matched wrong location:                                " + self.unknown_locations[0]['unknown_loc']['loc_name']
-    print "Moving to different database for manual correction."
+    print("Locations API matched wrong location:                                " + self.unknown_locations[0]['unknown_loc']['loc_name'])
+    print("Moving to different database for manual correction.")
 
     self.undo.config(state = "normal")
     self.lastAction = "FAIL"
@@ -229,12 +229,12 @@ class App:
     self.changeText()
 
   def undo(self):
-    print "Undoing last correct/wrong/fail!"
+    print("Undoing last correct/wrong/fail!")
 
     self.enableLabels()
 
     if self.lastAction == "CORRECT":
-      print "Undoing last CORRECT action..."
+      print("Undoing last CORRECT action...")
       tkinter_unknown_collection.insert_one(self.lastLocation)
       tkinter_known_collection.delete_one({'_id': self.lastLocation['_id']})
 
@@ -246,7 +246,7 @@ class App:
       self.updateLabels()
 
     elif self.lastAction == "WRONG":
-      print "Undoing last WRONG action..."
+      print("Undoing last WRONG action...")
       tkinter_unknown_collection.replace_one({'_id': self.lastLocation['_id']}, self.lastLocation) 
 
       # Add to beginning of events list
@@ -257,7 +257,7 @@ class App:
       self.updateLabels()
 
     elif self.lastAction == "FAIL":
-      print "Undoing last FAIL action..."
+      print("Undoing last FAIL action...")
       tkinter_unknown_collection.insert_one(self.lastLocation)
       tkinter_TODO_collection.delete_one({'_id': self.lastLocation['_id']})
 
@@ -270,14 +270,14 @@ class App:
 
     else:
       # Not undoing last action as it wasn't a YES/NO
-      print "Nothing to undo!"
+      print("Nothing to undo!")
 
     self.lastAction = "none"
     self.lastLocation = {}
     self.undo.config(state = DISABLED)
 
   def skip(self):
-    print "Skipping this location, idk what to do with it...                       " + self.unknown_locations[0]['unknown_loc']['loc_name']
+    print("Skipping this location, idk what to do with it...                       " + self.unknown_locations[0]['unknown_loc']['loc_name'])
 
     self.lastAction = "none"
     self.lastEvent = {}
@@ -301,8 +301,8 @@ class App:
       self.disableLabels()
 
   def filterLetter(self):
-    print "Filter what locations we're looking at by letter..."
-    print "Do this if multiple people are doing this at the same time"
+    print("Filter what locations we're looking at by letter...")
+    print("Do this if multiple people are doing this at the same time")
 
     self.lastAction = "none"
     self.lastLocation = {}
@@ -316,7 +316,7 @@ class App:
 
     if letter_num:
       FILTER_LETTER = chr(ord('a') + letter_num - 1)
-      print "Looking at locations starting with letter " + FILTER_LETTER
+      print("Looking at locations starting with letter " + FILTER_LETTER)
 
       # Get all the locations that start with the letter
       filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
@@ -330,10 +330,10 @@ class App:
           self.unknown_locations.append(loc)
         self.updateLabels()
       else:
-          print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          print('Cannot find any locations in database starting with letter ' + FILTER_LETTER)
           self.disableLabels()
     else:
-      print "No letter chosen for filtering, leaving unfiltered"
+      print("No letter chosen for filtering, leaving unfiltered")
 
     if letter_num != None:
       if letter_num == 0:
@@ -344,11 +344,11 @@ class App:
         if self.counter > 0:
           self.updateLabels()
         else:
-          print 'Cannot find any locations in database!'
+          print('Cannot find any locations in database!')
           quit()
       else:
         FILTER_LETTER = chr(ord('a') + letter_num - 1)
-        print "Looking at locations starting with letter " + FILTER_LETTER
+        print("Looking at locations starting with letter " + FILTER_LETTER)
 
         # Get all the locations that start with the letter
         filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
@@ -365,18 +365,18 @@ class App:
           if self.counter > 0:
             self.updateLabels()
           else:
-            print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+            print('Cannot find any locations in database starting with letter ' + FILTER_LETTER)
             self.disableLabels()
         else:
-          print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          print('Cannot find any locations in database starting with letter ' + FILTER_LETTER)
           self.disableLabels()
     else:
-      print "No letter chosen for filtering, leaving unfiltered"
+      print("No letter chosen for filtering, leaving unfiltered")
 
     self.focus()
 
   def helpInstructions(self):
-    print "Displaying instructions!"
+    print("Displaying instructions!")
 
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
@@ -394,7 +394,7 @@ class App:
       dr.quit()
       frame.quit()
     else:
-      print "Not done yet!"
+      print("Not done yet!")
       self.focus()
 
   # Populates unknown_locations with all locations left to process
@@ -405,7 +405,7 @@ class App:
         self.unknown_locations.append(loc)
         self.counter += 1
     else:
-        print 'Cannot find any locations in database!'
+        print('Cannot find any locations in database!')
         quit()
 
   def disableLabels(self):

@@ -46,7 +46,7 @@ class App:
           self.unknown_locations.append({ 'location': loc['location_name'], 'event': loc['event_name'] })
           self.counter += 1
     else:
-        print 'Cannot find any locations in database!'
+        print('Cannot find any locations in database!')
         quit()
 
     empty1 = Label(root, text="", font=("Open Sans", 10))
@@ -64,36 +64,36 @@ class App:
 
     # Correct - location name belongs to a location within UCLA/Westwood
     # Tag location with `isUCLA = True` and keep in database
-    self.correct = Button(frame, text="YES!", command=self.isCorrect)
+    self.correct = Button(frame, text="YES!", command=self.isCorrect, padx=10)
     self.correct.pack(side=LEFT)
 
     # Wrong - location name does not belong to a location within UCLA/Westwood
     # Remove location from database, we don't need to worry about it
-    self.wrong = Button(frame, text="NO!", command=self.isWrong)
+    self.wrong = Button(frame, text="NO!", command=self.isWrong, padx=10)
     self.wrong.pack(side=LEFT)
 
     # Skip - don't know if in UCLA or not, or not sure
     # Just moves on to next location without modifying any databases
-    self.skip = Button(frame, text="SKIP (idk)", command=self.skip)
+    self.skip = Button(frame, text="SKIP (idk)", command=self.skip, padx=10)
     self.skip.pack(side=LEFT)
 
     # Undo - only undoes last YES/NO action
-    self.undo = Button(frame, text="UNDO last YES/NO", command=self.undo)
+    self.undo = Button(frame, text="UNDO last YES/NO", command=self.undo, padx=10)
     self.undo.pack(side=LEFT)
     self.undo.config(state = DISABLED)
 
     # Filter Letter - if multiple people are working on this at same time
     # Filter by letter so everyone is wokring on something different
-    self.filter = Button(frame, text="FILTER", command=self.filterLetter)
+    self.filter = Button(frame, text="FILTER", command=self.filterLetter, padx=10)
     self.filter.pack(side=LEFT)
 
     # Help - displays instructions
-    self.help = Button(frame, text="HELP", command=self.helpInstructions)
+    self.help = Button(frame, text="HELP", command=self.helpInstructions, padx=10)
     self.help.pack(side=LEFT)
 
     # Quit - exit tkinter/displays
     # TODO: remove extra check to quit, let there in case we wanted to use similar code in future
-    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame))
+    self.button = Button(frame, text="QUIT", command= lambda: self.quit(frame), padx=10)
     self.button.pack(side=LEFT)
 
     # Define all the labels and strings used in the display
@@ -126,15 +126,15 @@ class App:
       self.skip.config(state = DISABLED)
 
   def left(self, event):
-    # print "Left key pressed"
+    # print("Left key pressed")
     self.isCorrect()
 
   def right(self, event):
-    # print "Right key pressed"
+    # print("Right key pressed")
     self.isWrong()
 
   def isCorrect(self):
-    print "Location in UCLA, marking as checked:                                " + self.unknown_locations[0]['location']
+    print("Location in UCLA, marking as checked:                                " + self.unknown_locations[0]['location'])
 
     self.undo.config(state = "normal")
 
@@ -150,7 +150,7 @@ class App:
       unknown_locs_collection.replace_one({'_id': location['_id']}, location.copy()) 
 
     else:
-      print "No such location found in db to replace, moving on...                " + self.unknown_locations[0]['location']
+      print("No such location found in db to replace, moving on...                " + self.unknown_locations[0]['location'])
 
       self.lastAction = "YES none"
       self.lastLocation = self.unknown_locations[0]
@@ -159,7 +159,7 @@ class App:
     self.changeText()
 
   def isWrong(self):
-    print "Location not in UCLA or an outlier, remove from database:            " + self.unknown_locations[0]['location']
+    print("Location not in UCLA or an outlier, remove from database:            " + self.unknown_locations[0]['location'])
     
     self.lastAction = "NO"
     self.lastLocation = self.unknown_locations[0]
@@ -172,12 +172,12 @@ class App:
     self.changeText()
 
   def undo(self):
-    print "Undoing last yes/no!"
+    print("Undoing last yes/no!")
 
     self.enable()
 
     if self.lastAction == "NO":
-      print "Reinserting location we just deleted..."
+      print("Reinserting location we just deleted...")
       # Reinsert location we just deleted
       unknown_locs_collection.insert_one({'location_name': self.lastLocation['location'], 'event_name': self.lastLocation['event']})
 
@@ -190,7 +190,7 @@ class App:
       eventLabel.set(self.unknown_locations[0]['event'])
       counterLabel.set("Locations Remaining: " + str(self.counter))
     elif self.lastAction == "YES none":
-      print "Adding previous event back to the list of locations..."
+      print("Adding previous event back to the list of locations...")
       # Only skipped/moved past event
       # Add to beginning of locations list
       self.unknown_locations.insert(0, self.lastLocation)
@@ -201,7 +201,7 @@ class App:
       eventLabel.set(self.unknown_locations[0]['event'])
       counterLabel.set("Locations Remaining: " + str(self.counter))
     elif self.lastAction == "YES ucla":
-      print "Removing UCLA tag from previous event..."
+      print("Removing UCLA tag from previous event...")
       # Marked as ucla location
       # Find location with matching name and remove ucla tag
       location = unknown_locs_collection.find_one({'location_name': self.lastLocation['location_name']})
@@ -222,7 +222,7 @@ class App:
       counterLabel.set("Locations Remaining: " + str(self.counter))
     else:
       # Not undoing last action as it wasn't a YES/NO
-      print "Nothing to undo!"
+      print("Nothing to undo!")
 
 
     self.lastAction = "none"
@@ -230,7 +230,7 @@ class App:
     self.undo.config(state = DISABLED)
 
   def skip(self):
-    print "Skipping this location, idk what to do with it...                    " + self.unknown_locations[0]['location']
+    print("Skipping this location, idk what to do with it...                    " + self.unknown_locations[0]['location'])
 
     self.lastAction = "none"
     self.lastLocation = {}
@@ -243,7 +243,7 @@ class App:
         location['skip_count'] = location['skip_count'] + 1
         # If number of times it has been skipped is > 3 move to todo_locs db
         if location['skip_count'] > 3:
-          print "Location has been skipped too often... moving to TODO db:            " + self.unknown_locations[0]['location']
+          print("Location has been skipped too often... moving to TODO db:            " + self.unknown_locations[0]['location'])
           # Insert to one database and remove from original
           loc = unknown_locs_collection.find_one({'location_name': self.unknown_locations[0]['location']}, {'_id': False, 'skip_count': False, 'isUCLA': False})
           if loc:
@@ -259,7 +259,7 @@ class App:
     self.changeText()
 
   def helpInstructions(self):
-    print "Displaying instructions!"
+    print("Displaying instructions!")
 
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
@@ -270,7 +270,7 @@ class App:
     self.focus()
 
   def quit(self, frame):
-    print "Quitting tkinter thing..."
+    print("Quitting tkinter thing...")
 
     # Prompt a yes/no response
     choice = tkMessageBox.askquestion("Ready to quit?", "Thanks for your help!", icon='warning')
@@ -278,7 +278,7 @@ class App:
     if choice == 'yes':
       frame.quit()
     else:
-      print "Not done yet!"
+      print("Not done yet!")
       self.focus()
 
   def changeText(self):
@@ -302,8 +302,8 @@ class App:
     self.lastAction = "none"
     self.lastLocation = {}
 
-    print "Filter what locations we're looking at by letter..."
-    print "Do this if multiple people are doing this at the same time"
+    print("Filter what locations we're looking at by letter...")
+    print("Do this if multiple people are doing this at the same time")
 
     self.enable()
     self.undo.config(state = DISABLED)
@@ -330,14 +330,14 @@ class App:
             eventLabel.set(self.unknown_locations[0]['event'])
             counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
-            print 'Cannot find any locations in database!'
+            print('Cannot find any locations in database!')
             quit()
         else:
-          print 'Cannot find any locations in database!'
+          print('Cannot find any locations in database!')
           quit()
       else:
         FILTER_LETTER = chr(ord('a') + letter_num - 1)
-        print "Looking at locations starting with letter " + FILTER_LETTER
+        print("Looking at locations starting with letter " + FILTER_LETTER)
 
         # Get all the locations that start with the letter
         filter_regex = re.compile('^' + FILTER_LETTER + '.*', re.IGNORECASE)
@@ -359,15 +359,15 @@ class App:
             eventLabel.set(self.unknown_locations[0]['event'])
             counterLabel.set("Locations Remaining: " + str(self.counter))
           else:
-            print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+            print('Cannot find any locations in database starting with letter ' + FILTER_LETTER)
             counterLabel.set("Locations Remaining: " + str(self.counter))
             self.disable()
         else:
-          print 'Cannot find any locations in database starting with letter ' + FILTER_LETTER
+          print('Cannot find any locations in database starting with letter ' + FILTER_LETTER)
           counterLabel.set("Locations Remaining: " + str(self.counter))
           self.disable()
     else:
-      print "No letter chosen for filtering, leaving unfiltered"
+      print("No letter chosen for filtering, leaving unfiltered")
 
     self.focus()
 

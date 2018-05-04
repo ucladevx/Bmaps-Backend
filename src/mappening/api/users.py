@@ -36,7 +36,7 @@ def get_all_users():
       for user in users_cursor:
         output.append({"user": user})
     else:
-        print 'Cannot find any users!'
+        print('Cannot find any users!')
 
     return jsonify({'users': output})
 
