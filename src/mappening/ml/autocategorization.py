@@ -6,7 +6,11 @@ from scipy.sparse import hstack
 import sys
 sys.path.insert(0,'./../..')
 
-from mappening.utils.database import events_ml_collection
+from mappening.utils.database import events_db, events_current_collection
+
+LIST_OF_CATEGORIES = [u'ART', u'CAUSE', u'COMEDY_PERFORMANCE', u'DANCE', u'DRINKS', u'FILM', u'FITNESS', u'FOOD',
+                   u'GAMES', u'GARDENING', u'HEALTH', u'LITERATURE', u'MEETUP', u'MUSIC', u'NETWORKING', u'PARTY',
+                   u'RELIGION', u'SHOPPING', u'SPORTS', u'THEATER', u'WELLNESS']
 
 def categorizeEvents(events, threshold=.1):
     """
@@ -32,13 +36,22 @@ def categorizeEvents(events, threshold=.1):
     with open(r"detailVectorizer.pickle", "r") as model:
         detailVectorizer = pickle.load(model)
 
-    catLists = predictCategoryProbability(nameVectorizer, detailVectorizer, rf, X, threshold)
+    catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
 
+    ## basically if the event already has a category put that first and then ensure no duplicates
     for i in range(0, len(catLists)):
-        events[i]['category'] = catLists[i]
+        curCategory = events[i].get('category', None)
+        if curCategory not in LIST_OF_CATEGORIES:
+            events[i]['category'] = catLists[i]
+        else:
+            events[i]['category'] = [curCategory]
+            for cat in catLists[i]:
+                if cat != curCategory:
+                    events[i]['category'].append(cat)
+
     return events
 
-def predictCategoryProbability(nameVectorizer, detailVectorizer, classifier, X, threshold=.1):
+def predictCategories(nameVectorizer, detailVectorizer, classifier, X, threshold=.1):
     """
     :param nameVectorizer: TfidfVectorizer for the event names
     :param detailVectorizer: TfidfVectorizer for details
@@ -46,7 +59,7 @@ def predictCategoryProbability(nameVectorizer, detailVectorizer, classifier, X, 
     :param X: pandas dataframe with 'name' and 'description' columns
     :param threshold: probabilty threshold for classifer prediction(note depending on classifer p varies)
 
-    Returns parallel list of categories
+    Returns parallel list of categories where the first elements have higher probability
     """
 
     X_name_transform = nameVectorizer.transform(X['name'])
@@ -72,7 +85,15 @@ def predictCategoryProbability(nameVectorizer, detailVectorizer, classifier, X, 
 
     return y_categories
 
-allEventsIterator = events_ml_collection.find({}, {"category": 1, "description": 1, "name": 1, "hoster": 1, "_id": 0})
-allEvents = [e for e in allEventsIterator]
-x = categorizeEvents(allEvents)
-print(x[:10])
+def categorizeAllCurrentEvents():
+    """
+    Takes all the events in events_current_collection and creates new events_curcategorized_collection
+        with all events having a list of categories now
+    """
+    events_curcategorized_collection = events_db.events_curcategorized
+    allEvents = [e for e in events_current_collection.find()]
+    allEvents = categorizeEvents(allEvents)
+    events_curcategorized_collection.insert_many(allEvents)
+
+if __name__ == "__main__":
+    categorizeAllCurrentEvents()

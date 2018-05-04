@@ -27,7 +27,7 @@ def gatherCategorizedEvents():
     return pd.DataFrame(modernEvents)
 
 def reduceCategories(events):
-    """OTHER will be discarded from the training data"""
+    """Legacy Facebook events have old categories that are consolidated, OTHER will be discarded from the training data"""
     categoryMapping = {
         u'BOOK': u'LITERATURE',
         u'COMEDY': u'COMEDY_PERFORMANCE',
@@ -80,4 +80,5 @@ def trainModels():
     with open(r"detailVectorizer.pickle", "wb") as output_file:
         pickle.dump(detailVectorizer, output_file)
 
-trainModels()
+if __name__ == "__main__":
+    trainModels()
