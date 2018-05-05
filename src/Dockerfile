@@ -34,8 +34,14 @@ RUN echo \
 RUN echo \
   && easy_install pip \
   && pip install --upgrade pip \
-  && if [[ ! -e /usr/bin/pip ]]; then ln -sf /usr/bin/pip2.7 /usr/bin/pip; fi \
-  && echo
+  && if [[ ! -e /usr/bin/pip ]]; then ln -sf /usr/bin/pip2.7 /usr/bin/pip; fi
+
+# Install geos-dev and some other packages for shapely
+RUN apk update && apk upgrade && apk add --no-cache --update build-base
+
+# add GEOS for shapely
+RUN echo "http://mirror.leaseweb.com/alpine/edge/testing/" >> /etc/apk/repositories
+RUN apk add --no-cache geos-dev
 
 COPY requirements.txt /tmp
 RUN cd /tmp && pip install -r requirements.txt
