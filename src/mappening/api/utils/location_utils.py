@@ -118,20 +118,16 @@ def get_locations_from_collection(events_collection):
 
 # UPDATE DATABASE
 
-# Add locations to database from given collection
-# Sample collection(s): events_ml_collection, ucla_events_collection
+# Add locations to database from new events
 # TODO: hook up so everytime we get new events we add their location data to db
-def add_locations_from_collection(events_collection):
+def add_locations_from_collection():
     # Update locations or insert new locations from events in db
     updated_locations = []
     added_locations = []
     updated = False
 
-    # TODO  Verify collection is valid
-    if events_collection != "ucla_events" and events_collection != "events_ml" and events_collection != "test":
-      return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
-
-    new_locations = get_locations_from_collection(events_collection)
+    # Can change what collection we get locations from
+    new_locations = get_locations_from_collection()
 
     # Latitude and Longitude range from (-90, 90) and (-180, 180)
     INVALID_COORDINATE = 420
@@ -141,9 +137,7 @@ def add_locations_from_collection(events_collection):
     # For every location from events db
     for new_loc in new_locations:
       # Tokenize and remove unnecessary/common words
-      place_name = re.sub(r'\bUCLA-\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
-      place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
-      place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
+      place_name = re.sub(r'(UCLA-|-UCLA)+\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
       place_name = tokenize.tokenize_text(place_name)
       processed_place = re.compile(place_name, re.IGNORECASE)
 
@@ -200,6 +194,36 @@ def add_locations_from_collection(events_collection):
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
 
+# Do some additional processing on the place_query
+def process_query(place_query):
+    if place_query.lower() != "ucla":
+      place_regex = re.sub(r'(UCLA-|-UCLA)+\s?', '', place_query, flags=re.IGNORECASE)
+      place_regex = re.sub(r'\bUCLA\s?', '', place_regex, flags=re.IGNORECASE)
+    place_regex = re.sub(r'\|', ' ', place_regex, flags=re.IGNORECASE)
+    place_regex = re.sub(r'[()]', '', place_regex, flags=re.IGNORECASE)
+    place_regex = place_regex.strip()
+
+    return place_regex
+
+# Append location information to output
+def append_location(place, score=False):
+  location_dict = {
+    'name': place['location'].get('name', "NO NAME"),
+    'street': place['location'].get('street', "NO STREET"),
+    'zip': place['location'].get('zip', "NO ZIP"),
+    'city': place['location'].get('city', "NO CITY"),
+    'state': place['location'].get('state', "NO STATE"),
+    'country': place['location'].get('country', "NO COUNTRY"),
+    'latitude': place['location'].get('latitude', "NO LATITUDE"),
+    'longitude': place['location'].get('longitude', "NO LONGITUDE"),
+    'alternative_names': place['location']['alternative_names']
+  }
+
+  if score:
+    location_dict['score'] = place['score']
+
+  return location_dict
+
 # Given a location string try to return coordinates/relevant location info
 # e.g. BH 3400 => Boelter Hall vs. Engr 4 => Engineering IV vs. Engineering VI
 # Given location string get all relevant locations found in our db, return json
@@ -214,46 +238,23 @@ def search_locations(place_query):
 
     # Search for exact match first
     # Sometimes regency village weighted more than sunset village due to repetition of village
-    # place_regex = re.compile('.*' + place_query + '.*', re.IGNORECASE)
-    place_regex = place_query
-    if place_query.lower() != "ucla":
-      place_regex = re.sub(r'\bUCLA\s?', '', place_regex, flags=re.IGNORECASE)
-    place_regex = re.sub(r'\|', ' ', place_regex, flags=re.IGNORECASE)
-    place_regex = re.sub(r'\(', '', place_regex, flags=re.IGNORECASE)
-    place_regex = re.sub(r'\)', '', place_regex, flags=re.IGNORECASE)
-    place_regex = place_regex.strip()
-    print("Regex place query: " + place_regex)
-
-    place_regex = re.compile("^" + place_regex + "$", re.IGNORECASE)
+    processed_query = process_query(place_query)
+    print("Processed place query: " + processed_query)
+    place_regex = re.compile("^" + processed_query + "$", re.IGNORECASE)
     places_cursor = locations_collection.find({'location.alternative_names': place_regex})
     
     # Places that match the name are appended to output
     if places_cursor.count() > 0:
       for place in places_cursor:
-        output.append({
-          'name': place['location'].get('name', "NO NAME"),
-          'street': place['location'].get('street', "NO STREET"),
-          'zip': place['location'].get('zip', "NO ZIP"),
-          'city': place['location'].get('city', "NO CITY"),
-          'state': place['location'].get('state', "NO STATE"),
-          'country': place['location'].get('country', "NO COUNTRY"),
-          'latitude': place['location'].get('latitude', "NO LATITUDE"),
-          'longitude': place['location'].get('longitude', "NO LONGITUDE"),
-          'alternative_names': place['location']['alternative_names']
-        })
+        output.append(append_location(place))
         output_places.append(place['location'].get('name', "NO NAME"))
-
-      print("Found exact match!")
       return output
 
     print("Doing text search...")
 
-    # Tokenize and remove unnecessary/common words 
-    place_name = re.sub(r'\bUCLA-\s?', '', place_query, flags=re.IGNORECASE)
-    place_name = re.sub(r'-UCLA\s?', '', place_name, flags=re.IGNORECASE)
-    place_name = re.sub(r'\b[a-zA-Z]+\d+\s?', '', place_name, flags=re.IGNORECASE)
-    processed_place = tokenize.tokenize_text(place_name)
-    print("Processed place query: " + processed_place)
+    # Tokenize query
+    tokenized_query = tokenize.tokenize_text(processed_query)
+    print("Tokenized place query: " + tokenized_query)
 
     # Locations db has text search index on alternate_locations field
     # Search for locations that match words in processed place query
@@ -261,7 +262,7 @@ def search_locations(place_query):
     # Sort by score (based on number of occurances of query words in alternate names)
     # Can limit numer of results as well
     places_cursor = locations_collection.find( 
-      { '$text': { '$search': processed_place, '$language': 'english', '$caseSensitive': False } },
+      { '$text': { '$search': tokenized_query, '$language': 'english', '$caseSensitive': False } },
       { 'score': { '$meta': 'textScore' } }
     ).sort([('score', { '$meta': 'textScore' })]) #.limit(3)
 
@@ -271,18 +272,7 @@ def search_locations(place_query):
       for place in places_cursor:
         # Check if already added by maintaining list of places added by name
         if place['location'].get('name', "NO NAME") not in output_places:
-          output.append({
-            'score': place['score'],
-            'name': place['location'].get('name', "NO NAME"),
-            'street': place['location'].get('street', "NO STREET"),
-            'zip': place['location'].get('zip', "NO ZIP"),
-            'city': place['location'].get('city', "NO CITY"),
-            'state': place['location'].get('state', "NO STATE"),
-            'country': place['location'].get('country', "NO COUNTRY"),
-            'latitude': place['location'].get('latitude', "NO LATITUDE"),
-            'longitude': place['location'].get('longitude', "NO LONGITUDE"),
-            'alternative_names': place['location']['alternative_names']
-          })
+          output.append(append_location(place, True))
           output_places.append(place['location'].get('name', "NO NAME"))
 
     return output
