@@ -2,6 +2,7 @@
 
 from mappening.utils.database import events_current_collection, events_ml_collection, locations_collection
 from mappening.api.utils import tokenize
+from mappening.utils.secrets import GOOGLE_API_KEY
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -37,7 +38,7 @@ def process_location_coordinates(place, loc):
 
 # No location coordinates found, location info may be wrong
 # Try to use Google API to get location info, otherwise default to Bruin Bear
-def process_location_google(place)
+def process_location_google(place):
     # No coordinates exist, indicate that coordinates may be incorrect
     place['coordinates'] = "GOOGLE"
 
@@ -306,7 +307,8 @@ def google_textSearch(place_query):
 
     # Forming the request
     textSearch = TextSearch_URL + "query=" + place_query + "&location=" + CENTER_LATITUDE + "," + CENTER_LONGITUDE + "&radius=" + RADIUS + "&key=" + GOOGLE_API_KEY
-
+    print(textSearch)
+    
     # Getting result from URL and processing
     resultsPage = requests.get(textSearch)
     resultsJSON = json.loads(resultsPage.content)

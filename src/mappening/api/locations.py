@@ -53,6 +53,12 @@ def get_location_results():
     term = request.args.get('term')
     count = request.args.get('count')
 
+    if count:
+      try:
+        count = int(count)
+      except:
+        return 'Invalid count parameter, needs to be integer!'
+
     search_results = location_utils.search_locations(term)
 
     if not search_results:
@@ -61,7 +67,9 @@ def get_location_results():
       return jsonify({"Locations": search_results})
     else:
       output = []
-      for i in range(0, count):
+      limit = min(count, len(search_results))
+
+      for i in range(0, limit):
         output.append(search_results[i])
       return jsonify({'Locations': output})
 
@@ -79,16 +87,20 @@ def get_google_search():
     :param term: A query component/parameter for the search term to filter by
     :type term: str
 
-    :param count: An optional query component/parameter to limit the number of results returned by the search method
-    :type count: int or None
+    :param api: An optional query component/parameter to specify which Google Maps Search API to use. Takes values `text` or `nearby` with the default value being `text`
+    :type api: str or None
 
     """
     term = request.args.get('term')
     api = request.args.get('api')
 
-    if api and api == 'text':
+    output = []
+
+    # Default is text search API
+    if api and api == 'text' or not api:
       output = location_utils.google_textSearch(term)
     elif api and api == 'nearby':
-      output = location_utils.google_nearbySearch(place_query)
+      output = location_utils.google_nearbySearch(term)
+  
 
     return jsonify({'results': output})
