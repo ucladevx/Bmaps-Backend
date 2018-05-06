@@ -22,99 +22,114 @@ CENTER_LONGITUDE = "-118.445"
 # Hammer Museum within radius 1300, Saffron and Rose within radius 1800
 RADIUS = "2000"
 
+# Use location coordinates to process event location
+def process_location_coordinates(place, loc):
+    if loc['location'].get('latitude', INVALID_COORDINATE) == place['latitude'] and loc['location'].get('longitude', INVALID_COORDINATE) == place['longitude']:
+      # Go through all the keys
+      for key in place['location']:
+        # If new key then add it to location
+        if key not in loc['location']:
+          loc['location'][key] = place['location'][key]
+        # If names do not match, coordinates do so add name as an alternate name
+        if key == "name" and 'name' in loc['location'] and loc['location']['name'] != place['location']['name']:
+          if place['location']['name'].lower() not in (name.lower() for name in loc['location']['alternative_names']):
+            loc['location']['alternative_names'].append(place['location']['name'])
+
+# No location coordinates found, location info may be wrong
+# Try to use Google API to get location info, otherwise default to Bruin Bear
+def process_location_google(place)
+    # No coordinates exist, indicate that coordinates may be incorrect
+    place['coordinates'] = "GOOGLE"
+
+    # Try to get coordinates from google places
+    if 'name' in place['location']:
+      # Use location name to try to find location info
+      search_results = google_textSearch(place['location']['name'])
+      if search_results:
+        # If there are results see if there is a latitude/longitude otherwise default to Bruin Bear
+        if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+          place['location']['latitude'] = CENTER_LATITUDE
+          place['location']['longitude'] = CENTER_LONGITUDE
+        else:
+          place['location']['latitude'] = search_results[0]['latitude']
+          place['location']['longitude'] = search_results[0]['longitude']
+
+    # If there is no name, see if there is street info
+    elif 'street' in place['location'] and place['location']['street'] != "NO STREET" and place['location']['street'] != '':
+      # Use name to try to find location info
+      search_results = google_textSearch(place['location']['street'])
+      if search_results:
+        # If there are results see if there is a latitude/longitude otherwise default to Bruin Bear
+        if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
+          place['location']['latitude'] = CENTER_LATITUDE
+          place['location']['longitude'] = CENTER_LONGITUDE
+        else:
+          place['location']['latitude'] = search_results[0]['latitude']
+          place['location']['longitude'] = search_results[0]['longitude']
+          updated = True
+    else:
+      # There was no name or street info, set to Bruin Bear location
+      place['location']['latitude'] = CENTER_LATITUDE
+      place['location']['longitude'] = CENTER_LONGITUDE
+
+    return place
+
+# Process location info from event
+def process_event_location_info(place, places):
+    # Check that place is not empty
+    if not any(place):
+      # Reset place to an empty dict
+      return {}
+
+    # Otherwise place has valid info
+    # All places should have alternative names field
+    place['location']['alternative_names'] = []
+    if 'name' in event['place']:
+      place['location']['alternative_names'].append(place['location']['name'])
+
+    # Reject exact matches, already seen location info
+    if place in places:
+      return {}
+
+    # Check whether coordinates exist
+    if 'latitude' in place['location'] and 'longitude' in place['location']:
+      # Check whether coordinates match another event
+      if not any(loc.get('latitude', INVALID_COORDINATE) == place['location']['latitude'] and loc.get('longitude', INVALID_COORDINATE) == place['location']['longitude'] for loc in places):
+        # No matching coordinates, append to list
+        places.append(place)
+      else:
+        # There exists a nonidentical location with matching coordinates
+        # Merge information of new event into old event
+        # TODO does this modify places
+        for loc in places:
+          process_location_coordinates(place, loc)
+    else:
+      places.append(process_location_google(place))
+
 # Go through all events in given events db and extract unique locations from the events
 # Return the array of locations discovered
-def get_locations_from_collection(events_collection):
+def get_locations_from_collection():
     # Iterate through all events and get list of unique venues
     places = []
     place = {}
-
-    if events_collection == "ucla_events":
-      events_cursor = events_current_collection.find({"place": {"$exists": True}})
-    elif events_collection == "events_ml":
-      events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    else:
-      events_cursor = None
     
     # Every time there are new events, check location info and update db if necessary
     # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    # events_cursor = events_collection.find({"place": {"$exists": True}})
-    if events_cursor and events_cursor.count() > 0:
-      for event in events_cursor:
-        # Add location info to place dict
-        if 'location' in event['place']:
-          place['location'] = event['place']['location']
-        if 'name' in event['place']:
-          place['location']['name'] = event['place']['name']
+    events_cursor = events_current_collection.find({"place": {"$exists": True}})
 
-        # Check that place is not empty
-        if any(place):
-          # All places should have alternative names field
-          place['location']['alternative_names'] = []
-          if 'name' in event['place']:
-            place['location']['alternative_names'].append(place['location']['name'])
-          # Reject exact matches
-          if place not in places:
-            # Check whether coordinates exist
-            if 'latitude' in place['location'] and 'longitude' in place['location']:
-              # Check whether coordinates match another event
-              if not any(loc.get('latitude', INVALID_COORDINATE) == place['location']['latitude'] and loc.get('longitude', INVALID_COORDINATE) == place['location']['longitude'] for loc in places):
-                # No matching coordinates, append to list
-                places.append(place)
-              else:
-                # There exists a nonidentical location with matching coordinates
-                # Merge information of new event into old event
-                # Can probably improve this part
-                for loc in places:
-                  if loc['location'].get('latitude', INVALID_COORDINATE) == place['latitude'] and loc['location'].get('longitude', INVALID_COORDINATE) == place['longitude']:
-                    # Go through all the keys
-                    for key in place['location']:
-                      # If new key then add it to location
-                      if key not in loc['location']:
-                        loc['location'][key] = place['location'][key]
-                      # If names do not match, coordinates do so add name as an alternate name
-                      if key == "name" and 'name' in loc['location'] and loc['location']['name'] != place['location']['name']:
-                        if place['location']['name'].lower() not in (name.lower() for name in loc['location']['alternative_names']):
-                          if place['location']['name']:
-                            loc['location']['alternative_names'].append(place['location']['name'])
-            else:
-              # No coordinates exist, indicate that coordinates may be incorrect
-              place['coordinates'] = "GOOGLE"
-              # Try to get coordinates from google places
-              if 'name' in place['location']:
-                # Use location name to try to find location info
-                search_results = google_textSearch(place['location']['name'])
-                if search_results:
-                  # If there are results see if there is a latitude/longitude
-                  if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
-                    place['location']['latitude'] = CENTER_LATITUDE
-                    place['location']['longitude'] = CENTER_LONGITUDE
-                  else:
-                    place['location']['latitude'] = search_results[0]['latitude']
-                    place['location']['longitude'] = search_results[0]['longitude']
-              # If there is no name, see if there is street info
-              elif 'street' in place['location'] and place['location']['street'] != "NO STREET" and place['location']['street'] != '':
-                # Use name to try to find location info
-                search_results = google_textSearch(place['location']['street'])
-                if search_results:
-                  if search_results[0]['latitude'] == "NO LATITUDE" or search_results[0]['longitude'] == "NO LONGITUDE":
-                    place['location']['latitude'] = CENTER_LATITUDE
-                    place['location']['longitude'] = CENTER_LONGITUDE
-                  else:
-                    place['location']['latitude'] = search_results[0]['latitude']
-                    place['location']['longitude'] = search_results[0]['longitude']
-                    updated = True
-              else:
-                # There was no name or street info, set to Bruin Bear location
-                place['location']['latitude'] = CENTER_LATITUDE
-                place['location']['longitude'] = CENTER_LONGITUDE
-
-              places.append(place)
-        # Reset place to an empty dict
-        place = {}
-      return places
-    else:
+    if not events_cursor or events_cursor.count() <= 0:
       return 'Cannot find any events with locations!'
+
+    for event in events_cursor:
+      # Add location info to place dict
+      if 'location' in event['place']:
+        place['location'] = event['place']['location']
+      if 'name' in event['place']:
+        place['location']['name'] = event['place']['name']
+
+      place = process_event_location_info(place, places)
+
+    return places      
 
 # UPDATE DATABASE
 
@@ -134,7 +149,7 @@ def handle_keys(old_location, new_location, place_name, is_name=False):
         if new_location['location']['name'].lower() not in (name.lower() for name in old_location['location']['alternative_names']):
           old_location['location']['alternative_names'].append(new_location['location']['name'])
           updated = True
-          
+
     # Also add stripped down name
     if place_name not in (name.lower() for name in old_location['location']['alternative_names']):
       old_location['location']['alternative_names'].append(place_name)
