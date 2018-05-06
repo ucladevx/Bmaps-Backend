@@ -41,6 +41,7 @@ A |location| object is a JSON with the following keys:
     The |longitude| field contains the longitude the |location| is located at.
 
 .. data:: name
+    :noindex:
 
     .. |name| replace:: :data:`name`
 
@@ -68,24 +69,20 @@ A |location| object is a JSON with the following keys:
     :caption: Sample |location| Object
 
     {
-      "Locations": [
-        {
-          "alternative_names": [
-            "Powell Library", 
-            "UCLA Powell", 
-            "UCLA Powell Library", 
-            "Powell"
-          ], 
-          "city": "Los Angeles", 
-          "country": "United States", 
-          "latitude": 34.07161260000001, 
-          "longitude": -118.4421809, 
-          "name": "Powell Library", 
-          "state": "CA", 
-          "street": "120S Election Walk", 
-          "zip": 90095
-        }
-      ]
+      "alternative_names": [
+        "Powell Library", 
+        "UCLA Powell", 
+        "UCLA Powell Library", 
+        "Powell"
+      ], 
+      "city": "Los Angeles", 
+      "country": "United States", 
+      "latitude": 34.07161260000001, 
+      "longitude": -118.4421809, 
+      "name": "Powell Library", 
+      "state": "CA", 
+      "street": "120S Election Walk", 
+      "zip": 90095
     }
 
 API Docs
