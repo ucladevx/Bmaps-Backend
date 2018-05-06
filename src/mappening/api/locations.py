@@ -1,5 +1,5 @@
 from mappening.utils.database import locations_collection
-from mappening.api.utils import location_utils, tokenize
+from mappening.api.utils import location_utils, location_helpers, tokenize
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -98,9 +98,16 @@ def get_google_search():
 
     # Default is text search API
     if api and api == 'text' or not api:
-      output = location_utils.google_textSearch(term)
+      output = location_helpers.google_textSearch(term)
     elif api and api == 'nearby':
-      output = location_utils.google_nearbySearch(term)
+      output = location_helpers.google_nearbySearch(term)
   
+
+    return jsonify({'results': output})
+
+@locations.route('/test', methods=['GET'])
+def get_test():
+    output = location_utils.get_locations_from_collection()
+    # location_utils.add_locations_from_collection
 
     return jsonify({'results': output})
