@@ -118,78 +118,81 @@ def get_locations_from_collection(events_collection):
 
 # UPDATE DATABASE
 
+# Handle keys between the new and old location info
+def handle_keys(old_location, new_location, place_name, is_name=False):
+    updated = False
+
+    # Location already in db but missing info
+    # Merge new info with db document
+    for key in new_location['location']:
+      # Key is missing from location so add it
+      if key not in old_location['location']:
+        old_location['location'][key] = new_location['location'][key]
+        updated = True
+      # Names do not match, coordinates do so add name as alternate name
+      if key == "name" and 'name' in old_location['location'] and old_location['location']['name'] != new_location['location']['name']:
+        if new_location['location']['name'].lower() not in (name.lower() for name in old_location['location']['alternative_names']):
+          old_location['location']['alternative_names'].append(new_location['location']['name'])
+          updated = True
+          
+    # Also add stripped down name
+    if place_name not in (name.lower() for name in old_location['location']['alternative_names']):
+      old_location['location']['alternative_names'].append(place_name)
+      updated = True
+
+    # Only replace document if it was updated
+    if updated:
+      if is_name:
+        locations_collection.replace_one({'location.alternative_names': processed_place}, old_location)
+      else:
+        locations_collection.replace_one({'location.latitude': new_location['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_location['location'].get('longitude', INVALID_COORDINATE)}, old_location)
+
+      return old_location
+    return None
+
+
 # Add locations to database from new events
 # TODO: hook up so everytime we get new events we add their location data to db
 def add_locations_from_collection():
     # Update locations or insert new locations from events in db
     updated_locations = []
     added_locations = []
-    updated = False
 
     # Can change what collection we get locations from
     new_locations = get_locations_from_collection()
 
-    # Latitude and Longitude range from (-90, 90) and (-180, 180)
-    INVALID_COORDINATE = 420
-
-    print(new_locations)
-
     # For every location from events db
     for new_loc in new_locations:
-      # Tokenize and remove unnecessary/common words
-      place_name = re.sub(r'(UCLA-|-UCLA)+\s?', '', new_loc['location'].get('name', "NO NAME"), flags=re.IGNORECASE)
-      place_name = tokenize.tokenize_text(place_name)
-      processed_place = re.compile(place_name, re.IGNORECASE)
-
       # Find location of same coordinates/name
       coord_loc = locations_collection.find_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, {'_id': False})
-      alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
+      alt_name_loc = None
 
+      # Tokenize and remove unnecessary/common words
+      place_name = new_loc['location'].get('name')
+      if place_name:
+        place_name = re.sub(r'(UCLA-|-UCLA)+\s?', '', place_name, flags=re.IGNORECASE)
+        place_name = tokenize.tokenize_text(place_name)
+        processed_place = re.compile(place_name, re.IGNORECASE)
+        alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
+      
       # If there exists a pre-existing location with matching coordinates/name
+      # Location already in db but missing info
+      # Merge new info with db document
       if coord_loc or alt_name_loc:
-        old_loc = alt_name_loc
-        is_name = True
+        loc_result = None
         if coord_loc and not alt_name_loc:
-          old_loc = coord_loc
-          is_name = False
-
-        # Location already in db but missing info
-        # Merge new info with db document
-        for key in new_loc['location']:
-          # Key is missing from location so add it
-          if key not in old_loc['location']:
-            old_loc['location'][key] = new_loc['location'][key]
-            updated = True
-          # Names do not match, coordinates do so add name as alternate name
-          if key == "name" and 'name' in old_loc['location'] and old_loc['location']['name'] != new_loc['location']['name']:
-            if new_loc['location']['name'].lower() not in (name.lower() for name in old_loc['location']['alternative_names']):
-              if new_loc['location']['name']:
-                old_loc['location']['alternative_names'].append(new_loc['location']['name'])
-                updated = True
-            # Also add stripped down name
-            if place_name not in (name.lower() for name in old_loc['location']['alternative_names']):
-              if place_name:
-                old_loc['location']['alternative_names'].append(place_name)
-                updated = True
-
-        # Only replace document if it was updated
-        if updated:
-          updated = False
-          updated_locations.append(old_loc)
-          print("Updated: " + old_loc['location']['name'])
-          # Replace document with updated info
-          if is_name:
-            locations_collection.replace_one({'location.alternative_names': processed_place}, old_loc)
-          else:
-            locations_collection.replace_one({'location.latitude': new_loc['location'].get('latitude', INVALID_COORDINATE), 'location.longitude': new_loc['location'].get('longitude', INVALID_COORDINATE)}, old_loc)
-
+          loc_result = handle_keys(coord_loc, new_loc, place_name)
+        else:
+          loc_result = handle_keys(alt_name_loc, new_loc, place_name, True)
+        
+        if loc_result:
+          updated_locations.append(loc_result)
       else:
         # No pre-existing location so insert new location to db
         # Also add stripped version of name to location info
-        if place_name != new_loc['location']['name'].lower():
+        if place_name and place_name != new_loc['location']['name'].lower():
           new_loc['location']['alternative_names'].append(place_name)
         added_locations.append(new_loc)
-        print("Added: " + new_loc['location']['name'])
         locations_collection.insert_one(new_loc.copy())
 
     return jsonify({'Added Locations': added_locations, 'Updated Locations': updated_locations})
