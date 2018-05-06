@@ -104,10 +104,3 @@ def get_google_search():
   
 
     return jsonify({'results': output})
-
-@locations.route('/test', methods=['GET'])
-def get_test():
-    output = location_utils.get_locations_from_collection()
-    # location_utils.add_locations_from_collection
-
-    return jsonify({'results': output})
