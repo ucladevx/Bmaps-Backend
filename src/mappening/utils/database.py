@@ -40,8 +40,7 @@ unknown_locations_collection = locations_db.unknown_locations
 
 #### USERS
 users_collection = users_db.users
-# map_users_collection = users_db.map_users
-# dead_users_collection = users_db.dead_users
+dead_users_collection = users_db.dead_users
 
 #### TKINTER
 UCLA_locations_collection = tkinter_db.UCLA_locations
