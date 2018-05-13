@@ -1,4 +1,5 @@
 # TODO: test all the non-GET routes
+# TODO: error checking on int parameters?
 
 from mappening.utils.database import users_collection, dead_users_collection
 from mappening.api.utils import user_utils
@@ -7,6 +8,7 @@ from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_login import current_user
 from flask_cors import CORS, cross_origin
 from datetime import datetime
+import json
 
 # Route Prefix: /api/v2/users
 users = Blueprint('users', __name__)
@@ -70,11 +72,11 @@ def update_user(user_id):
         if email: user['personal_info']['email'] = email
 
         # Update database entry
-        users_collection.replace_one({ "user_id": user_id }, user.copy())
+        users_collection.replace_one({ "account.id": str(user_id) }, user.copy())
+
+        return jsonify(user_utils.get_user(user_id))
     
     return "No such user with id " + str(user_id) + " found!"
-
-
 
 # Add a new user to users collection 
 @users.route('/', methods=['POST'])
@@ -84,8 +86,8 @@ def add_user_through_api():
   first_name = request.args.get('first_name', '')
   last_name = request.args.get('last_name', '')
   email = request.args.get('email', '')
-  active = request.args.get('active', True)
-  admin = request.args.get('admin', False)
+  active = request.args.get('active')
+  admin = request.args.get('admin')
   password = request.args.get('password', '')
   username = request.args.get('username', '')
 
@@ -93,7 +95,34 @@ def add_user_through_api():
     # TODO: add ID automatically, don't require it to be supplied
     return "User ID required to add a new user"
 
+  if active and active.lower() == "false": 
+    active = False
+  else:
+    active = True
+
+  if admin and admin.lower() == "true": 
+    admin = True
+  else:
+    admin = False
+
   return user_utils.add_user(user_id, full_name, first_name, last_name, email, active, admin, password, username)
+
+# Reactivate a user
+@users.route('/activate/<int:user_id>', methods=['PUT'])
+def activate_user(user_id):
+    # Check if user exists in collection
+    user = user_utils.get_user(user_id)
+    if user:
+        # Update status to active
+        user['account']['is_active'] = True
+        user['account']['time_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Update database entry
+        users_collection.replace_one({ "account.id": str(user_id) }, user.copy())
+
+        return "Activated user with id " + str(user_id) + "!"
+    
+    return "No such user with id " + str(user_id) + " found!"
 
 # Deactivate a user without deleting it from the database
 @users.route('/deactivate/<int:user_id>', methods=['PUT'])
@@ -103,9 +132,12 @@ def deactivate_user(user_id):
     if user:
         # Update status to inactive
         user['account']['is_active'] = False
+        user['account']['time_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # Update database entry
-        users_collection.replace_one({ "user_id": user_id }, user.copy())
+        users_collection.replace_one({ "account.id": str(user_id) }, user.copy())
+
+        return "Deactivated user with id " + str(user_id) + "!"
     
     return "No such user with id " + str(user_id) + " found!"
 
@@ -119,16 +151,17 @@ def remove_user(user_id):
     return "No such user with id " + str(user_id) + " found!"
   
   # Delete user from OG database
-  users_collection.find_one_and_delete({'account.id': user_id})
+  users_collection.find_one_and_delete({'account.id': str(user_id)})
   
   # Check that user was successfully deleted from collection
   if user_utils.get_user(user_id):
     return "User with id " + str(user_id) + " was not deleted successfully!"
   
   # Insert to database for deleted users
+  user['account']['time_deleted'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   dead_users_collection.insert_one(user)
 
-  if dead_users_collection.find_one({'account.id': user_id}, {'_id': False}):
-    return "User was successfully removed from the database"
+  if dead_users_collection.find_one({'account.id': str(user_id)}, {'_id': False}):
+    return "User was successfully removed from the database and saved to past users!"
   else:
-    return "User with id " + str(user_id) + " was successfully deleted (and saved to past users)!"
+    return "User with id " + str(user_id) + " was successfully deleted (but not saved to past users)!"

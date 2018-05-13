@@ -204,8 +204,8 @@ def filter_by_nearby(unfiltered_events, latitude, longitude):
 
 def is_valid_coords(in_lat, in_long):
   try:
-    float(in_lat)
-    float(in_long)
+    in_lat = float(in_lat)
+    in_long = float(in_long)
   except:
     return False
   if in_lat <= 90 and in_lat >= -90 and in_long <= 180 and in_long >= -180:
