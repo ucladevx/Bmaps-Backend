@@ -1,0 +1,747 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Users &mdash; Mappening 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Mappening 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="Events" href="events.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Mappening
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html#module-mappening.api.events">API DOCS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Users</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mappening.api.users">API Docs</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Mappening</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Users</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/users.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="users">
+<h1>Users<a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the Mappening Users API! The simplest way to access the API is to go to the url <a class="reference external" href="https://whatsmappening.io/api/v2/users">whatsmappening.io/api/v2/users</a>. See the explanation of the API below. The Users API is NOT intended to be a public API, admin permissions required to access any other user data.</p>
+<div class="section" id="user">
+<h2>User<a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="#user">User</a> object is a JSON with the following keys</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Sample <a class="reference internal" href="#user">User</a> Object</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>{
+  &quot;alternative_names&quot;: [
+    &quot;Powell Library&quot;,
+    &quot;UCLA Powell&quot;,
+    &quot;UCLA Powell Library&quot;,
+    &quot;Powell&quot;
+  ],
+  &quot;city&quot;: &quot;Los Angeles&quot;,
+  &quot;country&quot;: &quot;United States&quot;,
+  &quot;latitude&quot;: 34.07161260000001,
+  &quot;longitude&quot;: -118.4421809,
+  &quot;name&quot;: &quot;Powell Library&quot;,
+  &quot;state&quot;: &quot;CA&quot;,
+  &quot;street&quot;: &quot;120S Election Walk&quot;,
+  &quot;zip&quot;: 90095
+}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-mappening.api.users">
+<span id="api-docs"></span><h2>API Docs<a class="headerlink" href="#module-mappening.api.users" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mappening.api.users.get_all_users">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_all_users</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_all_users" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets all users and their information</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">JSON of all user info</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.get_user_by_id">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_user_by_id</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_user_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /&lt;user_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets single user with id <cite>user_id</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON of specific user info</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.search_users">
+<code class="descclassname">mappening.api.users.</code><code class="descname">search_users</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.search_users" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /search?favorite=id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets ID and name of users as filtered by a specified event ID. If user has specified event listed as a favorite then is included in results.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>favorite</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter where the ID of an event is passed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON of all users matching filters</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.update_user">
+<code class="descclassname">mappening.api.users.</code><code class="descname">update_user</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.update_user" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">PUT /&lt;user_id&gt;?active=false&amp;admin=true&amp;password=str&amp;first_name=Katrina&amp;last_name=Wijaya&amp;email=mappeningdevx&#64;gmail.com</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Updates user with id <cite>user_id</cite>. Updates any optional fields that are set as query parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The int ID of a specific user</li>
+<li><strong>active</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter to update whether or not a user is active. If true, user has an activated account that they can log in to, otherwise account will be rejected/suspended from use</li>
+<li><strong>admin</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter to update whether or not a user has admin permissions. All admins have same permissions so maybe should create a super admin.</li>
+<li><strong>password</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the password for a user. TODO: actually supporting passwords/salting/hashing.</li>
+<li><strong>first_name</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s first name. Does not modify full name stored in database.</li>
+<li><strong>last_name</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s last name. Does not modify full name stored in database.</li>
+<li><strong>email</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s email. TODO: email verification.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">JSON of updated user or an error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.add_user_through_api">
+<code class="descclassname">mappening.api.users.</code><code class="descname">add_user_through_api</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.add_user_through_api" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">POST /?user_id=int&amp;full_name=Katrina A. <a class="reference external" href="mailto:Wijaya&amp;first_name=Katrina&amp;last_name=Wijaya&amp;email=mappeningdevx&#37;&#52;&#48;gmail&#46;com&amp;active=false&amp;admin=true&amp;password=str&amp;username=str">Wijaya&amp;first_name=Katrina&amp;last_name=Wijaya&amp;email=mappeningdevx<span>&#64;</span>gmail<span>&#46;</span>com&amp;active=false&amp;admin=true&amp;password=str&amp;username=str</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Add a new user with required id <cite>user_id</cite> and any optional fields that are set as query parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The int ID of a specific user</li>
+<li><strong>full_name</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s full name.</li>
+<li><strong>first_name</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s first name. Does not modify full name stored in database.</li>
+<li><strong>last_name</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s last name. Does not modify full name stored in database.</li>
+<li><strong>email</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the user’s email. TODO: email verification.</li>
+<li><strong>active</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter to update whether or not a user is active. If true, user has an activated account that they can log in to, otherwise account will be rejected/suspended from use</li>
+<li><strong>admin</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter to update whether or not a user has admin permissions. All admins have same permissions so maybe should create a super admin.</li>
+<li><strong>password</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the password for a user. TODO: actually supporting passwords/salting/hashing.</li>
+<li><strong>username</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to update the username for a user. TODO: actually supporting usernames.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.activate_user">
+<code class="descclassname">mappening.api.users.</code><code class="descname">activate_user</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.activate_user" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">PUT /activate/&lt;user_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Reactivates a user with id <cite>user_id</cite>. A user with an activated account can log in. Otherwise account is rejected/suspended from use.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Success/error message</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.deactivate_user">
+<code class="descclassname">mappening.api.users.</code><code class="descname">deactivate_user</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.deactivate_user" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">PUT /deactivate/&lt;user_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Deactivates a user with id <cite>user_id</cite> without deleting user from database. A user with an activated account can log in. Otherwise account is rejected/suspended from use.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Success/error message</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.remove_user">
+<code class="descclassname">mappening.api.users.</code><code class="descname">remove_user</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.remove_user" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">DELETE /&lt;user_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Removes a user with id <cite>user_id</cite>. User information stored in a different database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Success/error message</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.get_user_filters">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_user_filters</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_user_filters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /&lt;user_id&gt;/filter</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets all filters for a single user with id <cite>user_id</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON of specific user’s filters</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.replace_user_filters">
+<code class="descclassname">mappening.api.users.</code><code class="descname">replace_user_filters</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.replace_user_filters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">PUT /&lt;user_id&gt;/filter?filter=now&amp;filter=popular</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Replaces all filters for a single user with id <cite>user_id</cite>. New filters passed by query parameter are validated.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>filter</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are validated as filters before being added.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.add_user_filters">
+<code class="descclassname">mappening.api.users.</code><code class="descname">add_user_filters</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.add_user_filters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">POST /&lt;user_id&gt;/filter?filter=now&amp;filter=popular</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Add new filters for a single user with id <cite>user_id</cite>. New filters passed by query parameter are validated. Only new filters are added, aka no duplicates are inserted.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>filter</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are validated as filters before being added.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.remove_user_filters">
+<code class="descclassname">mappening.api.users.</code><code class="descname">remove_user_filters</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.remove_user_filters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">DELETE /&lt;user_id&gt;/filter?filter=now&amp;filter=popular</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Remove filters for a single user with id <cite>user_id</cite>. Filters to remove are passed by query parameter. If no filters are specified, all of the user’s filters are removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>filter</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.get_all_favorites">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_all_favorites</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_all_favorites" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET favorites</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets all unique favorited events for all users.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">JSON of all favorited events</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.get_user_favorites">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_user_favorites</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_user_favorites" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /&lt;user_id&gt;/favorite</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets all favorited events for a single user with id <cite>user_id</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON of specific user’s favorited events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.add_user_favorite">
+<code class="descclassname">mappening.api.users.</code><code class="descname">add_user_favorite</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.add_user_favorite" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">POST /&lt;user_id&gt;/favorite?favorite=event_id&amp;favorite=event_id</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Add new favorited events for a single user with id <cite>user_id</cite>. Only unique events are added, aka no duplicates are inserted.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>favorite</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are int event IDs which uniquely identify an event.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.remove_user_favorites">
+<code class="descclassname">mappening.api.users.</code><code class="descname">remove_user_favorites</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.remove_user_favorites" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">DELETE /&lt;user_id&gt;/favorite?favorite=event_id&amp;favorite=event_id</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Remove favorited events for a single user with id <cite>user_id</cite>. If no favorited events are specified, all of the user’s favorited events are removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>favorite</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are int event IDs which uniquely identify an event.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.get_user_past_events">
+<code class="descclassname">mappening.api.users.</code><code class="descname">get_user_past_events</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.get_user_past_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">GET /&lt;user_id&gt;/past</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Gets all past events for a single user with id <cite>user_id</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JSON of specific user’s past events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">Admin permissions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.add_user_past_events">
+<code class="descclassname">mappening.api.users.</code><code class="descname">add_user_past_events</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.add_user_past_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">POST /&lt;user_id&gt;/past?past_event=event_id&amp;past_event=event_id</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Add new past events for a single user with id <cite>user_id</cite>. Only unique events are added, aka no duplicates are inserted.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>past_event</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are int event IDs which uniquely identify an event.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.users.remove_user_past_events">
+<code class="descclassname">mappening.api.users.</code><code class="descname">remove_user_past_events</code><span class="sig-paren">(</span><em>user_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.users.remove_user_past_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">DELETE /&lt;user_id&gt;/past?past_event=event_id&amp;past_event=event_id</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Remove past events for a single user with id <cite>user_id</cite>. If no past events are specified, all of the user’s past events are removed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_id</strong> (<em>int</em>) – The unique ID of a specific user</li>
+<li><strong>past_event</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that takes a list of values. Passed in values are int event IDs which uniquely identify an event.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Success/error message</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first last">Admin permissions</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="events.html" class="btn btn-neutral" title="Events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Mappening.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
