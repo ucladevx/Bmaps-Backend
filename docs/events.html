@@ -38,6 +38,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Mappening 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Users" href="users.html"/>
         <link rel="prev" title="Welcome to Mappening’s documentation!" href="index.html"/> 
 
   
@@ -97,6 +98,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#module-mappening.api.events">API DOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
 </ul>
 
             
@@ -374,35 +376,6 @@
 <div class="section" id="module-mappening.api.events">
 <span id="api-docs"></span><h1>API DOCS<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="mappening.api.events.filter_events">
-<code class="descclassname">mappening.api.events.</code><code class="descname">filter_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.filter_events" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/filter?when=period&amp;time_period=morning&amp;time_period=afternoon&amp;date=April 20 2018&amp;where=offcampus&amp;popularity=50&amp;food=True</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events filtered by the specified filters. Filtering options include filtering by time, location, popularity, and whether or not an event has free food.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>when</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies whether an event is happening now (event start time &lt;= current time &lt; event end time), is an upcoming event (event start time &lt;= current time + 2 hours), or allows you to specify a time period with the <cite>period</cite> parameter. The parameter values can be <cite>now</cite>, <cite>upcoming</cite>, or <cite>period</cite>.</li>
-<li><strong>time_period</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that is only checked (and must be set) if the parameter <cite>when</cite> was set to value <cite>time_period</cite>. May have value <cite>morning</cite>, <cite>afternoon</cite>, or <cite>night</cite> where <cite>morning</cite> is from 3 am - 12 pm, <cite>afternoon</cite> is from 12 pm - 5 pm, and <cite>night</cite> is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have <em>multiple</em> values such as in example route above. Will return events that are in the morning or afternoon time period. A <cite>date</cite> must be specified or will return all events in database in the specified time periods.</li>
-<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to specify what day to filter on. Does not work with <cite>upcoming</cite> or <cite>now</cite>. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 20 April 2018)</li>
-<li><strong>where</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies a location filter for events. The parameter values can be <cite>nearby</cite>, <cite>oncampus</cite>, or <cite>offcampus</cite> where <cite>nearby</cite> filters for events within a ~1000 ft (0.3 km) radius, <cite>oncampus</cite> gets locations within the UCLA boundary, and <cite>offcampus</cite> gets locations in Westwood and outside of the UCLA boundaries. A <cite>date</cite> may be specified or will return all events in database matching specified location parameters. For <cite>nearby</cite>, a <cite>latitude</cite> and <cite>longitude</cite> must be specified.</li>
-<li><strong>latitude</strong> (<em>float</em><em> or </em><em>None</em>) – An optional query component/parameter used with the <cite>nearby</cite> filter. Must be passed in order to find events near the supplied coordinates.</li>
-<li><strong>longitude</strong> (<em>float</em><em> or </em><em>None</em>) – An optional query component/parameter used with the <cite>nearby</cite> filter. Must be passed in order to find events near the supplied coordinates.</li>
-<li><strong>popularity</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that only returns events that meet a specified integer threshold: # interested || # going &gt; this parameter value. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.</li>
-<li><strong>food</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="mappening.api.events.get_all_events">
 <code class="descclassname">mappening.api.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_all_events" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -412,57 +385,6 @@
 <tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a few miles of UCLA</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="mappening.api.events.get_event_by_id">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/id/&lt;event_id&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event ID</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> (<em>str</em>) – ID string to search database for exact match</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="mappening.api.events.get_event_by_name">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/name/&lt;event_name&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event name</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> (<em>str</em>) – case-insensitive name string to search database for exact match</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="mappening.api.events.get_event_categories">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/categories/&lt;event_date&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
 </tr>
 </tbody>
 </table>
@@ -492,6 +414,86 @@
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="mappening.api.events.filter_events">
+<code class="descclassname">mappening.api.events.</code><code class="descname">filter_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.filter_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/filter?when=period&amp;time_period=morning&amp;time_period=afternoon&amp;date=April 20 2018&amp;where=offcampus&amp;popularity=50&amp;food=True</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events filtered by the specified filters. Filtering options include filtering by time, location, popularity, and whether or not an event has free food.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>when</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies whether an event is happening now (event start time &lt;= current time &lt; event end time), is an upcoming event (event start time &lt;= current time + 2 hours), or allows you to specify a time period with the <cite>period</cite> parameter. The parameter values can be <cite>now</cite>, <cite>upcoming</cite>, or <cite>period</cite>.</li>
+<li><strong>time_period</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that is only checked (and must be set) if the parameter <cite>when</cite> was set to value <cite>time_period</cite>. May have value <cite>morning</cite>, <cite>afternoon</cite>, or <cite>night</cite> where <cite>morning</cite> is from 3 am - 12 pm, <cite>afternoon</cite> is from 12 pm - 5 pm, and <cite>night</cite> is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have <em>multiple</em> values such as in example route above. Will return events that are in the morning or afternoon time period. A <cite>date</cite> must be specified or will return all events in database in the specified time periods.</li>
+<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter to specify what day to filter on. Does not work with <cite>upcoming</cite> or <cite>now</cite>. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 20 April 2018)</li>
+<li><strong>where</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies a location filter for events. The parameter values can be <cite>nearby</cite>, <cite>oncampus</cite>, or <cite>offcampus</cite> where <cite>nearby</cite> filters for events within a ~1000 ft (0.3 km) radius, <cite>oncampus</cite> gets locations within the UCLA boundary, and <cite>offcampus</cite> gets locations in Westwood and outside of the UCLA boundaries. A <cite>date</cite> may be specified or will return all events in database matching specified location parameters. For <cite>nearby</cite>, a <cite>latitude</cite> and <cite>longitude</cite> must be specified.</li>
+<li><strong>latitude</strong> (<em>float</em><em> or </em><em>None</em>) – An optional query component/parameter used with the <cite>nearby</cite> filter. Must be passed in order to find events near the supplied coordinates.</li>
+<li><strong>longitude</strong> (<em>float</em><em> or </em><em>None</em>) – An optional query component/parameter used with the <cite>nearby</cite> filter. Must be passed in order to find events near the supplied coordinates.</li>
+<li><strong>popularity</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that only returns events that meet a specified integer threshold: # interested || # going &gt; this parameter value. Returns events sorted in decreasing order of popularity. Based on Facebook event data and may not result in changes.</li>
+<li><strong>food</strong> (<em>boolean</em><em> or </em><em>None</em>) – An optional query component/parameter that gets events that have free food at them. May not be 100% accurate.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_by_name">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/name/&lt;event_name&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> (<em>str</em>) – case-insensitive name string to search database for exact match</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_by_id">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_id</code><span class="sig-paren">(</span><em>event_id</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/id/&lt;event_id&gt;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event ID</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_id</strong> (<em>str</em>) – ID string to search database for exact match</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.get_event_categories">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/categories?date=April 20 2018</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -503,6 +505,8 @@
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="users.html" class="btn btn-neutral float-right" title="Users" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="Welcome to Mappening’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
