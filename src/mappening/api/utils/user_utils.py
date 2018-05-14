@@ -48,3 +48,11 @@ def add_user(user_id, full_name, first_name, last_name, email='', is_active=True
     return "User with id " + str(user_id) + " successfully added!"
   else:
     return "Adding user with id " + str(user_id) + " failed!"
+
+# Check that filter is one of accepted filters
+def is_valid_filter(f):
+  valid_filters = ['now', 'upcoming', 'period', 'morning', 'afternoon', 'night', 'oncampus', 'offcampus', 'nearby', 'popular', 'food']
+  
+  if f in valid_filters:
+    return True
+  return False

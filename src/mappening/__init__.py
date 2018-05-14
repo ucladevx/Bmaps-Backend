@@ -16,10 +16,9 @@ app.register_blueprint(events, url_prefix='/api/v2/events')
 app.register_blueprint(locations, url_prefix='/api/v2/locations')
 app.register_blueprint(auth, url_prefix='/api/v2/auth') # Not actually public API
 app.register_blueprint(users, url_prefix='/api/v2/users')
-# app.register_blueprint(preferences, url_prefix='/api/v2/preferences')
-
 
 app.config['SECRET_KEY'] = 'whats mappening'
+# app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 # app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Enable Cross Origin Resource Sharing (CORS)
