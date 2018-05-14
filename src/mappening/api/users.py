@@ -1,6 +1,3 @@
-# TODO: test all the non-GET routes
-# TODO: error checking on int parameters?
-
 from mappening.utils.database import users_collection, dead_users_collection
 from mappening.api.utils import user_utils
 
@@ -13,12 +10,12 @@ import json
 # Route Prefix: /api/v2/users
 users = Blueprint('users', __name__)
 
-@users.before_request
-def check_admin_permissions():
-    if not current_user.is_authenticated:
-      return "No user is logged in!"
-    if current_user.is_authenticated and not current_user.is_admin():
-      return "User does not have permissions to access/modify user data."
+# @users.before_request
+# def check_admin_permissions():
+#     if not current_user.is_authenticated:
+#       return "No user is logged in!"
+#     if current_user.is_authenticated and not current_user.is_admin():
+#       return "User does not have permissions to access/modify user data."
 
 # Get all users
 @users.route('/', methods=['GET'])
@@ -44,6 +41,24 @@ def get_user_by_id(user_id):
     if user:
         return jsonify(user)
     return "No such user with id " + str(user_id) + " found!"
+
+@users.route('/search', methods=['GET'])
+def search_users():
+  favorite = request.args.get('favorite')
+  
+  search_dict = {}
+  output = []
+
+  # Add to search dict
+  if favorite:
+    search_dict['app.favorites'] = favorite
+
+  users_cursor = users_collection.find(search_dict, {'_id': False})
+  if users_cursor.count() > 0:
+    for user in users_cursor:
+      output.append({'user_id': user['account']['id'], 'full_name': user['personal_info']['full_name']})
+
+  return jsonify({ 'users': output })
 
 # Update specific user's information
 @users.route('/<int:user_id>', methods=['PUT'])
@@ -165,3 +180,205 @@ def remove_user(user_id):
     return "User was successfully removed from the database and saved to past users!"
   else:
     return "User with id " + str(user_id) + " was successfully deleted (but not saved to past users)!"
+
+##### Get/add/remove filters #####
+
+@users.route('/<int:user_id>/filter', methods=['GET'])
+def get_user_filters(user_id):
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user filters
+  return jsonify({ 'filters': user['app']['filters'] })
+
+# Replace all filters
+@users.route('/<int:user_id>/filter', methods=['PUT'])
+def replace_user_filters(user_id):
+  new_filters = request.args.getlist('filter')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  valid_filters = [f for f in new_filters if user_utils.is_valid_filter(f)]
+
+  users_collection.update({'account.id': str(user_id)}, {'$set': {'app.filters': valid_filters}})
+
+  return "Replaced filters for user with id " + str(user_id)
+
+@users.route('/<int:user_id>/filter', methods=['POST'])
+def add_user_filters(user_id):
+  new_filters = request.args.getlist('filter')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user filters
+  updated = False
+  added_filters = []
+  old_filters = user['app']['filters']
+
+  # Ignore filters already in filters list
+  for new_f in [f for f in new_filters if f not in old_filters]:
+    # Check that filter is valid and then add to filters list
+    if user_utils.is_valid_filter(new_f):
+      added_filters.append(new_f)
+      updated = True
+     
+  if updated: 
+    users_collection.update({'account.id': str(user_id)}, {'$push': {'app.filters': {'$each': added_filters}}})
+    return "Added specified filters for user with id " + str(user_id)
+
+  return "No filters specified to add to user with id " + str(user_id)
+
+# If no filter specified deletes all filters, otherwise only deletes those specified
+@users.route('/<int:user_id>/filter', methods=['DELETE'])
+def remove_user_filters(user_id):
+  remove_filters = request.args.getlist('filter')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # If no filters specified, remove all filters from the user
+  if not remove_filters:
+    users_collection.update({'account.id': str(user_id)}, {'$set': {'app.filters': []}})
+    return "Removed all filters for user with id " + str(user_id)
+
+  # Otherwise remove only the filters specified
+  users_collection.update({'account.id': str(user_id)}, {'$pull': {'app.filters': {'$in': remove_filters}}})
+
+  return "Removed specified filters for user with id " + str(user_id)
+
+##### Get/add/remove favorite events by id #####
+
+@users.route('/favorites', methods=['GET'])
+def get_all_favorites():
+  output = []
+  users_cursor = users_collection.find({"app.favorites": {'$not': {'$size': 0}}})
+
+  if users_cursor.count() > 0:
+    for user in users_cursor:
+      output = output + [fav for fav in user['app']['favorites'] if fav not in output]
+  else:
+      return 'Cannot find any users with favorites!'
+
+  return jsonify({'favorites': output})
+
+@users.route('/<int:user_id>/favorite', methods=['GET'])
+def get_user_favorites(user_id):
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user filters
+  return jsonify({ 'filters': user['app']['favorites'] })
+
+@users.route('/<int:user_id>/favorite', methods=['POST'])
+def add_user_favorite(user_id):
+  new_favorites = request.args.getlist('favorite')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user favorites
+  updated = False
+  added_favorites = []
+  old_favorites = user['app']['favorites']
+
+  # Ignore favorites already in favorites list
+  for new_f in [f for f in new_favorites if f not in old_favorites]:
+    added_favorites.append(new_f)
+    updated = True
+     
+  if updated: 
+    users_collection.update({'account.id': str(user_id)}, {'$push': {'app.favorites': {'$each': added_favorites}}})
+    return "Added specified favorites for user with id " + str(user_id)
+
+  return "No favorites specified to add to user with id " + str(user_id)
+
+# If no favorite specified deletes all favorites, otherwise only deletes those specified
+@users.route('/<int:user_id>/favorite', methods=['DELETE'])
+def remove_user_favorites(user_id):
+  remove_favorites = request.args.getlist('favorite')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # If no favorites specified, remove all favorites from the user
+  if not remove_favorites:
+    users_collection.update({'account.id': str(user_id)}, {'$set': {'app.favorites': []}})
+    return "Removed all favorites for user with id " + str(user_id)
+
+  # Otherwise remove only the favorites specified
+  users_collection.update({'account.id': str(user_id)}, {'$pull': {'app.favorites': {'$in': remove_favorites}}})
+
+  return "Removed specified favorites for user with id " + str(user_id)
+
+##### Get/add/remove past events by id #####
+
+@users.route('/<int:user_id>/past', methods=['GET'])
+def get_user_past_events(user_id):
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user filters
+  return jsonify({ 'filters': user['app']['past_events'] })
+
+@users.route('/<int:user_id>/past', methods=['POST'])
+def add_user_past_events(user_id):
+  new_past_events = request.args.getlist('past_event')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # Get user past events
+  updated = False
+  added_events = []
+  old_past_events = user['app']['past_events']
+
+  # Ignore past events already in past events list
+  for new_f in [f for f in new_past_events if f not in old_past_events]:
+    added_events.append(new_f)
+    updated = True
+     
+  if updated: 
+    users_collection.update({'account.id': str(user_id)}, {'$push': {'app.past_events': {'$each': added_events}}})
+    return "Added specified past events for user with id " + str(user_id)
+
+  return "No past events specified to add to user with id " + str(user_id)
+
+# If no favorite specified deletes all favorites, otherwise only deletes those specified
+@users.route('/<int:user_id>/past', methods=['DELETE'])
+def remove_user_past_events(user_id):
+  remove_past_events = request.args.getlist('past_event')
+
+  # Check that user exists
+  user = user_utils.get_user(user_id)
+  if not user:
+    return "No such user with id " + str(user_id) + " found!"
+
+  # If no past events specified, remove all past events from the user
+  if not remove_past_events:
+    users_collection.update({'account.id': str(user_id)}, {'$set': {'app.past_events': []}})
+    return "Removed all past events for user with id " + str(user_id)
+
+  # Otherwise remove only the past events specified
+  users_collection.update({'account.id': str(user_id)}, {'$pull': {'app.past_events': {'$in': remove_past_events}}})
+
+  return "Removed specified past events for user with id " + str(user_id)
