@@ -167,24 +167,178 @@
 <p>Welcome to the Mappening Users API! The simplest way to access the API is to go to the url <a class="reference external" href="https://whatsmappening.io/api/v2/users">whatsmappening.io/api/v2/users</a>. See the explanation of the API below. The Users API is NOT intended to be a public API, admin permissions required to access any other user data.</p>
 <div class="section" id="user">
 <h2>User<a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
-<p>A <a class="reference internal" href="#user">User</a> object is a JSON with the following keys</p>
+<p>A <a class="reference internal" href="#user">User</a> object is a JSON with the following keys:</p>
+<dl class="data">
+<dt id="account">
+<code class="descname">account</code><a class="headerlink" href="#account" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#account" title="account"><code class="xref py py-data docutils literal notranslate"><span class="pre">account</span></code></a> object contains info related to the user’s account with Mappening. Unique identifiers and user status/access permissions are set in the <a class="reference internal" href="#account" title="account"><code class="xref py py-data docutils literal notranslate"><span class="pre">account</span></code></a> fields.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">Sample <a class="reference internal" href="#user">User</a> Object</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text"><a class="reference internal" href="#account" title="account"><code class="xref py py-data docutils literal notranslate"><span class="pre">account</span></code></a> Object Structure:</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>account: {
+  id: &quot;unique_int&quot;,
+  is_active: true,
+  is_admin: false,
+  username: &quot;str&quot;,
+  password_hash: &quot;str&quot;,
+  time_joined: &quot;datetime&quot;,
+  time_updated: &quot;datetime&quot;
+}
+</pre></div>
+</div>
+</div>
+<dl class="attribute">
+<dt>
+<code class="descname">id</code></dt>
+<dd><p>Uniquely identifies the <a class="reference internal" href="#user">User</a> object. Should be a unique int, typically from Facebook accounts.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="is_active">
+<code class="descname">is_active</code><a class="headerlink" href="#is_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies whether or not a <a class="reference internal" href="#user">User</a> is active. If true, <a class="reference internal" href="#user">User</a> has an activated account that they can log in to, otherwise account will be rejected/suspended from use. <a class="reference internal" href="#user">User</a> information remains in the database if deactivated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="is_admin">
+<code class="descname">is_admin</code><a class="headerlink" href="#is_admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies whether or not a <a class="reference internal" href="#user">User</a> has admin privileges. An admin can grant and remove privileges at will. Should probably create a superpowered admin but devs are too lazy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="username">
+<code class="descname">username</code><a class="headerlink" href="#username" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: implement username/password accounts rather than just Facebook Authentication.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="password_hash">
+<code class="descname">password_hash</code><a class="headerlink" href="#password_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: implement username/password accounts rather than just Facebook Authentication.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="time_joined">
+<code class="descname">time_joined</code><a class="headerlink" href="#time_joined" title="Permalink to this definition">¶</a></dt>
+<dd><p>The date and time in UTC that the <a class="reference internal" href="#user">User</a> registered a <a class="reference internal" href="#user">User</a> account with Mappening.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">time_updated</code></dt>
+<dd><p>The date and time in UTC that the <a class="reference internal" href="#user">User</a> last logged in or their <a class="reference internal" href="#user">User</a> info was last updated.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="app">
+<code class="descname">app</code><a class="headerlink" href="#app" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#app" title="app"><code class="xref py py-data docutils literal notranslate"><span class="pre">app</span></code></a> object contains the app-related information for the <a class="reference internal" href="#user">User</a>, or information that gives each <a class="reference internal" href="#user">User</a> a personalized experience on Mappening.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><a class="reference internal" href="#app" title="app"><code class="xref py py-data docutils literal notranslate"><span class="pre">app</span></code></a> Object Structure:</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>app: {
+  filters: [<span class="nv">`filter`</span>, <span class="nv">`filter`</span>],
+  favorites: [<span class="nv">`event_id`</span>, <span class="nv">`event_id`</span>],
+  past_events: [<span class="nv">`event_id`</span>, <span class="nv">`event_id`</span>]
+}
+</pre></div>
+</div>
+</div>
+<dl class="attribute">
+<dt id="filter">
+<code class="descname">filter</code><a class="headerlink" href="#filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps track of what filters the <a class="reference internal" href="#user">User</a> is currently using. If conflicting filters are present (such as <cite>now</cite> and <cite>upcoming</cite>), they are both present in the database but the Events filtering API will only return appropriate results for the first received filter.</p>
+<p>Allowed values: <em>‘now’, ‘upcoming’, ‘period’, ‘morning’, ‘afternoon’, ‘night’, ‘oncampus’, ‘offcampus’, ‘nearby’, ‘popular’, ‘food’</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="favorites">
+<code class="descname">favorites</code><a class="headerlink" href="#favorites" title="Permalink to this definition">¶</a></dt>
+<dd><p>The events that the <a class="reference internal" href="#user">User</a> has favorited. Only the event ID is stored in the database and there is no guarantee that the event ID is a valid ID.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="past_events">
+<code class="descname">past_events</code><a class="headerlink" href="#past_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>The events that the <a class="reference internal" href="#user">User</a> has (TODO:) attended in the past. Only the event ID is stored in the database and there is no guarantee that the event ID is a valid ID.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="personal_info">
+<code class="descname">personal_info</code><a class="headerlink" href="#personal_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#personal_info" title="personal_info"><code class="xref py py-data docutils literal notranslate"><span class="pre">personal_info</span></code></a> object contains <a class="reference internal" href="#user">User</a> personal information to help customize interaction with each <a class="reference internal" href="#user">User</a>.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><a class="reference internal" href="#personal_info" title="personal_info"><code class="xref py py-data docutils literal notranslate"><span class="pre">personal_info</span></code></a> Object Structure:</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>personal_info: {
+  email: &quot;mappeningdevx@gmail.com&quot;,
+  full_name: &quot;Dora D. DevX&quot;,
+  first_name: &quot;Dora&quot;,
+  last_name: &quot;DevX&quot;
+}
+</pre></div>
+</div>
+</div>
+<dl class="attribute">
+<dt id="email">
+<code class="descname">email</code><a class="headerlink" href="#email" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string email of the <a class="reference internal" href="#user">User</a>. May not be present in which case the field will be an empty string. TODO: email validation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="full_name">
+<code class="descname">full_name</code><a class="headerlink" href="#full_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string full name of the <a class="reference internal" href="#user">User</a>. Not limited to just first and last name. The value is not updated if the first and last names are updated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="first_name">
+<code class="descname">first_name</code><a class="headerlink" href="#first_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string first name of the <a class="reference internal" href="#user">User</a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="last_name">
+<code class="descname">last_name</code><a class="headerlink" href="#last_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string last name of the <a class="reference internal" href="#user">User</a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Sample <a class="reference internal" href="#user">User</a> Object</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
 <div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>{
-  &quot;alternative_names&quot;: [
-    &quot;Powell Library&quot;,
-    &quot;UCLA Powell&quot;,
-    &quot;UCLA Powell Library&quot;,
-    &quot;Powell&quot;
-  ],
-  &quot;city&quot;: &quot;Los Angeles&quot;,
-  &quot;country&quot;: &quot;United States&quot;,
-  &quot;latitude&quot;: 34.07161260000001,
-  &quot;longitude&quot;: -118.4421809,
-  &quot;name&quot;: &quot;Powell Library&quot;,
-  &quot;state&quot;: &quot;CA&quot;,
-  &quot;street&quot;: &quot;120S Election Walk&quot;,
-  &quot;zip&quot;: 90095
+  &quot;account&quot;: {
+    &quot;id&quot;: &quot;1557193131009244&quot;,
+    &quot;is_active&quot;: true,
+    &quot;is_admin&quot;: true,
+    &quot;password_hash&quot;: &quot;&quot;,
+    &quot;time_joined&quot;: &quot;2018-05-12 12:26:03&quot;,
+    &quot;time_updated&quot;: &quot;2018-05-13 07:08:49&quot;,
+    &quot;username&quot;: &quot;&quot;
+  },
+  &quot;app&quot;: {
+    &quot;favorites&quot;: [
+      &quot;42&quot;,
+      &quot;69&quot;
+    ],
+    &quot;filters&quot;: [
+      &quot;now&quot;,
+      &quot;popular&quot;,
+      &quot;food&quot;
+    ],
+    &quot;past_events&quot;: [
+      &quot;101&quot;,
+      &quot;821&quot;
+    ]
+  },
+  &quot;personal_info&quot;: {
+    &quot;email&quot;: &quot;katrina@thewijayas.com&quot;,
+    &quot;first_name&quot;: &quot;Katrina&quot;,
+    &quot;full_name&quot;: &quot;Katrina Wijaya&quot;,
+    &quot;last_name&quot;: &quot;Wijaya&quot;
+  }
 }
 </pre></div>
 </div>
