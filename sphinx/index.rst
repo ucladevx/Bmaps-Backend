@@ -19,6 +19,7 @@ Classes Documented
    :maxdepth: 2
 
    events
+   locations
    users
 
 Indices and tables

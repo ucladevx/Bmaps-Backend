@@ -93,7 +93,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
-<li class="toctree-l1"><a class="reference internal" href="events.html#module-mappening.api.events">API DOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="locations.html">Locations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
 </ul>
 
@@ -176,6 +176,7 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -187,13 +188,15 @@
 </li>
       <li><a href="users.html#mappening.api.users.add_user_favorite">add_user_favorite() (in module mappening.api.users)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="users.html#mappening.api.users.add_user_filters">add_user_filters() (in module mappening.api.users)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="users.html#mappening.api.users.add_user_past_events">add_user_past_events() (in module mappening.api.users)</a>
 </li>
       <li><a href="users.html#mappening.api.users.add_user_through_api">add_user_through_api() (in module mappening.api.users)</a>
+</li>
+      <li><a href="locations.html#alternative_names">alternative_names (built-in variable)</a>
 </li>
       <li><a href="users.html#app">app (built-in variable)</a>
 </li>
@@ -205,9 +208,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#category">category</a>
 </li>
+      <li><a href="locations.html#city">city (built-in variable)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#geometry.coordinates">coordinates (geometry attribute)</a>
+</li>
+      <li><a href="locations.html#country">country (built-in variable)</a>
 </li>
       <li><a href="events.html#cover_picture">cover_picture</a>
 </li>
@@ -269,15 +276,21 @@
 </li>
       <li><a href="users.html#mappening.api.users.get_all_favorites">get_all_favorites() (in module mappening.api.users)</a>
 </li>
+      <li><a href="locations.html#mappening.api.locations.get_all_locations">get_all_locations() (in module mappening.api.locations)</a>
+</li>
       <li><a href="users.html#mappening.api.users.get_all_users">get_all_users() (in module mappening.api.users)</a>
 </li>
       <li><a href="events.html#mappening.api.events.get_event_by_id">get_event_by_id() (in module mappening.api.events)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#mappening.api.events.get_event_by_name">get_event_by_name() (in module mappening.api.events)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#mappening.api.events.get_event_categories">get_event_categories() (in module mappening.api.events)</a>
+</li>
+      <li><a href="locations.html#mappening.api.locations.get_google_search">get_google_search() (in module mappening.api.locations)</a>
+</li>
+      <li><a href="locations.html#mappening.api.locations.get_location_results">get_location_results() (in module mappening.api.locations)</a>
 </li>
       <li><a href="users.html#mappening.api.users.get_user_by_id">get_user_by_id() (in module mappening.api.users)</a>
 </li>
@@ -320,6 +333,12 @@
       <li><a href="users.html#last_name">last_name</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="locations.html#latitude">latitude (built-in variable)</a>
+</li>
+      <li><a href="locations.html#longitude">longitude (built-in variable)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
@@ -329,6 +348,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="locations.html#module-mappening.api.locations">mappening.api.locations (module)</a>
+</li>
       <li><a href="users.html#module-mappening.api.users">mappening.api.users (module)</a>
 </li>
   </ul></td>
@@ -385,11 +406,15 @@
 </li>
       <li><a href="users.html#mappening.api.users.search_users">search_users() (in module mappening.api.users)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#start_time">start_time</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="locations.html#state">state (built-in variable)</a>
+</li>
       <li><a href="events.html#stats">stats</a>
+</li>
+      <li><a href="locations.html#street">street (built-in variable)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -418,6 +443,14 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="users.html#username">username</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="locations.html#zip">zip (built-in variable)</a>
 </li>
   </ul></td>
 </tr></table>
