@@ -20,6 +20,7 @@ Classes Documented
 
    events
    locations
+   users
 
 Indices and tables
 ------------------
