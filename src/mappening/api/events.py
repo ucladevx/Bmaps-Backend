@@ -1,5 +1,3 @@
-# Interacting with events collection in mlab
-
 from mappening.utils.database import events_current_collection
 from mappening.api.utils import event_caller, event_utils, event_filters
 
@@ -204,26 +202,27 @@ def get_event_by_id(event_id):
 #TODO: Change this to search for category list when you implement ml category model
 
 # CATEGORIES
-@events.route('/categories', defaults={'event_date': None}, methods=['GET'])
-@events.route('/categories/<event_date>', methods=['GET'])
-def get_event_categories(event_date):
+@events.route('/categories', methods=['GET'])
+def get_event_categories():
     """
-    :Route: /categories/<event_date>
+    :Route: /categories?date=April 20 2018
 
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
 
-    :param event_date: An optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type event_date: str or None
+    :param date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :type date: str or None
 
     """
     # Iterate through all events and get unique list of all categories
     # If date was passed in, only check events starting on that date
+    date = request.args.get('date')
+
     uniqueList = []
     output = []
 
-    if event_date:
-        print("Using date parameter: " + event_date)
-        date_regex_obj = event_utils.construct_date_regex(event_date)
+    if date:
+        print("Using date parameter: " + date)
+        date_regex_obj = event_utils.construct_date_regex(date)
         events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")

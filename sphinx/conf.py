@@ -37,6 +37,9 @@ autodoc_mock_imports = [
     'flask_login'
 ]
 
+# https://stackoverflow.com/questions/37209921/python-how-not-to-sort-sphinx-output-in-alphabetical-order
+autodoc_member_order = 'bysource'
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
