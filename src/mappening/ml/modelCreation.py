@@ -1,5 +1,5 @@
-#if trainModels() doesn't have cateogirzationModel appear in git, its b/c theres a hard limit of 100MB to files
-#lower complexity of training model
+#if trainModels() doesn't have cateogirzationModel appear in git, its b/c theres a hard limit of 100MB to files, so lower complexity of training model
+#TODO: Train more complex model on the fly when pushed, the difference is about 1.5% accuracy
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
