@@ -13,7 +13,7 @@ sys.path.insert(0,'./../..')
 from mappening.utils.database import events_ml_collection
 
 def gatherCategorizedEvents():
-    """Return panda dataframe of events with category, description, and name"""
+    """:Description: Return panda dataframe of events with category, description, and name"""
     allCategorizedEvents = []
     allEvents = events_ml_collection.find({}, {"category": 1, "description": 1, "name": 1, "hoster": 1, "_id": 0})
     count = 0
@@ -27,7 +27,7 @@ def gatherCategorizedEvents():
     return pd.DataFrame(modernEvents)
 
 def reduceCategories(events):
-    """Legacy Facebook events have old categories that are consolidated, OTHER will be discarded from the training data"""
+    """:Description: Legacy Facebook events have old categories that are consolidated, OTHER will be discarded from the training data"""
     categoryMapping = {
         u'BOOK': u'LITERATURE',
         u'COMEDY': u'COMEDY_PERFORMANCE',
