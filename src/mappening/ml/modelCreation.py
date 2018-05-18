@@ -1,3 +1,5 @@
+#if trainModels() doesn't have cateogirzationModel appear in git, its b/c theres a hard limit of 100MB to files
+#lower complexity of training model
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -67,7 +69,7 @@ def trainModels():
     X_total_transform = hstack([X_name_transform, X_details_transform])
 
     # train model
-    rf = RandomForestClassifier(n_estimators=150, max_depth=None)
+    rf = RandomForestClassifier(n_estimators=75, max_depth=60)
     rf.fit(X_total_transform, X['category'])
 
     #save model
