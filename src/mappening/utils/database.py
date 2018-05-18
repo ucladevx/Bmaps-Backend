@@ -29,6 +29,7 @@ print("Connected to database!")
 events_current_collection = events_db.events_current
 events_ml_collection = events_db.events_ml
 events_test_collection = events_db.events_test
+events_current_processed_collection = events_db.events_current_processed
 
 ### PAGES
 pages_saved_collection = events_db.pages_saved

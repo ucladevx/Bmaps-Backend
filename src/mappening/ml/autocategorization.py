@@ -87,14 +87,14 @@ def predictCategories(nameVectorizer, detailVectorizer, classifier, X, threshold
 
 def categorizeAllCurrentEvents():
     """
-    Takes all the events in events_current_collection and creates new events_curcategorized_collection
+    :Description: Takes all the events in events_current_collection and creates new events_current_processed_collection
         with all events having a list of categories now
     """
-    events_curcategorized_collection = events_db.events_curcategorized
+    events_current_processed_collection = events_db.events_current_processed
     allEvents = [e for e in events_current_collection.find()]
     allEvents = categorizeEvents(allEvents)
-    events_curcategorized_collection.insert_many(allEvents)
-    print("Created new categorized event collection: events_curcategorized")
+    events_current_processed_collection.insert_many(allEvents)
+    print("Created new categorized event collection: events_current_processed")
 
 if __name__ == "__main__":
     categorizeAllCurrentEvents()
