@@ -26,8 +26,8 @@ Government & Politics [Government] | Fashion & Beauty [Fashion] | Home & Lifesty
 Hobbies & Special Interest [Hobbies] | Other | School Activities
 """
 
-days_back = 0
-days_forward = 5
+days_back = 1000
+days_forward = 500
 now = datetime.datetime.now()
 past_bound = (now - datetime.timedelta(days=days_back)).strftime('%Y-%m-%dT%H:%M:%S')
 future_bound = (now + datetime.timedelta(days=days_forward)).strftime('%Y-%m-%dT%H:%M:%S')
@@ -68,10 +68,7 @@ cat_resp = session.get(
 # list of dicts, 1 per category (with ID and name, full and shorthand)
 all_categories = {}
 raw_categories = cat_resp.json().get('categories')
-for raw_cat in raw_categories:
-    print(raw_cat['name'] + ', ', end='')
-for raw_cat in raw_categories:
-    print(raw_cat['short_name'] + ', ', end='')
+
 
 for raw_cat in raw_categories:
     used_name = raw_cat['short_name']
@@ -134,7 +131,7 @@ for event_info in all_events:
 with open('eveb.json', 'w') as f:
     json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
 
-
+print(len(cleaned_events))
 
 
 # if not all_events:

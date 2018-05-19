@@ -7,7 +7,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--test', help='Use a test database, to protect live data.', action='store_true')
 parser.add_argument('-d', '--days-before', help='Specify # of days to go back in time for past events.', type=int)
 parser.add_argument('-c', '--clear', help='Clear out old database data to start anew.', action='store_true')
-parser.add_argument('-p', '--refresh-pages', help='Run a search for any new pages to look through.', action='store_true')
 args = parser.parse_args()
 
 # if ever need to quit early, call sys.exit()
@@ -52,8 +51,7 @@ if __name__ == "__main__":
         dbit = 0
     # event_utils.update_ucla_events_database(use_test=args.test,
     #                                         days_back_in_time=dbit,
-    #                                         clear_old_db=args.clear,
-    #                                         refresh_pages=args.refresh_pages)
+    #                                         clear_old_db=args.clear)
 
     # GOOD TO KNOW
     # to QUIT when not in Docker container: run Ctrl+\ (SIGQUIT, equivalent to kill -3 <pid>)
