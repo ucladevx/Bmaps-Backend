@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection, events_test_collection
+from mappening.utils.database import events_current_collection, events_current_processed_collection, events_ml_collection, pages_saved_collection, events_test_collection
 import event_caller
 
 
@@ -22,14 +22,18 @@ def remove_db_duplicates(changed_collection):
     return total_dups
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
-    output = get_events_in_database(find_dict, one_result_expected, print_results, legacy)
+    if legacy:
+        output = legacy_get_events_in_database(find_dict, one_result_expected, print_results)
+    else:
+        output = get_events_in_database(find_dict, one_result_expected, print_results)
+
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
+def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = []
 
     if one_result_expected:
-        single_event = events_current_collection.find_one(find_dict)
+        single_event = events_current_processed_collection.find_one(find_dict)
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
@@ -39,13 +43,10 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
             print('No single event with attributes:' + str(find_dict))
     else:
-        events_cursor = events_current_collection.find(find_dict)
+        events_cursor = events_current_processed_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                if legacy:
-                    output.append(legacy_process_event(event))
-                else:
-                    output.append(process_event_info(event))
+                output.append(process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
@@ -104,6 +105,36 @@ def process_event_info(event):
 
 
 #TODO: DELETE LEGACY CODE
+def legacy_get_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
+    output = []
+
+    if one_result_expected:
+        single_event = events_current_collection.find_one(find_dict)
+        if single_event:
+            output.append(process_event_info(single_event))
+            if print_results:
+                print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
+        else:
+            # careful: output is still empty here; make sure output list never set ANYWHERE else
+            # i.e. no other conditional branch is entered after this one, same with multiple event case below
+            print('No single event with attributes:' + str(find_dict))
+    else:
+        events_cursor = events_current_collection.find(find_dict)
+        if events_cursor.count() > 0:
+            for event in events_cursor:
+                output.append(legacy_process_event(event))
+                if print_results:
+                    # Python 2 sucks
+                    # event['name'] returns unicode string
+                    # to use with format(), another unicode string must be parent
+                    # unicode strings have 'u' in the front, as below
+                    # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
+                    print(u'Event: {0}'.format(event.get('name', '<NONE>')))
+        else:
+            print('No events found with attributes:' + str(find_dict))
+
+    return output
+
 def legacy_process_event(event):
     formatted_info = {
         # will ALWAYS have an ID
@@ -199,7 +230,7 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
-    
+
     changed_collection = events_current_collection
     if use_test:
         changed_collection = events_test_collection
