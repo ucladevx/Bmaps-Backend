@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection, events_test_collection
+from mappening.utils.database import events_current_collection, events_ml_collection, fb_pages_saved_collection, events_test_collection
 import event_caller
 
 
@@ -15,7 +15,7 @@ def remove_db_duplicates(changed_collection):
 
     # Difference between append and extend: extend flattens out lists to add multiple elements, append adds 1 element
     total_dups.extend(clean_collection(changed_collection))
-    total_dups.extend(clean_collection(pages_saved_collection))
+    total_dups.extend(clean_collection(fb_pages_saved_collection))
     total_dups.extend(clean_collection(events_ml_collection))
 
     print('Removed {0} duplicates.'.format(len(total_dups)))
@@ -195,7 +195,7 @@ def clean_collection(collection):
     return dups
 
 # Get all UCLA-related Facebook events and add to database
-def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False, refresh_pages=False):
+def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
