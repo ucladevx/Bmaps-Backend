@@ -7,7 +7,6 @@ from scipy.sparse import hstack
 import pandas as pd
 import cPickle as pickle
 
-
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
 sys.path.insert(0,'./../..')
