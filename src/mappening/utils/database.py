@@ -26,7 +26,16 @@ print("Connected to database!")
 # Get all the collections
 
 #### EVENTS
-events_current_collection = events_db.events_current
+
+"""
+how it works as of 2018/05/18:
+every unique source website of events (e.g. FB, Eventbrite, UCLA club list)
+has its own "raw" database, for just inserting the unprocessed returned data from API / scraping directly
+at the same time, process the raw data (add category / location, reformat fields to be standard)
+and add to a single processed database of events from all sources
+the website uses this processed database's info directly (no processing needed when pulling it out)
+"""
+events_processed_collection = events_db.events_processed
 events_ml_collection = events_db.events_ml
 events_test_collection = events_db.events_test
 

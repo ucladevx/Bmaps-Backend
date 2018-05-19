@@ -1,7 +1,9 @@
+from __future__ import print_function
 import requests
 import time, datetime
 from pprint import pprint
 import json
+
 
  # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
@@ -11,6 +13,18 @@ CENTER_LONGITUDE = -118.445
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
+
+"""
+Categories for reference, as of May 2018: Full Name [Short Name, if any]
+fewer than Facebook (many pairs consolidated)
+
+Music | Business & Professional [Business] | Food & Drink | Community & Culture [Community] |
+Performing & Visual Arts [Arts] | Film, Media & Entertainment [Film & Media] | Sports & Fitness |
+Health & Wellness [Health] | Science & Technology [Science & Tech] | Travel & Outdoor | Charity & Causes |
+Religion & Spirituality [Spirituality] | Family & Education | Seasonal & Holiday [Holiday] |
+Government & Politics [Government] | Fashion & Beauty [Fashion] | Home & Lifestyle | Auto, Boat & Air |
+Hobbies & Special Interest [Hobbies] | Other | School Activities
+"""
 
 days_back = 0
 days_forward = 5
@@ -55,25 +69,12 @@ cat_resp = session.get(
 all_categories = {}
 raw_categories = cat_resp.json().get('categories')
 for raw_cat in raw_categories:
-    used_name = raw_cat['short_name'].upper()
-    if used_name == 'SPIRITUALITY':
-        used_name = 'RELIGION'
-    elif used_name == 'FOOD & DRINK':
-        used_name = 'FOOD'
-    elif used_name == 'BUSINESS':
-        used_name = 'NETWORKING'
-    elif used_name == 'ARTS':
-        used_name = 'ART'
-    elif used_name == 'FILM & MEDIA':
-        used_name = 'FILM'
-    elif used_name == 'HOME & LIFESTYLE':
-        used_name = 'HOME'
-    elif used_name == 'SPORTS & FITNESS':
-        used_name = 'SPORTS'
-    elif used_name == 'CHARITY & CAUSES':
-        used_name = 'CAUSES'
-    elif used_name == 'COMMUNITY':
-        used_name = 'NEIGHBORHOOD'
+    print(raw_cat['name'] + ', ', end='')
+for raw_cat in raw_categories:
+    print(raw_cat['short_name'] + ', ', end='')
+
+for raw_cat in raw_categories:
+    used_name = raw_cat['short_name']
     all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
 
 all_venues = {}
@@ -132,6 +133,8 @@ for event_info in all_events:
 
 with open('eveb.json', 'w') as f:
     json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+
 
 
 # if not all_events:
