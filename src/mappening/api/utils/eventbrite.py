@@ -1,4 +1,5 @@
-from __future__ import print_function
+from mappening.utils.database import events_eventbrite_collection
+
 import requests
 import time, datetime
 from pprint import pprint
@@ -128,10 +129,9 @@ for event_info in all_events:
 
     cleaned_events.append(one_event)
 
-with open('eveb.json', 'w') as f:
+with open('evebr.json', 'w') as f:
     json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
 
-print(len(cleaned_events))
 
 
 # if not all_events:
