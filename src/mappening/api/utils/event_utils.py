@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection, fb_pages_saved_collection, events_test_collection
+from mappening.utils.database import events_fb_collection, events_ml_collection, fb_pages_saved_collection, events_test_collection
 import event_caller
 
 
@@ -29,7 +29,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
     output = []
 
     if one_result_expected:
-        single_event = events_current_collection.find_one(find_dict)
+        single_event = events_fb_collection.find_one(find_dict)
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
@@ -39,7 +39,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
             print('No single event with attributes:' + str(find_dict))
     else:
-        events_cursor = events_current_collection.find(find_dict)
+        events_cursor = events_fb_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
                 if legacy:
@@ -200,64 +200,66 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
     
-    changed_collection = events_current_collection
+    changed_collection = events_fb_collection
     if use_test:
         changed_collection = events_test_collection
 
     if clear_old_db:
         changed_collection.delete_many({})
 
+    
+
     # take out all current events from DB, put into list, check for updates
-    processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
+    # processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
 
-    # actually update all in database, but without mass deletion (for safety)
-    for old_event in tqdm(changed_collection.find()):
-        event_id = old_event['id']
-        updated_event = processed_db_events.get(event_id)
-        # if event should be kept and updated
-        if updated_event:
-            changed_collection.delete_one({'id': event_id})
-            changed_collection.insert_one(updated_event)
-        # event's time has passed, according to update_current_events
-        else:
-            changed_collection.delete_one({'id': event_id})
+    # # actually update all in database, but without mass deletion (for safety)
+    # for old_event in tqdm(changed_collection.find()):
+    #     event_id = old_event['id']
+    #     updated_event = processed_db_events.get(event_id)
+    #     # if event should be kept and updated
+    #     if updated_event:
+    #         changed_collection.delete_one({'id': event_id})
+    #         changed_collection.insert_one(updated_event)
+    #     # event's time has passed, according to update_current_events
+    #     else:
+    #         changed_collection.delete_one({'id': event_id})
 
-    new_events_data = event_caller.get_facebook_events(days_back_in_time)
-    # debugging events output
-    # with open('events_out.json', 'w') as outfile:
-    #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+    # new_events_data = event_caller.get_facebook_events(days_back_in_time)
+    # # debugging events output
+    # # with open('events_out.json', 'w') as outfile:
+    # #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
-    # Also add all new events to total_events
+    # # Also add all new events to total_events
 
-    # .find() returns a CURSOR, like an iterator (NOT a list or dictionary)
-    # conclusion after running some small timed tests: for our purposes and with our data sizes,
-    # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
-    # normally use incremental Cursor, to save memory usage
-    new_count = 0
-    for event in tqdm(new_events_data['events']):
-        curr_id = event['id']
-        existing_event = processed_db_events.get(curr_id)
+    # # .find() returns a CURSOR, like an iterator (NOT a list or dictionary)
+    # # conclusion after running some small timed tests: for our purposes and with our data sizes,
+    # # INCREMENTAL DB calls (iterate over .find()) and BATCH DB calls (list(.find())) take about the same time
+    # # normally use incremental Cursor, to save memory usage
+    # new_count = 0
+    # for event in tqdm(new_events_data['events']):
+    #     curr_id = event['id']
+    #     existing_event = processed_db_events.get(curr_id)
 
-        # sidenote: when event inserted into DB,
-        # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
+    #     # sidenote: when event inserted into DB,
+    #     # the event dict has _id key appended to itself both remotely (onto DB) and LOCALLY!
 
-        # don't need to do anything if event found previously, since updated in update_current_events()
-        if existing_event:
-            continue
-        changed_collection.insert_one(event)
-        new_count += 1
+    #     # don't need to do anything if event found previously, since updated in update_current_events()
+    #     if existing_event:
+    #         continue
+    #     changed_collection.insert_one(event)
+    #     new_count += 1
 
-        # below = UPDATE: pymongo only allows update of specifically listed attributes in a dictionary...
-        # so delete old if exists, then insert new
+    #     # below = UPDATE: pymongo only allows update of specifically listed attributes in a dictionary...
+    #     # so delete old if exists, then insert new
 
-        # See if event already existed
-        update_event = events_ml_collection.find_one({'id': curr_id})
+    #     # See if event already existed
+    #     update_event = events_ml_collection.find_one({'id': curr_id})
 
-        # If it existed then delete it, new event gets inserted either way
-        if update_event:
-            events_ml_collection.delete_one({'id': curr_id})
-        events_ml_collection.insert_one(event)
+    #     # If it existed then delete it, new event gets inserted either way
+    #     if update_event:
+    #         events_ml_collection.delete_one({'id': curr_id})
+    #     events_ml_collection.insert_one(event)
 
-    remove_db_duplicates(changed_collection)
+    # remove_db_duplicates(changed_collection)
 
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)

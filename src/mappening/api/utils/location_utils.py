@@ -1,6 +1,6 @@
 # TODO some more testing before integration
 
-from mappening.utils.database import events_current_collection, events_ml_collection, locations_collection
+from mappening.utils.database import events_fb_collection, events_ml_collection, locations_collection
 from mappening.api.utils import tokenize, location_helpers
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -30,7 +30,7 @@ def get_locations_from_collection():
     
     # Every time there are new events, check location info and update db if necessary
     # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    events_cursor = events_current_collection.find({"place": {"$exists": True}})
+    events_cursor = events_fb_collection.find({"place": {"$exists": True}})
 
     if not events_cursor or events_cursor.count() <= 0:
       return 'Cannot find any events with locations!'

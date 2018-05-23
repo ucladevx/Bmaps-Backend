@@ -1,5 +1,5 @@
-from mappening.utils.database import events_current_collection
-from mappening.api.utils import event_caller, event_utils, event_filters
+from mappening.utils.database import events_fb_collection
+from mappening.api.utils import event_utils, event_filters
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -223,10 +223,10 @@ def get_event_categories():
     if date:
         print("Using date parameter: " + date)
         date_regex_obj = event_utils.construct_date_regex(date)
-        events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+        events_cursor = events_fb_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_current_collection.find({"category": {"$exists": True}})
+        events_cursor = events_fb_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
