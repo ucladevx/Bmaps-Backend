@@ -2,7 +2,7 @@
 # IF THIS CODE STILL EXISTS AT THE END OF SPRING 2018 SOMEONE FAILED
 
 # Interacting with events collection in mlab
-from mappening.utils.database import events_current_collection
+from mappening.utils.database import events_fb_collection
 from mappening.api.utils import event_caller, event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -34,10 +34,10 @@ def search_events(search_term, event_date):
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = events_current_collection.find({'name': search_regex, 'start_time': date_regex_obj})
+        events_cursor = events_fb_collection.find({'name': search_regex, 'start_time': date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_current_collection.find({'name': search_regex})
+        events_cursor = events_fb_collection.find({'name': search_regex})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -92,10 +92,10 @@ def get_events_by_category(event_category):
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = events_current_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
+        events_cursor = events_fb_collection.find({"category": cat_regex_obj, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_current_collection.find({"category": cat_regex_obj})
+        events_cursor = events_fb_collection.find({"category": cat_regex_obj})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
@@ -117,10 +117,10 @@ def get_event_categories(event_date):
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+        events_cursor = events_fb_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_current_collection.find({"category": {"$exists": True}})
+        events_cursor = events_fb_collection.find({"category": {"$exists": True}})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
