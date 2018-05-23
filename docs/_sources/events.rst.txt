@@ -1,7 +1,7 @@
 Events
 ======
 
-Welcome to the Mappening Events API! Through a RESTful interface, this API provides information on all the events happening around UCLA. The simplest way to access this data is to go to the url `whatsmappening.io/api/v1/events <https://whatsmappening.io/api/v1/events>`_ to get a comprehensive listing of all upcoming UCLA events. See the explanation of |event| objects below. The Events API offers various ways to search and filter the event data and also allows for independent processing and filtering.
+Welcome to the Mappening Events API! Through a RESTful interface, this API provides information on all the events happening around UCLA. The simplest way to access this data is to go to the url `www.mappening.io/api/v1/events <https://www.mappening.io/api/v1/events>`_ to get a comprehensive listing of all upcoming UCLA events. See the explanation of |event| objects below. The Events API offers various ways to search and filter the event data and also allows for independent processing and filtering.
 
 Event
 -----
