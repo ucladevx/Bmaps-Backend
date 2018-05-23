@@ -9,7 +9,7 @@ schedule
 python-dotenv
 pytz
 tqdm
-nltk
+nltk==3.2.5
 shapely
 haversine
 
