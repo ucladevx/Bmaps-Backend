@@ -38,6 +38,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Mappening 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Locations" href="locations.html"/>
         <link rel="prev" title="Welcome to Mappening’s documentation!" href="index.html"/> 
 
   
@@ -94,9 +95,11 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Events</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#event">Event</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mappening.api.events">API Docs</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#module-mappening.api.events">API DOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="locations.html">Locations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
 </ul>
 
             
@@ -370,9 +373,47 @@
 </div>
 </div>
 </div>
-</div>
 <div class="section" id="module-mappening.api.events">
-<span id="api-docs"></span><h1>API DOCS<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h1>
+<span id="api-docs"></span><h2>API Docs<a class="headerlink" href="#module-mappening.api.events" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mappening.api.events.get_all_events">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_all_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a few miles of UCLA</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mappening.api.events.search_events">
+<code class="descclassname">mappening.api.events.</code><code class="descname">search_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.search_events" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search?term=str&amp;date=str&amp;category=str</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter for the search term to filter by</li>
+<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
+<li><strong>category</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the event category to filter by</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="function">
 <dt id="mappening.api.events.filter_events">
 <code class="descclassname">mappening.api.events.</code><code class="descname">filter_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.filter_events" title="Permalink to this definition">¶</a></dt>
@@ -403,15 +444,17 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="mappening.api.events.get_all_events">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_all_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_all_events" title="Permalink to this definition">¶</a></dt>
+<dt id="mappening.api.events.get_event_by_name">
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/</td>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/name/&lt;event_name&gt;</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns a GeoJSON of all events within a few miles of UCLA</td>
+<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> (<em>str</em>) – case-insensitive name string to search database for exact match</td>
 </tr>
 </tbody>
 </table>
@@ -435,63 +478,23 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="mappening.api.events.get_event_by_name">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_by_name</code><span class="sig-paren">(</span><em>event_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/name/&lt;event_name&gt;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns GeoJSON of singular event matching event name</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_name</strong> (<em>str</em>) – case-insensitive name string to search database for exact match</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="mappening.api.events.get_event_categories">
-<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><em>event_date</em><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">mappening.api.events.</code><code class="descname">get_event_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.get_event_categories" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/categories/&lt;event_date&gt;</td>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body">/categories?date=April 20 2018</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="mappening.api.events.search_events">
-<code class="descclassname">mappening.api.events.</code><code class="descname">search_events</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mappening.api.events.search_events" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search?term=str&amp;date=str&amp;category=str</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>term</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter for the search term to filter by</li>
-<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
-<li><strong>category</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the event category to filter by</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+</div>
 </div>
 
 
@@ -503,6 +506,8 @@
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="locations.html" class="btn btn-neutral float-right" title="Locations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="Welcome to Mappening’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -30,10 +30,4 @@ Autodocumentation through Sphinx for Mappening's APIs. Hosted on GitHub Pages at
 - `_static/` folder contains the minified css/js/static files for v1.7.0
   - Overwrites auto-generated static files so we don't add 30k lines of css/js
   - Manual Changes with [reST](http://www.sphinx-doc.org/en/stable/rest.html)
-  - Moved below lines to header in index.html as they didn't seem to load
-  ```
-  <script type="text/javascript" src="_static/jquery.js"></script>
-  <script type="text/javascript" src="_static/underscore.js"></script>
-  <script type="text/javascript" src="_static/doctools.js"></script>
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-  ```
+    - `p.first{width:50vw;word-wrap:break-word;}` in `theme.css`
