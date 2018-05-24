@@ -156,7 +156,7 @@ class App:
 
   def right(self, event):
     # print("Right key pressed")
-    self.isWrong()
+    self.isFail()
 
   def isCorrect(self):
     print("Coordinates are correct!                                             " + self.unknown_locations[0]['unknown_loc']['loc_name'])
@@ -203,8 +203,11 @@ class App:
       updated = True
 
     # If updated, update location in database
+    # TODO: update locations database
     if updated:
       print("Updating location in database...")
+      self.unknown_locations[0]['updated_location'] = True
+      self.unknown_locations[0]['db_loc']['map_url'] = "https://www.google.com/maps/place/" + str(self.unknown_locations[0]['db_loc']['loc_latitude']) + "," + str(self.unknown_locations[0]['db_loc']['loc_longitude'])
       tkinter_unknown_collection.replace_one({'_id': self.unknown_locations[0]['_id']}, self.unknown_locations[0]) 
     else:
       print("Nothing changed, event is left unmodified...")
