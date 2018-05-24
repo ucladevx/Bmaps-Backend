@@ -2,6 +2,7 @@ import cPickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
 
+#Run this file to grom events_current_collection and make events_current_processed_collection, delete old events_current_processed_collection first
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
 sys.path.insert(0,'./../..')
@@ -42,12 +43,12 @@ def categorizeEvents(events, threshold=.1):
     for i in range(0, len(catLists)):
         curCategory = events[i].get('category', None)
         if curCategory not in LIST_OF_CATEGORIES:
-            events[i]['category'] = catLists[i]
+            events[i]['categories'] = catLists[i]
         else:
-            events[i]['category'] = [curCategory]
+            events[i]['categories'] = [curCategory]
             for cat in catLists[i]:
                 if cat != curCategory:
-                    events[i]['category'].append(cat)
+                    events[i]['categories'].append(cat)
 
     return events
 
