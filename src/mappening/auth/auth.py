@@ -1,4 +1,5 @@
 from mappening.utils.secrets import FACEBOOK_SECRET_KEY
+from mappening.api.utils import user_utils
 from mappening.api.models.user import User
 from mappening.api import users
 from facebook import facebook_oauth
@@ -36,13 +37,24 @@ def on_load(state):
 # Must change user's ID to invalidate login sessions
 # Can achieve this with session tokens rather than the user's ID
 # Would modify get_id() method to return session token rather than user's ID
+# Return None if ID is not valid, will remove ID from session and continue processing
 @login_manager.user_loader
 def user_loader(user_id):
-    result = users.get_user(user_id)
-    if result:
-        user = User(result['user_name'], result['user_id'])
-        return user
-    return None    
+    db_user = user_utils.get_user(user_id)
+    if db_user:
+        return User(db_user['account']['id'], db_user['account']['is_active'], db_user['account']['is_admin'])
+    return None
+
+# TODO: move this to users but don't require admin privileges?
+@auth.route('/current', methods=['GET'])
+def get_current_user():
+    if not current_user.is_authenticated:
+      return "No user is logged in!"
+      
+    user = user_utils.get_user(current_user.get_id())
+    if user:
+        return jsonify(user)
+    return "Could not get current user!"
 
 @auth.route('/')
 def auth_redirect():
@@ -80,17 +92,18 @@ def facebook_authorized(resp):
 
     # If user exists in collection, logs them in
     # Otherwise, registers new user and logs them in
-    fb_user = users.get_user(userID)
-    if fb_user == None:
-        users.add_user(userID, userName, me.data['first_name'], me.data['last_name'], accessToken)
-        user = User(userName, userID)
+    # TODO get email if we can
+    fb_user = user_utils.get_user(userID)
+    if not fb_user:
+        user_utils.add_user(userID, userName, me.data['first_name'], me.data['last_name'])
+        user = User(userID)
         login_user(user)
+        return "Successfully registered new user!"
     else:
         users.update_user(userID)
-        user = User(fb_user['user_name'], userID)
+        user = User(userID, fb_user['account']['is_active'], fb_user['account']['is_admin'])
         login_user(user)
-
-    return "Successfully logged in with Facebook!"
+        return "Successfully logged in with Facebook!"
 
 # Log out user. 
 # Will no longer be able to access any route decorated with @login_required
@@ -99,4 +112,3 @@ def facebook_authorized(resp):
 def logout():
     logout_user()
     return "Successfully logged out!"  
-    # return redirect(url_for('blueprint.function'))

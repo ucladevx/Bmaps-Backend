@@ -20,12 +20,19 @@ from mappening.utils import scheduler
 from mappening.api.utils import event_utils
 
 from flask import Flask
+import datetime
 
 from threading import Thread
 
 @app.route('/')
 def index():
     return "Mappening is running!"
+
+# https://www.jordanbonser.com/flask-session-timeout.html
+# @app.before_request
+# def before_request():
+#     flask.session.permanent = True
+#     app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 
 if __name__ == "__main__":
     print('Arguments passed: {0}'.format(args))
