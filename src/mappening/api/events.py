@@ -27,6 +27,10 @@ def get_all_events():
     """
     return event_utils.find_events_in_database(print_results=True)
 
+@events.route('/test')
+def test():
+    return jsonify("HELLO")
+
 # SEARCH
 @events.route('/search', methods=['GET'])
 def search_events():
@@ -217,24 +221,13 @@ def get_event_categories():
     """
     # Iterate through all events and get unique list of all categories
     # If date was passed in, only check events starting on that date
-<<<<<<< HEAD
+
     uniqueCats = set()
 
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
         events_cursor = events_current_processed_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
-=======
-    date = request.args.get('date')
-
-    uniqueList = []
-    output = []
-
-    if date:
-        print("Using date parameter: " + date)
-        date_regex_obj = event_utils.construct_date_regex(date)
-        events_cursor = events_current_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
->>>>>>> origin
     else:
         print("No date parameter given...")
         events_cursor = events_current_processed_collection.find({"category": {"$exists": True}})
