@@ -33,7 +33,7 @@ def get_all_events():
 @events.route('/search', methods=['GET'])
 def search_events():
     """
-    :Route: /search?term=str&date=str&category=str&month=str
+    :Route: /search?term=str&date=str&category=str&month=8
 
     :Description: Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.
 
