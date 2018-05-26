@@ -207,15 +207,16 @@ def get_event_by_id(event_id):
 #TODO: Allow all events to be returned on date not just those that start on that datetime
 #TODO: Change this to search for category list when you implement ml category model
 
-# CATEGORIES
-@events.route('/categories', methods=['GET'])
-def get_event_categories():
+ # CATEGORIES
+@events.route('/categories', defaults={'event_date': None}, methods=['GET'])
+@events.route('/categories/<event_date>', methods=['GET'])
+def get_event_categories(event_date):
     """
-    :Route: /categories?date=April 20 2018
+    :Route: /categories/<event_date>
 
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
 
-    :param date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :param event_date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type date: str or None
 
     """
