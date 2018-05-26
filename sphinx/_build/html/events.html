@@ -397,7 +397,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search?term=str&amp;date=str&amp;category=str</p>
+<tr class="field-odd field"><th class="field-name">Route:</th><td class="field-body"><p class="first">/search?term=str&amp;date=str&amp;category=str&amp;month=8</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.</p>
@@ -405,8 +405,10 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>term</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter for the search term to filter by</li>
-<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
-<li><strong>category</strong> (<em>str</em><em> or </em><em>None</em>) – A query component/parameter for the event category to filter by</li>
+<li><strong>date</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -&gt; 22 January 2018)</li>
+<li><strong>category</strong> (<em>str</em><em> or </em><em>None</em>) – An optional query component/parameter for the event category to filter by</li>
+<li><strong>month</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies which month to filter by. Accepts 1-12 to specify the month. Defaults to the current year, if a different year should be specified the <cite>year</cite> parameter must be set. Does NOT work with the <cite>date</cite> parameter.</li>
+<li><strong>year</strong> (<em>int</em><em> or </em><em>None</em>) – An optional query component/parameter that specifies which year to filter by. Accepts the format YYYY and used with the <cite>month</cite> search filter.</li>
 </ul>
 </td>
 </tr>
