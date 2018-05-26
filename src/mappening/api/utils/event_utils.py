@@ -9,31 +9,14 @@ import json
 import os
 import re
 
-def parse_month(month):
-    if month == "jan":
-        return "01"
-    elif month == "feb":
-        return "02"
-    elif month == "mar":
-        return "03"
-    elif month == "apr":
-        return "04"
-    elif month == "may":
-        return "05"
-    elif month == "june":
-        return "06"
-    elif month == "july":
-        return "07"
-    elif month == "aug":
-        return "08"
-    elif month == "sept":
-        return "09"
-    elif month == "oct":
-        return "10"
-    elif month == "nov":
-        return "11"
-    elif month == "dec":
-        return "12"
+def get_month(month):
+    try:
+        month = int(month)
+    except:
+        return None
+        
+    if 1 <= month <= 12:
+        return "{0:0=2d}".format(month)
     else:
         return None
 
