@@ -46,8 +46,8 @@ def search_events():
     :param category: An optional query component/parameter for the event category to filter by
     :type category: str or None
 
-    :param month: An optional query component/parameter that specifies which month to filter by. Case-insensitive string that accepts the 3-4 letter abbreviation for the specified month (jan, feb, mar, apr, may, june, july, aug, sept, oct, nov, dec). Defaults to the current year, if a different year should be specified the `year` parameter must be set. Does NOT work with the `date` parameter.
-    :type month: str or None
+    :param month: An optional query component/parameter that specifies which month to filter by. Accepts 1-12 to specify the month. Defaults to the current year, if a different year should be specified the `year` parameter must be set. Does NOT work with the `date` parameter.
+    :type month: int or None
 
     :param year: An optional query component/parameter that specifies which year to filter by. Accepts the format YYYY and used with the `month` search filter.
     :type year: int or None
@@ -73,14 +73,14 @@ def search_events():
         cat_regex_obj = re.compile('^{0}|{0}$'.format(category.upper()))
         search_dict['category'] = cat_regex_obj
         print(search_dict)
-    if month and event_utils.parse_month(month.lower()):
+    if month and event_utils.get_month(month):
         year_str = 2018
         if year and len(year) == 4:
             year_str = year
         else:
             now = datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
             year_str = datetime.strftime(now, '%Y')
-        month_str = event_utils.parse_month(month.lower())
+        month_str = event_utils.get_month(month)
         date_regex_str = '^{0}-{1}.*'.format(year_str, month_str)
         date_regex = re.compile(date_regex_str)
         search_dict['start_time'] = date_regex
