@@ -1,7 +1,7 @@
 Locations
 =========
 
-Welcome to the Mappening Locations API! The simplest way to access the API is to go to the url `whatsmappening.io/api/v2/locations <https://whatsmappening.io/api/v2/locations>`_. See the explanation of the API below. The Locations API mainly offers a way get location data for a specific Westwood/UCLA location. As the database is relatively young, some locations may be missing or may have incorrect data. If any inconsistencies are noted, please let us know at mappeningdevx@gmail.com
+Welcome to the Mappening Locations API! The simplest way to access the API is to go to the url `www.mappening.io/api/v2/locations <https://www.mappening.io/api/v2/locations>`_. See the explanation of the API below. The Locations API mainly offers a way get location data for a specific Westwood/UCLA location. As the database is relatively young, some locations may be missing or may have incorrect data. If any inconsistencies are noted, please let us know at mappeningdevx@gmail.com
 
 Location
 --------

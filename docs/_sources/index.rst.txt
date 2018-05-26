@@ -6,11 +6,11 @@
 Welcome to Mappening's documentation!
 =====================================
 *Here we are supposed to talk about the function of the project
-and usefulness of API.*
+and usefulness of API. TODO: jorge*
 
 `Mappening Backend Repository <https://github.com/ucladevx/Mappening-Backend>`_
 
-`Mappening Product <http://www.whatsmappening.io/>`_
+`Mappening Product <https://www.mappening.io/>`_
 
 
 Classes Documented
