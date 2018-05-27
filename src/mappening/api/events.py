@@ -228,14 +228,16 @@ def get_event_categories(event_date):
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
-        events_cursor = events_current_processed_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+        events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_current_processed_collection.find({"category": {"$exists": True}})
+        events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}})
 
     if events_cursor.count() > 0:
         for event in events_cursor:
-            uniqueCats.add(event["category"].title())
+            categories = event["categories"]
+            for cat in categories:
+                uniqueCats.add(cat)
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': list(uniqueCats)})

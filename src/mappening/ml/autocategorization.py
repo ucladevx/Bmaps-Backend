@@ -1,6 +1,7 @@
 import cPickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
+import itertools
 
 #Run this file to grom events_current_collection and make events_current_processed_collection, delete old events_current_processed_collection first
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
@@ -19,10 +20,8 @@ def categorizeEvents(events, threshold=.1):
     Returns list of events updated with a list of categories
     """
 
-    #make copy just for machine learning
-    #TODO: could be optimized by just changing the original events then running through and deleting empty string values
-    X = events[:]
-    for event in X:
+    #ensure there is a name and description for machine learning
+    for event in events:
         if 'name' not in event:
             event['name'] = ''
         if 'description' not in event:
@@ -40,15 +39,23 @@ def categorizeEvents(events, threshold=.1):
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
 
     ## basically if the event already has a category put that first and then ensure no duplicates
-    for i in range(0, len(catLists)):
-        curCategory = events[i].get('category', None)
+    for (event, catList) in itertools.izip(events, catLists):
+        curCategory = event.get('category', None)
         if curCategory not in LIST_OF_CATEGORIES:
-            events[i]['categories'] = catLists[i]
+            event['categories'] = catList
         else:
-            events[i]['categories'] = [curCategory]
-            for cat in catLists[i]:
+            event['categories'] = [curCategory]
+            for cat in catList:
                 if cat != curCategory:
-                    events[i]['categories'].append(cat)
+                    event['categories'].append(cat)
+
+        #UNDO initial empty desctiption and name adds and base category
+        if 'category' in event:
+            del event['category']
+        if event['name'] == '':
+            del event['name']
+        if event['description'] == '':
+            del event['description']
 
     return events
 
