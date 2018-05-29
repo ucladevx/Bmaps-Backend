@@ -9,6 +9,17 @@ import json
 import os
 import re
 
+def get_month(month):
+    try:
+        month = int(month)
+    except:
+        return None
+        
+    if 1 <= month <= 12:
+        return "{0:0=2d}".format(month)
+    else:
+        return None
+
 # If needed, clean database of duplicate documents
 def remove_db_duplicates(changed_collection):
     total_dups = []

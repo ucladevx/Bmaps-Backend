@@ -156,7 +156,7 @@ class App:
 
   def right(self, event):
     # print("Right key pressed")
-    self.isWrong()
+    self.isFail()
 
   def isCorrect(self):
     print("Coordinates are correct!                                             " + self.unknown_locations[0]['unknown_loc']['loc_name'])
@@ -203,8 +203,11 @@ class App:
       updated = True
 
     # If updated, update location in database
+    # TODO: update locations database
     if updated:
       print("Updating location in database...")
+      self.unknown_locations[0]['updated_location'] = True
+      self.unknown_locations[0]['db_loc']['map_url'] = "https://www.google.com/maps/place/" + str(self.unknown_locations[0]['db_loc']['loc_latitude']) + "," + str(self.unknown_locations[0]['db_loc']['loc_longitude'])
       tkinter_unknown_collection.replace_one({'_id': self.unknown_locations[0]['_id']}, self.unknown_locations[0]) 
     else:
       print("Nothing changed, event is left unmodified...")
@@ -381,7 +384,7 @@ class App:
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
       "Instructions",
-      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nUNDO: Undo last CORRECT/WRONG/FAIL action.\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
+      "Hello! Thanks for your help checking whether or not our locations are right. Check us out at www.mappening.io!\n\nHere's what the buttons do:\n\nCORRECT: The information displayed and the pin on the map all seem to be right, approve the location!\n\nWRONG: Something seems to be wrong... the location name matches the location data, but perhaps the coordinates are off. Please fix the coordinates for us!\n\nWrong location found: The location name doesn't seem to match the location data displayed... we'll take care of this one from here!\n\nSKIP: Confused or don't know what to do with a particular location? Just skip it!\n\nUNDO: Undo last CORRECT/WRONG/FAIL action.\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all locations there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the displays and be on your merry way! Thanks for your help!"
     )
 
     self.focus()
