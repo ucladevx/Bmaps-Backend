@@ -1,7 +1,7 @@
 Users
 =====
 
-Welcome to the Mappening Users API! The simplest way to access the API is to go to the url `whatsmappening.io/api/v2/users <https://whatsmappening.io/api/v2/users>`_. See the explanation of the API below. The Users API is NOT intended to be a public API, admin permissions required to access any other user data.
+Welcome to the Mappening Users API! The simplest way to access the API is to go to the url `www.mappening.io/api/v2/users <https://www.mappening.io/api/v2/users>`_. See the explanation of the API below. The Users API is NOT intended to be a public API, admin permissions required to access any other user data.
 
 User
 ----

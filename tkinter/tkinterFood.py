@@ -243,7 +243,7 @@ class App:
     # Display message dialog with instructions explaining the buttons and our website
     tkMessageBox.showinfo(
       "Instructions",
-      "Hello! Thanks for your help checking whether or not these events have free food or not. Check us out at www.whatsmappening.io!\n\nHere's what the buttons do:\nCORRECT: The event has free food! Also triggered with the LEFT arrow key.\n\nWRONG: The event doesn't have free food! How sad... Also triggered with the RIGHT arrow key.\n\nUNDO: Undoes the last CORRECT/WRONG you did!\n\nSKIP: Confused or don't know what to do with a particular event? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all events there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
+      "Hello! Thanks for your help checking whether or not these events have free food or not. Check us out at www.mappening.io!\n\nHere's what the buttons do:\nCORRECT: The event has free food! Also triggered with the LEFT arrow key.\n\nWRONG: The event doesn't have free food! How sad... Also triggered with the RIGHT arrow key.\n\nUNDO: Undoes the last CORRECT/WRONG you did!\n\nSKIP: Confused or don't know what to do with a particular event? Just skip it!\n\nFILTER: If multiple people are working on this at the same time, filter by letter so everyone is working on something different! By default/when first run, it has all events there.\n\nHELP: As you can tell, this one leads to the instructions!\n\nQUIT: Exit from the display and be on your merry way! Thanks for your help!"
     )
 
     self.focus()

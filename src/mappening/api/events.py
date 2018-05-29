@@ -4,7 +4,11 @@ from mappening.api.utils import event_utils, event_filters
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests, urllib
-import time, datetime, dateutil.parser
+import time, dateutil.parser
+from datetime import datetime, timedelta
+import pytz
+from pytz import timezone
+from dateutil.tz import tzlocal
 import json
 import re
 from tqdm import tqdm
@@ -29,23 +33,31 @@ def get_all_events():
 @events.route('/search', methods=['GET'])
 def search_events():
     """
-    :Route: /search?term=str&date=str&category=str
+    :Route: /search?term=str&date=str&category=str&month=8
 
     :Description: Returns GeoJSON of all events filtered by date, search term, and/or category. The search term is case insensitive and searched for in the event name. Useful for a search bar.
 
     :param term: An optional query component/parameter for the search term to filter by
     :type term: str or None
 
-    :param date: A query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :param date: An optional query component/parameter for the date to filter by. Case-insensitive string with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type date: str or None
 
-    :param category: A query component/parameter for the event category to filter by
+    :param category: An optional query component/parameter for the event category to filter by
     :type category: str or None
+
+    :param month: An optional query component/parameter that specifies which month to filter by. Accepts 1-12 to specify the month. Defaults to the current year, if a different year should be specified the `year` parameter must be set. Does NOT work with the `date` parameter.
+    :type month: int or None
+
+    :param year: An optional query component/parameter that specifies which year to filter by. Accepts the format YYYY and used with the `month` search filter.
+    :type year: int or None
 
     """
     term = request.args.get('term')
     date = request.args.get('date')
     category = request.args.get('category')
+    month = request.args.get('month')
+    year = request.args.get('year')
 
     search_dict = {}
     output = []
@@ -61,6 +73,17 @@ def search_events():
         cat_regex_obj = re.compile('^{0}|{0}$'.format(category.upper()))
         search_dict['category'] = cat_regex_obj
         print(search_dict)
+    if month and event_utils.get_month(month):
+        year_str = 2018
+        if year and len(year) == 4:
+            year_str = year
+        else:
+            now = datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
+            year_str = datetime.strftime(now, '%Y')
+        month_str = event_utils.get_month(month)
+        date_regex_str = '^{0}-{1}.*'.format(year_str, month_str)
+        date_regex = re.compile(date_regex_str)
+        search_dict['start_time'] = date_regex
 
     return event_utils.find_events_in_database(search_dict)
 

@@ -31,3 +31,5 @@ Autodocumentation through Sphinx for Mappening's APIs. Hosted on GitHub Pages at
   - Overwrites auto-generated static files so we don't add 30k lines of css/js
   - Manual Changes with [reST](http://www.sphinx-doc.org/en/stable/rest.html)
     - `p.first{width:50vw;word-wrap:break-word;}` in `theme.css`
+    - `.note{width:50vw;margin:0 auto;}` in `theme.css`
+    - removed `max-width:800px;` from `.wy-nav-content` in `theme.css`
