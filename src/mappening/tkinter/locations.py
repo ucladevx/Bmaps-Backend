@@ -1,5 +1,5 @@
-from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, events_ml_collection, locations_collection
-from mappening.api.utils import location_utils, tokenize
+from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, locations_collection # , events_ml_collection
+from mappening.api.utils import location_utils, tokenizer
 
 import requests
 import re
@@ -73,7 +73,8 @@ def test_location_search():
   wrong_locs = []
   counter = 1
 
-  events_cursor = events_ml_collection.find({}, {'_id': False})
+  # events_cursor = events_ml_collection.find({}, {'_id': False})
+  events_cursor = events_test_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
       print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong))
@@ -136,7 +137,7 @@ def tokenize_names():
     place = location
     if 'alternative_names' in place['location']:
       for alt_name in place['location']['alternative_names']:
-        processed_name = tokenize.tokenize_text(alt_name)
+        processed_name = tokenizer.tokenize_text(alt_name)
         if processed_name not in (name.lower() for name in place['location']['alternative_names']):
           if processed_name:
             place['location']['alternative_names'].append(processed_name)
@@ -189,7 +190,7 @@ def fill_location_data():
     place = location
     # Add stripped down name to alternative_names
     if 'name' in location['location']:
-      processed_place = tokenize.tokenize_text(location['location']['name'])
+      processed_place = tokenizer.tokenize_text(location['location']['name'])
       if 'alternative_names' in location['location']:
         if location['location']['name'].lower() not in (name.lower() for name in location['location']['alternative_names']):
           if location['location']['name']:

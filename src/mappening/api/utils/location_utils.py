@@ -1,7 +1,7 @@
 # TODO some more testing before integration
 
-from mappening.utils.database import events_fb_collection, events_ml_collection, locations_collection
-from mappening.api.utils import tokenize, location_helpers
+from mappening.utils.database import events_fb_collection, locations_collection # , events_ml_collection
+from mappening.api.utils import tokenizer, location_helpers
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -70,7 +70,7 @@ def add_locations_from_collection():
       place_name = new_loc['location'].get('name')
       if place_name:
         place_name = re.sub(r'(UCLA-|-UCLA)+\s?', '', place_name, flags=re.IGNORECASE)
-        place_name = tokenize.tokenize_text(place_name)
+        place_name = tokenizer.tokenize_text(place_name)
         processed_place = re.compile(place_name, re.IGNORECASE)
         alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
       
@@ -125,7 +125,7 @@ def search_locations(place_query):
     print("Doing text search...")
 
     # Tokenize query
-    tokenized_query = tokenize.tokenize_text(processed_query)
+    tokenized_query = tokenizer.tokenize_text(processed_query)
     print("Tokenized place query: " + tokenized_query)
 
     # Locations db has text search index on alternate_locations field

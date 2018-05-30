@@ -1,6 +1,8 @@
 # Mappening
 id_rsa_mappening.pem
 scraping/data/
+src/mappening/api/*/*.json
+src/mappening/api/*.json
 
 # Mac Stuff
 .DS_Store
