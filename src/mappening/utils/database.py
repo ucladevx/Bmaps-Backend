@@ -10,16 +10,16 @@ tkinter_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/tkinter'.format(MLAB_US
 
 # Set up database connections
 events_client = MongoClient(events_uri)
-events_db = events_client['events'] 
+events_db = events_client['events']
 
 locations_client = MongoClient(locations_uri)
-locations_db = locations_client['locations'] 
+locations_db = locations_client['locations']
 
 users_client = MongoClient(users_uri)
-users_db = users_client['users'] 
+users_db = users_client['users']
 
 tkinter_client = MongoClient(tkinter_uri)
-tkinter_db = tkinter_client['tkinter'] 
+tkinter_db = tkinter_client['tkinter']
 
 print("Connected to database!")
 
@@ -29,6 +29,7 @@ print("Connected to database!")
 events_current_collection = events_db.events_current
 events_ml_collection = events_db.events_ml
 events_test_collection = events_db.events_test
+events_current_processed_collection = events_db.events_current_processed
 
 ### PAGES
 pages_saved_collection = events_db.pages_saved
