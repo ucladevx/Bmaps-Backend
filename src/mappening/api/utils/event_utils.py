@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection, events_ml_collection, pages_saved_collection, events_test_collection
+from mappening.utils.database import events_current_collection, events_current_processed_collection, events_ml_collection, pages_saved_collection, events_test_collection
 import event_caller
 
 
@@ -32,15 +32,15 @@ def remove_db_duplicates(changed_collection):
     print('Removed {0} duplicates.'.format(len(total_dups)))
     return total_dups
 
-def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
-    output = get_events_in_database(find_dict, one_result_expected, print_results, legacy)
+def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
+    output = get_events_in_database(find_dict, one_result_expected, print_results)
     return jsonify({'features': output, 'type': 'FeatureCollection'})
 
-def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False, legacy=False):
+def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = []
 
     if one_result_expected:
-        single_event = events_current_collection.find_one(find_dict)
+        single_event = events_current_processed_collection.find_one(find_dict)
         if single_event:
             output.append(process_event_info(single_event))
             if print_results:
@@ -50,13 +50,10 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             # i.e. no other conditional branch is entered after this one, same with multiple event case below
             print('No single event with attributes:' + str(find_dict))
     else:
-        events_cursor = events_current_collection.find(find_dict)
+        events_cursor = events_current_processed_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                if legacy:
-                    output.append(legacy_process_event(event))
-                else:
-                    output.append(process_event_info(event))
+                output.append(process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
@@ -111,48 +108,6 @@ def process_event_info(event):
         'properties': event
     }
 
-    return formatted_info
-
-
-#TODO: DELETE LEGACY CODE
-def legacy_process_event(event):
-    formatted_info = {
-        # will ALWAYS have an ID
-        'id': event['id'],
-        'type': 'Feature',
-        'geometry': {
-            # no coordinates? default to Bruin Bear
-            'coordinates': [
-                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
-                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
-            ],
-            'type': 'Point'
-        },
-        'properties': {
-            'event_name': event.get('name', '<NONE>'),
-            'description': event.get('description', '<NONE>'),
-            'hoster': event.get('hoster', '<MISSING HOST>'),
-            'start_time': processed_time(event.get('start_time', '<NONE>')),
-            'end_time': processed_time(event.get('end_time', '<NONE>')),
-            'venue': event['place'],
-            'stats': {
-                'attending': event['attending_count'],
-                'noreply': event['noreply_count'],
-                'interested': event['interested_count'],
-                'maybe': event['maybe_count']
-            },
-            # TODO: whenever category is checked, run Jorge's online ML algorithm
-            'category': event.get('category', '<NONE>'),
-            'cover_picture': event['cover'].get('source', '<NONE>') if 'cover' in event else '<NONE>',
-            'is_cancelled': event.get('is_canceled', False),
-            'ticketing': {
-                'ticket_uri': event.get('ticket_uri', '<NONE>')
-            },
-            'free_food': 'YES' if 'category' in event and 'FOOD' == event['category'] else 'NO',
-            'duplicate_occurrence': 'YES' if 'duplicate_occurrence' in event else 'NO',
-            'time_updated': event.get('time_updated', '<UNKNOWN TIME>')
-        }
-    }
     return formatted_info
 
 def processed_time(old_time_str):
@@ -210,7 +165,7 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
-    
+
     changed_collection = events_current_collection
     if use_test:
         changed_collection = events_test_collection
