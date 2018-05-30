@@ -7,6 +7,7 @@ import requests
 import sys
 sys.path.insert(0, './../../..')
 from mappening.utils.database import events_eventbrite_collection
+from mappening.utils.secrets import EVENTBRITE_USER_KEY
 
  # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
@@ -39,7 +40,7 @@ def entire_eventbrite_retrieval():
 
     session = requests.Session()
 
-    personal_token = 'WVLKNUTHJ72TDTDV6GUP'
+    personal_token = EVENTBRITE_USER_KEY
     base_endpoint = 'https://www.eventbriteapi.com/v3'
     sample_headers = {
         'Authorization': 'Bearer ' + personal_token
@@ -145,5 +146,3 @@ def entire_eventbrite_retrieval():
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
-if __name__ == '__main__':
-    entire_eventbrite_retrieval()
