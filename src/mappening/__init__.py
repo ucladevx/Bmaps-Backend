@@ -3,8 +3,7 @@ from flask_cors import CORS, cross_origin
 
 from mappening.api.events import events
 from mappening.api.locations import locations
-from mappening.api.users import users             # TODO: finish
-# from mappening.api.preferences import preferences # TODO: finish
+from mappening.api.users import users
 from mappening.auth.auth import auth
 
 # Configure app and register blueprints
