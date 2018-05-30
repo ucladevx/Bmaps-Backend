@@ -1,5 +1,5 @@
 from mappening.utils.database import locations_collection
-from mappening.api.utils import location_utils, location_helpers, tokenize
+from mappening.api.utils import location_utils, location_helpers, tokenizer
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin

@@ -1,5 +1,5 @@
-from mappening.utils.database import events_fb_collection, events_ml_collection, locations_collection
-from mappening.api.utils import tokenize
+from mappening.utils.database import events_fb_collection, locations_collection
+from mappening.api.utils import tokenizer
 from mappening.utils.secrets import GOOGLE_API_KEY
 
 from flask import Flask, jsonify, request, json, Blueprint

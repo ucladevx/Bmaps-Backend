@@ -1,6 +1,6 @@
-from mappening.utils.database import events_fb_collection, events_ml_collection, fb_pages_saved_collection, events_test_collection
+from mappening.utils.database import events_fb_collection, fb_pages_saved_collection, events_test_collection #, events_ml_collection
+from mappening.utils.database import events_eventbrite_collection, events_processed_collection
 import event_caller
-
 
 from flask import jsonify
 import time, datetime, dateutil.parser
@@ -8,6 +8,13 @@ from tqdm import tqdm   # a progress bar, pretty
 import json
 import os
 import re
+
+# each website source has its own database, where raw event info is stored
+all_collections = {
+    'eventbrite': events_eventbrite_collection,
+    'facebook': events_fb_collection,
+    'test': events_test_collection
+}
 
 def get_month(month):
     try:
@@ -27,7 +34,7 @@ def remove_db_duplicates(changed_collection):
     # Difference between append and extend: extend flattens out lists to add multiple elements, append adds 1 element
     total_dups.extend(clean_collection(changed_collection))
     total_dups.extend(clean_collection(fb_pages_saved_collection))
-    total_dups.extend(clean_collection(events_ml_collection))
+    # total_dups.extend(clean_collection(events_ml_collection))
 
     print('Removed {0} duplicates.'.format(len(total_dups)))
     return total_dups
@@ -205,20 +212,52 @@ def clean_collection(collection):
             unique_ids.add(curr_id)
     return dups
 
+def clean_up_existing_events(days_back_in_time, chosen_db_name=''):
+    remaining_events = {}
+    # only choose 1 source's DB of raw event data to check / clean up existing events
+    if len(chosen_db_name) > 0:
+        chosen_db = all_collections.get(chosen_db_name)
+        if chosen_db:
+            remaining_events.update(
+                event_caller.update_current_events(
+                    list(chosen_db.find()), days_back_in_time
+                )
+            )
+        else:
+            print('Invalid website source db specified, skipping existing events update')
+            return {}
+    # look at all DBs (except the testing one)
+    else:
+        for db_name, raw_data_db in all_collections.iteritems():
+            if db_name == 'test':
+                continue
+            remaining_events.update(
+                event_caller.update_current_events(
+                    list(raw_data_db.find()), days_back_in_time
+                )
+            )
+    return remaining_events
+
 # Get all UCLA-related Facebook events and add to database
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
     print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
     print('BEGIN POPULATING EVENTS DATABASE')
     print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
     
-    changed_collection = events_fb_collection
-    if use_test:
-        changed_collection = events_test_collection
+    # TODO: pass this in as command line arg for testing
+    specified_db = 'eventbrite'
 
-    if clear_old_db:
-        changed_collection.delete_many({})
+    # TODO: figure out if clearing old DB is processed pooled events, or raw data
+    # changed_collection = events_fb_collection
+    # if use_test:
+    #     changed_collection = events_test_collection
 
-    
+    # if clear_old_db:
+    #     changed_collection.delete_many({})
+
+    processed_db_events = 'todo'
+    new_events_data = 'todo'
+    new_count = 0
 
     # take out all current events from DB, put into list, check for updates
     # processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
