@@ -1,4 +1,4 @@
-from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, locations_collection # , events_ml_collection
+from mappening.utils.database import unknown_locations_collection, API_unknown_locations_collection, API_TODO_locations_collection, locations_collection, events_fb_collection
 from mappening.api.utils import location_utils, tokenizer
 
 import requests
@@ -63,7 +63,7 @@ def process_unknown_locations():
   print("num_unassigned: " + str(num_unassigned))
   return "Added unknown locations to database\n"
 
-# Go through events_ml_collection and run every location name through locations api
+# Go through events collection and run every location name through locations api
 # See if resulting coordinates match the supplied location data from the event
 # Manually verify/resolve any conflicting results
 def test_location_search():
@@ -73,8 +73,7 @@ def test_location_search():
   wrong_locs = []
   counter = 1
 
-  # events_cursor = events_ml_collection.find({}, {'_id': False})
-  events_cursor = events_test_collection.find({}, {'_id': False})
+  events_cursor = events_fb_collection.find({}, {'_id': False})
   if events_cursor.count() > 0:
     for event in events_cursor:
       print("~~~~~~~ " + str(counter) + " ~~~~~~~" + " WR: " + str(num_wrong))

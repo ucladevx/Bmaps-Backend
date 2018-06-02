@@ -1,3 +1,6 @@
+import sys
+sys.stdout = open('update_log.json', 'w')
+
 from mappening.api.utils import event_utils
 
 import schedule

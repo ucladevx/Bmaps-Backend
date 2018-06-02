@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, './../../..')
 
-from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection # , events_ml_collection
+from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import requests
@@ -495,17 +495,6 @@ def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     total_event_object = {'events': all_events, 'metadata': {'events': len(all_events)}}
     print("Total event count: {0}".format(len(all_events)))
     return total_event_object
-
-# def find_many_events():
-#     unknown_locations_collection.delete_many({})
-#     """
-#     find events up to 2 years ago
-#     """
-#     raw_events = get_facebook_events(730)
-#     # still the dumb but simple update method
-#     events_ml_collection.delete_many({})
-#     events_ml_collection.insert_many(raw_events['events'])
-#     print('Found {0} events'.format(raw_events['metadata']['events']))
 
 if __name__ == '__main__':
     res = get_facebook_events()
