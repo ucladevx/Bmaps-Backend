@@ -46,6 +46,9 @@ events_test_collection = events_db.events_test
 # the final, aggregated database of all events from all sources, processed for frontend
 events_current_processed_collection = events_db.events_current_processed
 
+# a db for logs when running on AWS
+events_log_collection = events_db.events_log
+
 ### FACEBOOK PAGES
 fb_pages_saved_collection = events_db.fb_pages_saved
 fb_pages_ignored_collection = events_db.fb_pages_ignored
