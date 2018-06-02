@@ -41,7 +41,7 @@ if __name__ == "__main__":
     event_update_thread = Thread(target = scheduler.event_thread_func)
     event_update_thread.start()
 
-    code_update_date = "5/18/18"
+    code_update_date = "6/1/18"
     print("Updated on: {0}".format(code_update_date))
 
     print("UPDATE EVENTS FIRST...\n")

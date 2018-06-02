@@ -1,7 +1,6 @@
 # TODO: merge events_fb and events_ml to just events_fb, with all the ML events
-from mappening.utils.database import events_fb_collection
-from mappening.utils.database import events_eventbrite_collection, events_processed_collection
-from mappening.utils.database import events_current_collection, events_current_processed_collection, events_ml_collection, fb_pages_saved_collection, events_test_collection
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
+from mappening.utils.database import events_current_processed_collection
 import event_caller
 
 from flask import jsonify
@@ -31,15 +30,24 @@ def get_month(month):
 
 # If needed, clean database of duplicate documents
 def remove_db_duplicates(changed_collection):
-    total_dups = []
+    """
+    simply save each unique document and delete any that have been found already
+    """
+    # a set, not a dict
+    unique_ids = set()
+    dups = []
+    # IMPORTANT: do not take down _id, jsonify can't handle type
+    for item in collection.find({}, {'_id': False}):
+        # assume all items must have a unique id key-value pair
+        curr_id = item['id']
+        if curr_id in unique_ids:
+            dups.append(item)
+            collection.delete_many({'id': curr_id})
+        else:
+            unique_ids.add(curr_id)
 
-    # Difference between append and extend: extend flattens out lists to add multiple elements, append adds 1 element
-    total_dups.extend(clean_collection(changed_collection))
-    total_dups.extend(clean_collection(fb_pages_saved_collection))
-    # total_dups.extend(clean_collection(events_ml_collection))
-
-    print('Removed {0} duplicates.'.format(len(total_dups)))
-    return total_dups
+    print('Removed {0} duplicates.'.format(len(dups)))
+    return dups
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = get_events_in_database(find_dict, one_result_expected, print_results)
@@ -151,24 +159,6 @@ def construct_date_regex(raw_date):
     date_regex_obj = re.compile(date_regex_str)
     return date_regex_obj
 
-def clean_collection(collection):
-    """
-    simply save each unique document and delete any that have been found already
-    """
-    # a set, not a dict
-    unique_ids = set()
-    dups = []
-    # IMPORTANT: do not take down _id, jsonify can't handle type
-    for item in collection.find({}, {'_id': False}):
-        # assume all items must have a unique id key-value pair
-        curr_id = item['id']
-        if curr_id in unique_ids:
-            dups.append(item)
-            collection.delete_many({'id': curr_id})
-        else:
-            unique_ids.add(curr_id)
-    return dups
-
 def clean_up_existing_events(days_back_in_time, chosen_db_name=''):
     remaining_events = {}
     # only choose 1 source's DB of raw event data to check / clean up existing events
@@ -261,12 +251,12 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     #     # so delete old if exists, then insert new
 
     #     # See if event already existed
-    #     update_event = events_ml_collection.find_one({'id': curr_id})
+    #     update_event = events_fb_collection.find_one({'id': curr_id})
 
     #     # If it existed then delete it, new event gets inserted either way
     #     if update_event:
-    #         events_ml_collection.delete_one({'id': curr_id})
-    #     events_ml_collection.insert_one(event)
+    #         events_fb_collection.delete_one({'id': curr_id})
+    #     events_fb_collection.insert_one(event)
 
     # remove_db_duplicates(changed_collection)
 

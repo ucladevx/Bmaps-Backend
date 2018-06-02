@@ -3,12 +3,14 @@ import pandas as pd
 from scipy.sparse import hstack
 import itertools
 
-#Run this file to grom events_current_collection and make events_current_processed_collection, delete old events_current_processed_collection first
+# Run this file to groom events_current_collection and make events_current_processed_collection, delete old events_current_processed_collection first
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
 sys.path.insert(0,'./../..')
 
-from mappening.utils.database import events_db, events_current_collection
+# TODO: use these DBs for categorizeAllCurrentEvents
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection
+from mappening.utils.database import events_current_processed_collection
 
 LIST_OF_CATEGORIES = [u'ART', u'CAUSE', u'COMEDY_PERFORMANCE', u'DANCE', u'DRINKS', u'FILM', u'FITNESS', u'FOOD',
                    u'GAMES', u'GARDENING', u'HEALTH', u'LITERATURE', u'MEETUP', u'MUSIC', u'NETWORKING', u'PARTY',
@@ -20,7 +22,7 @@ def categorizeEvents(events, threshold=.1):
     Returns list of events updated with a list of categories
     """
 
-    #ensure there is a name and description for machine learning
+    # ensure there is a name and description for machine learning
     for event in events:
         if 'name' not in event:
             event['name'] = ''
@@ -38,7 +40,7 @@ def categorizeEvents(events, threshold=.1):
 
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
 
-    ## basically if the event already has a category put that first and then ensure no duplicates
+    # basically if the event already has a category put that first and then ensure no duplicates
     for (event, catList) in itertools.izip(events, catLists):
         curCategory = event.get('category', None)
         if curCategory not in LIST_OF_CATEGORIES:
@@ -49,7 +51,7 @@ def categorizeEvents(events, threshold=.1):
                 if cat != curCategory:
                     event['categories'].append(cat)
 
-        #UNDO initial empty desctiption and name adds and base category
+        # UNDO initial empty desctiption and name adds and base category
         if 'category' in event:
             del event['category']
         if event['name'] == '':
@@ -95,14 +97,16 @@ def predictCategories(nameVectorizer, detailVectorizer, classifier, X, threshold
 
 def categorizeAllCurrentEvents():
     """
-    :Description: Takes all the events in events_current_collection and creates new events_current_processed_collection
+    :Description: Takes all the events in ALL source DBs and puts in new events_current_processed_collection
         with all events having a list of categories now
     """
-    events_current_processed_collection = events_db.events_current_processed
-    allEvents = [e for e in events_current_collection.find()]
-    allEvents = categorizeEvents(allEvents)
-    events_current_processed_collection.insert_many(allEvents)
-    print("Created new categorized event collection: events_current_processed")
+    # TODO: get events from multiple raw event DBs (imported above) instead of 1 events_current
+    # since these include historical events, make sure event dates end after NOW
+
+    # allEvents = [e for e in events_current_collection.find()]
+    # allEvents = categorizeEvents(allEvents)
+    # events_current_processed_collection.insert_many(allEvents)
+    print("Added to categorized event collection: events_current_processed")
 
 if __name__ == "__main__":
     categorizeAllCurrentEvents()

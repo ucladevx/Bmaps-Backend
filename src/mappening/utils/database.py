@@ -36,16 +36,14 @@ At the same time, process the raw data (add category / location, reformat fields
 and add to a single processed database of events from all sources
 the website uses this processed database's info directly (no processing needed when pulling it out)
 """
-# TODO: DON'T USE THIS ANYMORE
-# events_current_collection = events_db.events_current
 
-# the final, aggregated database of all events from all sources, processed for frontend
-events_processed_collection = events_db.events_processed
 # the eventbrite accumulating db
 events_eventbrite_collection = events_db.events_eventbrite
+# the facebook accumulating db, used to be events_ml_collection
 events_fb_collection = events_db.events_fb
 # change the name of this test db to automatically make a new one if it doesn't exist already in mLab
 events_test_collection = events_db.events_test
+# the final, aggregated database of all events from all sources, processed for frontend
 events_current_processed_collection = events_db.events_current_processed
 
 ### FACEBOOK PAGES
