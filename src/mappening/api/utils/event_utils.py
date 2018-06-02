@@ -187,10 +187,6 @@ def clean_up_existing_events(days_back_in_time, chosen_db_name=''):
 
 # Get all UCLA-related Facebook events and add to database
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
-    print('\n\n\n\n\n\n\n\n######\n\n######\n\n######\n\n')
-    print('BEGIN POPULATING EVENTS DATABASE')
-    print('\n\n######\n\n######\n\n######\n\n\n\n\n\n\n')
-    
     # TODO: pass this in as command line arg for testing
     specified_db = 'eventbrite'
 
@@ -202,9 +198,9 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
 
     # if clear_old_db:
     #     changed_collection.delete_many({})
-
+    print('before the other string')
     processed_db_events = 'todo'
-    new_events_data = 'todo'
+    new_events_data = {'metadata': {'events': 0}}
     new_count = 0
 
     # take out all current events from DB, put into list, check for updates
@@ -259,5 +255,5 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     #     events_fb_collection.insert_one(event)
 
     # remove_db_duplicates(changed_collection)
-
+    print('here\'s a log testing string...')
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
