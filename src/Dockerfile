@@ -43,6 +43,15 @@ RUN apk update && apk upgrade && apk add --no-cache --update build-base
 RUN echo "http://mirror.leaseweb.com/alpine/edge/testing/" >> /etc/apk/repositories
 RUN apk add --no-cache geos-dev
 
+# Install numpy and scipy for ml categories
+# Takes 5 years to run... building this part as the base image
+# It is cached but just in case we're adding this image
+# https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
+RUN echo "http://dl-8.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+RUN apk add --update-cache gcc gfortran python python-dev py-pip build-base wget freetype-dev libpng-dev openblas-dev
+RUN pip install numpy scipy gensim
+
+# Install the rest of the packages
 COPY requirements.txt /tmp
 RUN cd /tmp && pip install -r requirements.txt
 
