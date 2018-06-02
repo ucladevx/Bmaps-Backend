@@ -1,4 +1,6 @@
-from mappening.utils.database import events_fb_collection
+# Interacting with events collection in mlab
+
+from mappening.utils.database import events_current_processed_collection
 from mappening.api.utils import event_utils, event_filters
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -28,6 +30,10 @@ def get_all_events():
 
     """
     return event_utils.find_events_in_database(print_results=True)
+
+@events.route('/test')
+def test():
+    return jsonify("HELLO")
 
 # SEARCH
 @events.route('/search', methods=['GET'])
@@ -94,7 +100,7 @@ def filter_events():
 
     :Description: Returns GeoJSON of all events filtered by the specified filters. Filtering options include filtering by time, location, popularity, and whether or not an event has free food.
 
-    :param when: An optional query component/parameter that specifies whether an event is happening now (event start time <= current time < event end time), is an upcoming event (event start time <= current time + 2 hours), or allows you to specify a time period with the `period` parameter. The parameter values can be `now`, `upcoming`, or `period`. 
+    :param when: An optional query component/parameter that specifies whether an event is happening now (event start time <= current time < event end time), is an upcoming event (event start time <= current time + 2 hours), or allows you to specify a time period with the `period` parameter. The parameter values can be `now`, `upcoming`, or `period`.
     :type when: str or None
 
     :param time_period: An optional query component/parameter that is only checked (and must be set) if the parameter `when` was set to value `time_period`. May have value `morning`, `afternoon`, or `night` where `morning` is from 3 am - 12 pm, `afternoon` is from 12 pm - 5 pm, and `night` is from 5 pm - 3 am. The start times are inclusive while the end times are exclusive. May have *multiple* values such as in example route above. Will return events that are in the morning or afternoon time period. A `date` must be specified or will return all events in database in the specified time periods.
@@ -154,7 +160,7 @@ def filter_events():
     else:
       unfiltered_events = event_utils.get_events_in_database(search_dict)
 
-    # Add to search dict 
+    # Add to search dict
     # Time filtering
     if when:
       if when == 'now' or when == 'upcoming':
@@ -186,7 +192,7 @@ def filter_events():
     # TODO JORGE IMPLEMENT ML
     # if food and food.lower() == "true":
     #   event_filters.filter_by_free_food(search_dict)
-      
+
     # return 'Success!'
 
     return jsonify({'features': unfiltered_events, 'type': 'FeatureCollection'})
@@ -224,39 +230,36 @@ def get_event_by_id(event_id):
 #TODO: Allow all events to be returned on date not just those that start on that datetime
 #TODO: Change this to search for category list when you implement ml category model
 
-# CATEGORIES
-@events.route('/categories', methods=['GET'])
-def get_event_categories():
+ # CATEGORIES
+@events.route('/categories', defaults={'event_date': None}, methods=['GET'])
+@events.route('/categories/<event_date>', methods=['GET'])
+def get_event_categories(event_date):
     """
-    :Route: /categories?date=April 20 2018
+    :Route: /categories/<event_date>
 
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
 
-    :param date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
+    :param event_date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
     :type date: str or None
 
     """
     # Iterate through all events and get unique list of all categories
     # If date was passed in, only check events starting on that date
-    date = request.args.get('date')
 
-    uniqueList = []
-    output = []
+    uniqueCats = set()
 
-    if date:
-        print("Using date parameter: " + date)
-        date_regex_obj = event_utils.construct_date_regex(date)
-        events_cursor = events_fb_collection.find({"category": {"$exists": True}, "start_time": date_regex_obj})
+    if event_date:
+        print("Using date parameter: " + event_date)
+        date_regex_obj = event_utils.construct_date_regex(event_date)
+        events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        events_cursor = events_fb_collection.find({"category": {"$exists": True}})
-
+        events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}})
     if events_cursor.count() > 0:
         for event in events_cursor:
-            if event["category"].title() not in uniqueList:
-                uniqueList.append(event["category"].title())
-        for category in uniqueList:
-            output.append({"category": category})
+            categories = event["categories"]
+            for cat in categories:
+                uniqueCats.add(cat)
     else:
         print('Cannot find any events with categories!')
-    return jsonify({'categories': output})
+    return jsonify({'categories': list(uniqueCats)})

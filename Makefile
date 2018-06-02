@@ -28,7 +28,7 @@ dora: ecr-login build-dora
 	docker tag $(DEV_NAME):dora $(ECR_REPO)/$(DEV_NAME):dora
 	docker push $(ECR_REPO)/$(DEV_NAME):dora
 
-##################       LOCAL DEVELOPMENT (Backend Only)     ################## 
+##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
 # Build and run backend image
 dev: build
