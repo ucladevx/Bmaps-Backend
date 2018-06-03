@@ -240,7 +240,7 @@ def get_event_categories(event_date):
     :Description: Returns JSON of all event categories used in all events. Can also find all event categories for events that start on a given date. Potential Categories: Crafts, Art, Causes, Comedy, Dance, Drinks, Film, Fitness, Food, Games, Gardening, Health, Home, Literature, Music, Other, Party, Religion, Shopping, Sports, Theater, Wellness Conference, Lecture, Neighborhood, Networking
 
     :param event_date: An optional case-insensitive query parameter with raw date format or a commonly parseable format (e.g. DD MONTH YYYY -> 22 January 2018)
-    :type date: str or None
+    :type event_date: str or None
 
     """
     # Iterate through all events and get unique list of all categories
