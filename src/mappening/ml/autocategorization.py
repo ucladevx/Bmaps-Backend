@@ -3,6 +3,24 @@ import pandas as pd
 from scipy.sparse import hstack
 import itertools
 
+import os
+# use this to change to this folder, since this might be run from anywhere in project...
+from definitions import ML_PATH
+
+# https://stackoverflow.com/questions/431684/how-do-i-change-directory-cd-in-python/13197763#13197763
+# make a nice cd command that auto changes directory back when exited
+class cd:
+    """Context manager for changing the current working directory"""
+    def __init__(self, newPath):
+        self.newPath = os.path.expanduser(newPath)
+
+    def __enter__(self):
+        self.savedPath = os.getcwd()
+        os.chdir(self.newPath)
+
+    def __exit__(self, etype, value, traceback):
+        os.chdir(self.savedPath)
+
 # Run this file to groom events_current_collection and make events_current_processed_collection, delete old events_current_processed_collection first
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
@@ -24,19 +42,21 @@ def categorizeEvents(events, threshold=.1):
 
     # ensure there is a name and description for machine learning
     for event in events:
-        if 'name' not in event:
+        if 'name' not in event or not event['name']:
             event['name'] = ''
-        if 'description' not in event:
+        if 'description' not in event or not event['description']:
             event['description'] = ''
 
     # Load data
     X = pd.DataFrame(events)
-    with open(r"categorizationModel.pickle", "r") as model:
-        rf = pickle.load(model)
-    with open(r"nameVectorizer.pickle", "r") as model:
-        nameVectorizer = pickle.load(model)
-    with open(r"detailVectorizer.pickle", "r") as model:
-        detailVectorizer = pickle.load(model)
+    # change path to load these files, for sure (correct directory)
+    with cd(ML_PATH):
+        with open(r"categorizationModel.pickle", "r") as model:
+            rf = pickle.load(model)
+        with open(r"nameVectorizer.pickle", "r") as model:
+            nameVectorizer = pickle.load(model)
+        with open(r"detailVectorizer.pickle", "r") as model:
+            detailVectorizer = pickle.load(model)
 
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
 

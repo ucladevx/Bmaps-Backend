@@ -6,8 +6,11 @@ import requests
 
 import sys
 sys.path.insert(0, './../../..')
-from mappening.utils.database import events_eventbrite_collection
+from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection
 from mappening.utils.secrets import EVENTBRITE_USER_KEY
+
+# to map all Eventbrite categories to Facebook ones
+from mappening.ml.autocategorization import categorizeEvents
 
  # Updated coordinates of Bruin Bear
 CENTER_LATITUDE = 34.070966
@@ -30,9 +33,15 @@ Government & Politics [Government] | Fashion & Beauty [Fashion] | Home & Lifesty
 Hobbies & Special Interest [Hobbies] | Other | School Activities
 """
 
-# yeah.....
-def entire_eventbrite_retrieval():
-    days_back = 0
+# TODO: like other APIs, split this method up
+# 1st part = get raw data and put in DB (updating repeats), 2nd part = process for events_current_processed
+def entire_eventbrite_retrieval(days_back_in_time):
+    # TODO: the dumb complete reinsertion thing again
+    # this should be removed completely: eventbrite_collection accumulates, never deletes
+    events_eventbrite_collection.delete_many({})
+    events_current_processed_collection.delete_many({})
+
+    days_back = days_back_in_time
     days_forward = 90
     now = datetime.datetime.now()
     past_bound = (now - datetime.timedelta(days=days_back)).strftime('%Y-%m-%dT%H:%M:%S')
@@ -46,6 +55,10 @@ def entire_eventbrite_retrieval():
         'Authorization': 'Bearer ' + personal_token
     }
 
+    # most events on 1 page = 50, want more
+    page_num = 1
+    request_new_results = True
+
     events_search_ep = '/events/search'
     search_args = {
         'location.latitude': str(CENTER_LATITUDE),
@@ -56,16 +69,30 @@ def entire_eventbrite_retrieval():
         'sort_by': 'best'
     }
 
-    # TODO: pagination after 50 events
-    response = session.get(
-        base_endpoint + events_search_ep,
-        headers = sample_headers,
-        verify = True,  # Verify SSL certificate
-        params = search_args,
-    )
+    all_events = []
+    # loop through returned pages of events until no more, or enough
+    while request_new_results and page_num <= 20:
+        search_args['page'] = str(page_num)  # there's always a 1st page result that works
+
+        response = session.get(
+            base_endpoint + events_search_ep,
+            headers = sample_headers,
+            verify = True,  # Verify SSL certificate
+            params = search_args,
+        ).json()
+        
+        # extend, not append!
+        # combines elements of two lists as expected vs adds in the new list as ONE element (no)
+        all_events.extend(response.get('events'))
+        if 'pagination' in response and response['pagination']['has_more_items']:
+            request_new_results = True
+            page_num += 1
+        else:
+            request_new_results = False
 
     print('done getting eventbrite events!')
-    all_events = response.json().get('events')
+    # raw event data insert
+    events_eventbrite_collection.insert_many(all_events)
 
     all_cat_ep = '/categories'
     cat_resp = session.get(
@@ -77,7 +104,7 @@ def entire_eventbrite_retrieval():
     all_categories = {}
     raw_categories = cat_resp.json().get('categories')
 
-    # TODO: figure out the whole category mapping to ML categorization thing
+    # TODO: temp solution: throw away Eventbrite category to use ML model trained on Facebook
     for raw_cat in raw_categories:
         used_name = raw_cat['short_name']
         all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
@@ -85,7 +112,6 @@ def entire_eventbrite_retrieval():
     all_venues = {}
 
     cleaned_events = []
-
     for event_info in tqdm(all_events):
         one_event = {
             'id': event_info.get('id', -1),
@@ -101,12 +127,14 @@ def entire_eventbrite_retrieval():
                 'offset_x': 0,
                 'offset_y': 0
             },
-            'category': all_categories[event_info['category_id']]['short_name'] if event_info['category_id'] else '<NONE>',
+            # 'category': all_categories[event_info['category_id']]['short_name'] if event_info['category_id'] else '<NONE>',
             'start_time': event_info['start']['local'] + '-0700'
         }
         if 'end' in event_info and 'local' in event_info['end']:
             one_event['end_time'] = event_info['end']['local'] + '-0700'
 
+        # finding place: takes forever (new API calls)
+        # TODO: cache already found places
         venue_id = event_info['venue_id']
         if venue_id in all_venues:
             one_event['place'] = all_venues[venue_id]
@@ -136,13 +164,18 @@ def entire_eventbrite_retrieval():
 
         cleaned_events.append(one_event)
 
+    cleaned_events = categorizeEvents(cleaned_events)
+
     with open('evebr.json', 'w') as f:
         json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
 
-    events_eventbrite_collection.insert_many(cleaned_events)
-    return cleaned_events
+    events_current_processed_collection.insert_many(cleaned_events)
+    return len(cleaned_events)
     # if not all_events:
     #     print(response.json())
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
+
+if __name__ == '__main__':
+    entire_eventbrite_retrieval(0)

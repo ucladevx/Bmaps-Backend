@@ -49,9 +49,9 @@ if __name__ == "__main__":
     # pass in args from command line, need to check it's there
     if not dbit or dbit < 1:
         dbit = 0
-    # event_utils.update_ucla_events_database(use_test=args.test,
-    #                                         days_back_in_time=dbit,
-    #                                         clear_old_db=args.clear)
+    event_utils.update_ucla_events_database(use_test=args.test,
+                                            days_back_in_time=dbit,
+                                            clear_old_db=args.clear)
 
     # GOOD TO KNOW
     # to QUIT when not in Docker container: run Ctrl+\ (SIGQUIT, equivalent to kill -3 <pid>)
