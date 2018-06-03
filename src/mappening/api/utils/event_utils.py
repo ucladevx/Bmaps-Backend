@@ -1,7 +1,7 @@
 # TODO: merge events_fb and events_ml to just events_fb, with all the ML events
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
 from mappening.utils.database import events_current_processed_collection
-import event_caller
+import event_caller, eventbrite
 
 from flask import jsonify
 import time, datetime, dateutil.parser
@@ -185,12 +185,19 @@ def clean_up_existing_events(days_back_in_time, chosen_db_name=''):
             )
     return remaining_events
 
-# Get all UCLA-related Facebook events and add to database
+# Get all UCLA-related events from sources (Eventbrite, FB, etc.) and add to database
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
     # TODO: pass this in as command line arg for testing
     specified_db = 'eventbrite'
+    
+    # TODO: move removal of events out of date into clean_up, right above
+    clean_up_existing_events(days_back_in_time, specified_db)
 
-    # TODO: figure out if clearing old DB is processed pooled events, or raw data
+    eb_count = eventbrite.entire_eventbrite_retrieval(days_back_in_time)
+
+    # processed_db_events = 'todo'
+    new_events_data = {'metadata': {'events': eb_count}}
+    new_count = eb_count
     # OLD
     # changed_collection = events_fb_collection
     # if use_test:
@@ -198,10 +205,6 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
 
     # if clear_old_db:
     #     changed_collection.delete_many({})
-    print('before the other string')
-    processed_db_events = 'todo'
-    new_events_data = {'metadata': {'events': 0}}
-    new_count = 0
 
     # take out all current events from DB, put into list, check for updates
     # processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
@@ -255,5 +258,4 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     #     events_fb_collection.insert_one(event)
 
     # remove_db_duplicates(changed_collection)
-    print('here\'s a log testing string...')
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
