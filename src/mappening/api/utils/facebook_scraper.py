@@ -1,10 +1,3 @@
-# need this to run file locally, or else won't know where to find mappening.utils.*
-import sys
-sys.path.insert(0, './../../..')
-
-from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
-from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
-
 import requests
 import json
 import time, datetime, dateutil.parser, pytz
@@ -15,6 +8,15 @@ from tqdm import tqdm   # a progress bar, pretty
 # for sys.exit()
 import os
 
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
+
+# need this to run file locally, or else won't know where to find mappening.utils.*
+import sys
+sys.path.insert(0, './../../..')
+
+from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
+from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
+
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
@@ -24,9 +26,6 @@ ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
 SEARCH_URL = BASE_URL + 'search'
 
-# Updated coordinates of Bruin Bear
-CENTER_LATITUDE = 34.070966
-CENTER_LONGITUDE = -118.445
 SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta']
 UCLA_ZIP_STRINGS = ['90024', '90095']
 
@@ -37,9 +36,6 @@ BASE_EVENT_URL = BASE_URL
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
-
-# the time period before now, IN DAYS, for finding and updating events instead of removing them 
-BASE_EVENT_START_BOUND = 0
 
 s = requests.Session()
 
@@ -170,7 +166,7 @@ def find_ucla_entities():
     # don't need a query string for this, still need to filter out by location
     place_search_args = {
         'type': 'place',
-        'center': str(CENTER_LATITUDE) + ',' + str(CENTER_LONGITUDE),
+        'center': CENTER_LATITUDE + ',' + CENTER_LONGITUDE,
         'distance': '1000',
         'limit': '100',
         'fields': 'name,location',
@@ -439,47 +435,6 @@ def process_event(event, host_info, add_duplicate_tag=False):
         # get up to microseconds with %f, probably not needed but just in case
         event_occurrence['time_updated'] = current_time.strftime('%Y-%m-%d %H:%M:%S.%f')
     return expanded_event_dict
-
-def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
-    """
-    takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
-    to account for weird timezone things, construct 2 datetime objects
-    one from simply parsing the string, and another from current time
-    required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
-    return boolean, if given time string has passed in real time
-    """
-    try:
-        # Use dateutil parser to get time zone
-        time_obj = dateutil.parser.parse(time_str).astimezone(pytz.UTC)
-    except ValueError:
-        # Got invalid date string
-        print('Invalid datetime string from event \'start_time\' key, cannot be parsed!')
-        return False
-    # need to explicitly set time zone (tzlocal() here), or else astimezone() will not work
-    now = datetime.datetime.now(tzlocal()).astimezone(pytz.UTC)
-
-    # if time from string is smaller than now, with offset (to match time range of new events found)
-    # offset shifts the boundary back in time, for which events to update rather than delete
-    return time_obj <= now - datetime.timedelta(days=days_before)
-
-# TODO: change to pass in a parameter for which database(s) to update
-# also update PROCESSED DB, not raw data DBs (never remove events from those)
-def update_current_events(events, days_before=BASE_EVENT_START_BOUND):
-    """
-    update events currently in database before new ones put in
-    means remove ones too old and re-search the rest
-    events = list of complete event dicts
-    """
-    # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
-    # to tell if multi-day event, check "duplicate_occurrence" tag
-    print('Go through currently stored events to update.')
-    kept_events = {}
-    for event in tqdm(events):
-        if not time_in_past(event['start_time'], days_before):
-            updated_event_dict = process_event(event, event.get('hoster', '<NONE>'), event.get('duplicate_occurrence', False))
-            kept_events.update(updated_event_dict)
-    # return a dict of kept event IDs to their info
-    return kept_events
 
 def get_facebook_events(days_before=BASE_EVENT_START_BOUND):
     """

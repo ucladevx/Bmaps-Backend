@@ -1,17 +1,19 @@
-# TODO: merge events_fb and events_ml to just events_fb, with all the ML events
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
-from mappening.utils.database import events_current_processed_collection
-import event_caller, eventbrite
-
 from flask import jsonify
-import time, datetime, dateutil.parser
+import time, datetime, dateutil.parser, pytz
+from dateutil.tz import tzlocal
 from tqdm import tqdm   # a progress bar, pretty
 import json
 import os
 import re
 
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
+
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
+from mappening.utils.database import events_current_processed_collection
+import facebook_scraper, eventbrite_scraper
+
 # each website source has its own database, where raw event info is stored
-all_collections = {
+all_raw_collections = {
     'eventbrite': events_eventbrite_collection,
     'facebook': events_fb_collection,
     'test': events_test_collection
@@ -117,8 +119,8 @@ def process_event_info(event):
         'geometry': {
             # no coordinates? default to Bruin Bear
             'coordinates': [
-                event['place']['location'].get('longitude', event_caller.CENTER_LONGITUDE),
-                event['place']['location'].get('latitude', event_caller.CENTER_LATITUDE)
+                event['place']['location'].get('longitude', float(CENTER_LONGITUDE)),
+                event['place']['location'].get('latitude', float(CENTER_LATITUDE))
             ],
             'type': 'Point'
         },
@@ -159,41 +161,55 @@ def construct_date_regex(raw_date):
     date_regex_obj = re.compile(date_regex_str)
     return date_regex_obj
 
-def clean_up_existing_events(days_back_in_time, chosen_db_name=''):
-    remaining_events = {}
-    # only choose 1 source's DB of raw event data to check / clean up existing events
-    if len(chosen_db_name) > 0:
-        chosen_db = all_collections.get(chosen_db_name)
-        if chosen_db:
-            remaining_events.update(
-                event_caller.update_current_events(
-                    list(chosen_db.find()), days_back_in_time
-                )
-            )
-        else:
-            print('Invalid website source db specified, skipping existing events update')
-            return {}
-    # look at all DBs (except the testing one)
-    else:
-        for db_name, raw_data_db in all_collections.iteritems():
-            if db_name == 'test':
-                continue
-            remaining_events.update(
-                event_caller.update_current_events(
-                    list(raw_data_db.find()), days_back_in_time
-                )
-            )
-    return remaining_events
+def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
+    """
+    takes in an FB formatted timestamp: Y-m-d'T'H:M:S<tz>
+    to account for weird timezone things, construct 2 datetime objects
+    one from simply parsing the string, and another from current time
+    required by Python (and to standardize), need to convert both times to UTC explicitly, use pytz module
+    return boolean, if given time string has passed in real time
+    """
+    try:
+        # Use dateutil parser to get time zone
+        time_obj = dateutil.parser.parse(time_str).astimezone(pytz.UTC)
+    except ValueError:
+        # Got invalid date string
+        print('Invalid datetime string from event \'start_time\' key, cannot be parsed!')
+        return False
+    # need to explicitly set time zone (tzlocal() here), or else astimezone() will not work
+    now = datetime.datetime.now(tzlocal()).astimezone(pytz.UTC)
+
+    # if time from string is smaller than now, with offset (to match time range of new events found)
+    # offset shifts the boundary back in time, for which events to update rather than delete
+    return time_obj <= now - datetime.timedelta(days=days_before)
+
+# ONLY clean up processed events, never raw DB
+def clean_up_existing_events(days_before=BASE_EVENT_START_BOUND):
+    """
+    update events currently in processed events database before new ones put in
+    means remove ones too old and re-search the rest
+    events = list of all event info dicts
+    """
+    print('Go through currently stored events to update.')
+    kept_events = {}
+    for processed_event in tqdm(events_current_processed_collection.find()):
+        # for multi-day events that were found a long time ago, have to recall API to check for updates (e.g. cancelled)
+        # to tell if multi-day event, check "duplicate_occurrence" tag
+        
+        if not time_in_past(processed_event['start_time'], days_before):
+            # TODO: make a general process_event function for events of each source
+            # this line is FB specific
+            # updated_event_dict = process_event(event, event.get('hoster', '<NONE>'), event.get('duplicate_occurrence', False))
+            kept_events.update(processed_event)
+        # return a dict of kept event IDs to their info
+    return kept_events
 
 # Get all UCLA-related events from sources (Eventbrite, FB, etc.) and add to database
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
-    # TODO: pass this in as command line arg for testing
-    specified_db = 'eventbrite'
     
-    # TODO: move removal of events out of date into clean_up, right above
-    clean_up_existing_events(days_back_in_time, specified_db)
+    clean_up_existing_events(days_back_in_time)
 
-    eb_count = eventbrite.entire_eventbrite_retrieval(days_back_in_time)
+    eb_count = eventbrite_scraper.entire_eventbrite_retrieval(days_back_in_time)
 
     # processed_db_events = 'todo'
     new_events_data = {'metadata': {'events': eb_count}}
@@ -205,9 +221,6 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
 
     # if clear_old_db:
     #     changed_collection.delete_many({})
-
-    # take out all current events from DB, put into list, check for updates
-    # processed_db_events = event_caller.update_current_events(list(changed_collection.find()), days_back_in_time)
 
     # # actually update all in database, but without mass deletion (for safety)
     # for old_event in tqdm(changed_collection.find()):
@@ -221,7 +234,7 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     #     else:
     #         changed_collection.delete_one({'id': event_id})
 
-    # new_events_data = event_caller.get_facebook_events(days_back_in_time)
+    # new_events_data = facebook_scraper.get_facebook_events(days_back_in_time)
     # # debugging events output
     # # with open('events_out.json', 'w') as outfile:
     # #     json.dump(new_events_data, outfile, sort_keys=True, indent=4, separators=(',', ': '))

@@ -4,6 +4,8 @@ from tqdm import tqdm
 import json
 import requests
 
+import os
+
 import sys
 sys.path.insert(0, './../../..')
 from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection
@@ -12,9 +14,7 @@ from mappening.utils.secrets import EVENTBRITE_USER_KEY
 # to map all Eventbrite categories to Facebook ones
 from mappening.ml.autocategorization import categorizeEvents
 
- # Updated coordinates of Bruin Bear
-CENTER_LATITUDE = 34.070966
-CENTER_LONGITUDE = -118.445
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, API_UTILS_PATH
 
 # use this as reference for now
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
@@ -36,11 +36,6 @@ Hobbies & Special Interest [Hobbies] | Other | School Activities
 # TODO: like other APIs, split this method up
 # 1st part = get raw data and put in DB (updating repeats), 2nd part = process for events_current_processed
 def entire_eventbrite_retrieval(days_back_in_time):
-    # TODO: the dumb complete reinsertion thing again
-    # this should be removed completely: eventbrite_collection accumulates, never deletes
-    events_eventbrite_collection.delete_many({})
-    events_current_processed_collection.delete_many({})
-
     days_back = days_back_in_time
     days_forward = 90
     now = datetime.datetime.now()
@@ -61,8 +56,8 @@ def entire_eventbrite_retrieval(days_back_in_time):
 
     events_search_ep = '/events/search'
     search_args = {
-        'location.latitude': str(CENTER_LATITUDE),
-        'location.longitude': str(CENTER_LONGITUDE),
+        'location.latitude': CENTER_LATITUDE,
+        'location.longitude': CENTER_LONGITUDE,
         'location.within': '1mi',
         'start_date.range_start': past_bound,
         'start_date.range_end': future_bound,
@@ -92,6 +87,9 @@ def entire_eventbrite_retrieval(days_back_in_time):
 
     print('done getting eventbrite events!')
     # raw event data insert
+    # TODO: the dumb complete reinsertion thing again
+    # this should be removed completely: eventbrite_collection accumulates, never deletes
+    events_eventbrite_collection.delete_many({})
     events_eventbrite_collection.insert_many(all_events)
 
     all_cat_ep = '/categories'
@@ -166,9 +164,14 @@ def entire_eventbrite_retrieval(days_back_in_time):
 
     cleaned_events = categorizeEvents(cleaned_events)
 
+    # autocategorization has a cleaner way to do this path switching
+    savedPath = os.getcwd()
+    os.chdir(API_UTILS_PATH)
     with open('evebr.json', 'w') as f:
         json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
+    os.chdir(savedPath)
 
+    events_current_processed_collection.delete_many({})
     events_current_processed_collection.insert_many(cleaned_events)
     return len(cleaned_events)
     # if not all_events:
