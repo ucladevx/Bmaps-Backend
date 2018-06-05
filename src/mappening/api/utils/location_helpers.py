@@ -1,7 +1,3 @@
-from mappening.utils.database import events_fb_collection, locations_collection
-from mappening.api.utils import tokenizer
-from mappening.utils.secrets import GOOGLE_API_KEY
-
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
 import requests
@@ -10,12 +6,15 @@ import json
 import os
 from operator import itemgetter
 
+# UH make sure this does not break anything!
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE
+
+from mappening.utils.database import events_fb_collection, locations_collection
+from mappening.api.utils import tokenizer
+from mappening.utils.secrets import GOOGLE_API_KEY
+
 # Latitude and Longitude range from (-90, 90) and (-180, 180)
 INVALID_COORDINATE = 420
-
-# Set parameters for Bruin Bear/Center of UCLA
-CENTER_LATITUDE = "34.070966"
-CENTER_LONGITUDE = "-118.445"
 
 # For comprehension: School of Theater, Film, TV within radius 700
 # Hammer Museum within radius 1300, Saffron and Rose within radius 1800

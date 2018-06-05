@@ -37,7 +37,6 @@ def get_new_events_with_logs():
     sys.stdout = saved_output
     try:
         event_utils.update_ucla_events_database()
-        sys.exit()
     except KeyboardInterrupt:
         print('Received KeyboardInterrupt somehow.')
     except SystemExit:
