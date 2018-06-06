@@ -1,7 +1,7 @@
 # TODO some more testing before integration
 
-from mappening.utils.database import events_current_collection, events_ml_collection, locations_collection
-from mappening.api.utils import tokenize, location_helpers
+from mappening.utils.database import events_fb_collection, locations_collection
+from mappening.api.utils import tokenizer, location_helpers
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -14,10 +14,6 @@ from operator import itemgetter
 # Latitude and Longitude range from (-90, 90) and (-180, 180)
 INVALID_COORDINATE = 420
 
-# Set parameters for Bruin Bear/Center of UCLA
-CENTER_LATITUDE = "34.070966"
-CENTER_LONGITUDE = "-118.445"
-
 # For comprehension: School of Theater, Film, TV within radius 700
 # Hammer Museum within radius 1300, Saffron and Rose within radius 1800
 RADIUS = "2000"
@@ -29,8 +25,7 @@ def get_locations_from_collection():
     places = []
     
     # Every time there are new events, check location info and update db if necessary
-    # events_cursor = events_ml_collection.find({"place": {"$exists": True}})
-    events_cursor = events_current_collection.find({"place": {"$exists": True}})
+    events_cursor = events_fb_collection.find({"place": {"$exists": True}})
 
     if not events_cursor or events_cursor.count() <= 0:
       return 'Cannot find any events with locations!'
@@ -70,7 +65,7 @@ def add_locations_from_collection():
       place_name = new_loc['location'].get('name')
       if place_name:
         place_name = re.sub(r'(UCLA-|-UCLA)+\s?', '', place_name, flags=re.IGNORECASE)
-        place_name = tokenize.tokenize_text(place_name)
+        place_name = tokenizer.tokenize_text(place_name)
         processed_place = re.compile(place_name, re.IGNORECASE)
         alt_name_loc = locations_collection.find_one({'location.alternative_names': processed_place}, {'_id': False})
       
@@ -125,7 +120,7 @@ def search_locations(place_query):
     print("Doing text search...")
 
     # Tokenize query
-    tokenized_query = tokenize.tokenize_text(processed_query)
+    tokenized_query = tokenizer.tokenize_text(processed_query)
     print("Tokenized place query: " + tokenized_query)
 
     # Locations db has text search index on alternate_locations field

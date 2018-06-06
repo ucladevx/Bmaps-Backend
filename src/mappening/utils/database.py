@@ -26,14 +26,32 @@ print("Connected to database!")
 # Get all the collections
 
 #### EVENTS
-events_current_collection = events_db.events_current
-events_ml_collection = events_db.events_ml
+
+"""
+how it works as of 2018/05/18:
+
+every unique source website of events (e.g. FB, Eventbrite, UCLA club list)
+has its own "raw" database, for just inserting the unprocessed returned data from API / scraping directly
+At the same time, process the raw data (add category / location, reformat fields to be standard)
+and add to a single processed database of events from all sources
+the website uses this processed database's info directly (no processing needed when pulling it out)
+"""
+
+# the eventbrite accumulating db
+events_eventbrite_collection = events_db.events_eventbrite
+# the facebook accumulating db, used to be events_ml_collection
+events_fb_collection = events_db.events_fb
+# change the name of this test db to automatically make a new one if it doesn't exist already in mLab
 events_test_collection = events_db.events_test
+# the final, aggregated database of all events from all sources, processed for frontend
 events_current_processed_collection = events_db.events_current_processed
 
-### PAGES
-pages_saved_collection = events_db.pages_saved
-pages_ignored_collection = events_db.pages_ignored
+# a db for logs when running on AWS
+events_log_collection = events_db.events_log
+
+### FACEBOOK PAGES
+fb_pages_saved_collection = events_db.fb_pages_saved
+fb_pages_ignored_collection = events_db.fb_pages_ignored
 
 #### LOCATIONS
 locations_collection = locations_db.locations

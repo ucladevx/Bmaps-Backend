@@ -255,7 +255,6 @@ def get_event_categories(event_date):
     else:
         print("No date parameter given...")
         events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}})
-
     if events_cursor.count() > 0:
         for event in events_cursor:
             categories = event["categories"]

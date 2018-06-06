@@ -11,12 +11,14 @@ import cPickle as pickle
 import sys
 sys.path.insert(0,'./../..')
 
-from mappening.utils.database import events_ml_collection
+# TODO: train model on multiple website events? but their categories are different...
+# for now just use Facebook
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection
 
 def gatherCategorizedEvents():
     """:Description: Return panda dataframe of events with category, description, and name"""
     allCategorizedEvents = []
-    allEvents = events_ml_collection.find({}, {"category": 1, "description": 1, "name": 1, "hoster": 1, "_id": 0})
+    allEvents = events_fb_collection.find({}, {"category": 1, "description": 1, "name": 1, "hoster": 1, "_id": 0})
     count = 0
     for e in allEvents:
         count += 1
