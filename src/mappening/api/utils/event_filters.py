@@ -1,4 +1,4 @@
-from mappening.utils.database import events_current_collection
+from mappening.utils.database import events_fb_collection
 from mappening.api.utils import event_utils
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -109,7 +109,7 @@ def filter_by_time(unfiltered_events, time_periods):
 def filter_by_popular(search_dict, threshold=50):
   # Sort events by # of interested
   sorted_events = []
-  events_cursor = events_current_collection.find(search_dict).sort('interested_count', -1)
+  events_cursor = events_fb_collection.find(search_dict).sort('interested_count', -1)
 
   if events_cursor.count() > 0:
     print("filter_by_popular with threshold {0}".format(threshold))

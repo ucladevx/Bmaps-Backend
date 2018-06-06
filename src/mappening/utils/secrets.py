@@ -20,4 +20,6 @@ APP_SECRET_KEY = os.getenv('APP_SECRET_KEY')
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
+EVENTBRITE_USER_KEY = os.getenv('EVENTBRITE_USER_KEY')
+
 print("Got the .env secrets...")
