@@ -20,9 +20,12 @@ Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
 
 ## Setting Up the Environment
 - Download [Docker](https://www.docker.com) and [Docker-Compose](https://github.com/docker/compose/releases) release 1.16.1.
+  - Run the Docker daemon
 - Clone this repository
   - `git clone https://github.com/ucladevx/Mappening-Backend.git`
+- For Mac users, install Xcode developer tools `xcode-select --install`
 - Get the `.env` file which contains sensitive information from a dev and add it to src/mappening/utils/
+- NOTE: the database connection doesn't seem to work over UCLA_WEB wifis, a more secure connection is needed (UCLA_WIFI)
 
 ## How to Push Image to AWS ECS
 - Enter the repository
