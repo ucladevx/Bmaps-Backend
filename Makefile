@@ -1,6 +1,7 @@
 ECR_REPO=698514710897.dkr.ecr.us-west-1.amazonaws.com
 APP_NAME=mappening/backend
 DEV_NAME=mappening/dev
+DEV_DOCKERFILE=./src/Dev-Dockerfile
 
 ##########################      AWS / PRODUCTION      ##########################
 
@@ -30,8 +31,12 @@ dora: ecr-login build-dora
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
+# Build backend image
+build-dev:
+	docker build ./src -t $(APP_NAME) -f $(DEV_DOCKERFILE)
+
 # Build and run backend image
-dev: build
+dev: build-dev
 	docker run --rm --name backend-dev -v $(shell pwd)/src:/app -p "5000:5000" -it $(APP_NAME)
 
 # Stop running containers
