@@ -13,7 +13,6 @@ import json
 # Route Prefix: /auth
 auth = Blueprint('auth', __name__)
 
-# Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 DEBUG = True
 auth.debug = DEBUG
 
@@ -82,16 +81,22 @@ def google_authorized(resp):
 
     me = google_oauth.get('userinfo')
     print(me.data)
+
     userID = me.data['id']
-    userName = me.data['name']
+    userName = me.data['name'].title()
     accessToken = resp['access_token']
+    email = me.data['email']
+
+    domain = email.split('@')[1]
+    if domain != 'ucla.edu' and domain != 'g.ucla.edu':
+        return "Invalid email. UCLA email required."
 
     # If user exists in collection, logs them in
     # Otherwise, registers new user and logs them in
     # TODO get email if we can
     g_user = user_utils.get_user(userID)
     if not g_user:
-        user_utils.add_user(userID, userName, me.data['given_name'], me.data['family_name'])
+        user_utils.add_user(userID, userName, me.data['given_name'].title(), me.data['family_name'].title(), me.data['email'])
         user = User(userID)
         login_user(user)
         return "Successfully registered new user!"
