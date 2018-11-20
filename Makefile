@@ -9,9 +9,9 @@ ecr-login:
 	$(shell aws ecr get-login --no-include-email --region us-west-1)
 
 # Build backend image
-build:
+build:	
 	docker build ./src -t $(APP_NAME)
-
+	
 # Login, build, and push latest image to AWS
 push: ecr-login build
 	docker tag $(APP_NAME):latest $(ECR_REPO)/$(APP_NAME):latest
