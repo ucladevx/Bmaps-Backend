@@ -180,5 +180,5 @@ def entire_eventbrite_retrieval(days_back_in_time):
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
 
-if __name__ == '__main__':
-    entire_eventbrite_retrieval(0)
+# if __name__ == '__main__':
+#     entire_eventbrite_retrieval(0)
