@@ -81,6 +81,8 @@ def auth_redirect():
 
 @auth.route('/login')
 def login():
+    if current_user.is_authenticated:
+        return "Already logged in!"
     return google_oauth.authorize(
       callback=url_for('auth.google_authorized',
       next=request.args.get('next') or None, _external=True))
@@ -127,7 +129,7 @@ def google_authorized(resp):
 
 # Log out user.
 # Will no longer be able to access any route decorated with @login_required
-@auth.route('/logout')
+@auth.route("/logout")
 @login_required
 def logout():
     logout_user()
