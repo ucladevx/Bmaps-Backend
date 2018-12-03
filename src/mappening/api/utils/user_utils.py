@@ -13,7 +13,7 @@ def get_user(user_id):
         return user
     return None
 
-# Add a new user to users collection 
+# Add a new user to users collection
 def add_user(user_id, full_name, first_name, last_name, email='', is_active=True, is_admin=False, password='', username=''):
   # Check if user already exists in collection
   if get_user(user_id):
@@ -38,7 +38,7 @@ def add_user(user_id, full_name, first_name, last_name, email='', is_active=True
     },
     "app": {
       "filters": [],
-      "favorites": [],
+      "favorites": {},
       "past_events": []
     }
   })
@@ -49,10 +49,32 @@ def add_user(user_id, full_name, first_name, last_name, email='', is_active=True
   else:
     return "Adding user with id " + str(user_id) + " failed!"
 
+# Add favorite event to a user
+def add_favorite(user_id, event_id):
+    event_key = 'app.favorites.' + str(event_id)
+    res = users_collection.update_one({'account.id': str(user_id)}, {'$set': {event_key: True}})
+    if res.matched_count == 0:
+        return "User not found"
+    elif res.modified_count == 0:
+        return "User found, but not updated"
+    else:
+        return "User with id " + str(user_id) + " successfully updated!"
+
+# Delete favorite event of a user
+def remove_favorite(user_id, event_id):
+    event_key = 'app.favorites.' + str(event_id)
+    res = users_collection.update_one({'account.id': str(user_id)}, {'$unset': {event_key: True}})
+    if res.matched_count == 0:
+        return "User not found"
+    elif res.modified_count == 0:
+        return "User found, but not updated"
+    else:
+        return "User with id " + str(user_id) + " successfully updated!"
+
 # Check that filter is one of accepted filters
 def is_valid_filter(f):
   valid_filters = ['now', 'upcoming', 'period', 'morning', 'afternoon', 'night', 'oncampus', 'offcampus', 'nearby', 'popular', 'food']
-  
+
   if f in valid_filters:
     return True
   return False
