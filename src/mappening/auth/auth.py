@@ -53,6 +53,25 @@ def get_current_user():
         return jsonify(user)
     return "Could not get current user!"
 
+@auth.route('/events/favorites', methods=['GET', 'POST'])
+def user_events():
+    if current_user.is_authenticated:
+        currID = current_user.get_id()
+        user = user_utils.get_user(currID)
+        if not user:
+            return "Could not get current user!"
+        eventID = request.args.get('eid')
+        if request.method == 'POST':
+            # POST
+            return user_utils.add_favorite(currID, eventID)
+        elif request.method == 'DELETE':
+            # DELETE
+            return user_utils.remove_favorite(currID, eventID)
+        else:
+            # GET or anything else
+            return jsonify(user['app']['favorites'])
+    return redirect(url_for('auth.login'))
+
 @auth.route('/')
 def auth_redirect():
     if current_user.is_authenticated:
