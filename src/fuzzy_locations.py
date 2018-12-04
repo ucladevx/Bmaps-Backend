@@ -1,6 +1,6 @@
 import requests
 from fuzzywuzzy import fuzz
-from allLocations import abbreviations_map
+from all_locations import abbreviations_map
 import random
 import re
 import sys
@@ -33,7 +33,7 @@ def fetch_locations():
 	for name in abbreviations_map:
 		abbreviations_map[name] = set(abbreviations_map[name])
 
-	pretty(abbreviations_map, 1)
+	# pretty(abbreviations_map, 1)
 	print('...finished fetching all locations!')
 	return names
 
@@ -108,6 +108,7 @@ if __name__ == '__main__':
 	locations = fetch_locations()
 	locations = sorted(locations)
 	# print_all_locations(locations)
+
 	iterations = int(sys.argv[1])
 	# print('==========================================================')
 	# test_swap(locations, 5)	

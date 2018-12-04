@@ -6,6 +6,7 @@ from flask_cors import CORS, cross_origin
 import re
 import os
 from operator import itemgetter
+from '../../fuzzy_locations.py' import abbreviations_map 
 
 # Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)
@@ -50,6 +51,13 @@ def get_location_results():
     :type count: int or None
 
     """
+
+    """
+    1) Check if term matches one of the names in the database
+    2) Check if term matches one of the names in the alternative locations and the abbreviations map
+    3) Use fuzzy matching on locations in database
+    """
+    
     term = request.args.get('term')
     count = request.args.get('count')
 
