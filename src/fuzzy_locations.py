@@ -5,7 +5,15 @@ import random
 import re
 import sys
 
-print(abbreviations_map)
+
+
+def pretty(d, indent=0):
+	for key, value in d.items():
+		print('\t' * indent + str(key))
+		if isinstance(value, dict):
+			pretty(value, indent+1)
+		else:
+			print('\t' * (indent+1) + str(value))
 
 url = 'http://api.mappening.io:5000/api/v2/locations/'
 def fetch_locations():
@@ -14,7 +22,18 @@ def fetch_locations():
 	locations = data['locations']
 	names = []
 	for location in locations:
-		names.append(location['location']['location']['name'])
+		location_name = location['location']['location']['name'].lower()
+		names.append(location_name)
+		alternative_names = [alternate.lower() for alternate in location['location']['location']['alternative_names']]
+		try:
+			abbreviations_map[location_name] += alternative_names
+		except KeyError:
+			abbreviations_map[location_name] = alternative_names
+
+	for name in abbreviations_map:
+		abbreviations_map[name] = set(abbreviations_map[name])
+
+	pretty(abbreviations_map, 1)
 	print('...finished fetching all locations!')
 	return names
 
