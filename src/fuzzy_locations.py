@@ -1,9 +1,11 @@
 import requests
 from fuzzywuzzy import fuzz
+from allLocations import abbreviations_map
 import random
 import re
 import sys
 
+print(abbreviations_map)
 
 url = 'http://api.mappening.io:5000/api/v2/locations/'
 def fetch_locations():
@@ -15,12 +17,6 @@ def fetch_locations():
 		names.append(location['location']['location']['name'])
 	print('...finished fetching all locations!')
 	return names
-
-def filter_locations(locations):
-	for location in locations:
-		location = re.sub(r'\W+', '', location)
-		print(location)
-	return locations
 
 def swap(string):
 	string = list(string)
@@ -92,6 +88,7 @@ def print_all_locations(locations):
 if __name__ == '__main__':
 	locations = fetch_locations()
 	locations = sorted(locations)
+	# print_all_locations(locations)
 	iterations = int(sys.argv[1])
 	# print('==========================================================')
 	# test_swap(locations, 5)	
