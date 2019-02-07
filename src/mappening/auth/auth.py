@@ -46,12 +46,14 @@ def user_loader(user_id):
 @auth.route('/current', methods=['GET'])
 def get_current_user():
     if not current_user.is_authenticated:
-      return "No user is logged in!"
+      return jsonify({})
 
     user = user_utils.get_user(current_user.get_id())
     if user:
         return jsonify(user)
-    return "Could not get current user!"
+
+    # Could not get current user
+    return jsonify({})
 
 @auth.route('/events/favorites', methods=['GET', 'POST'])
 def user_events():
@@ -81,16 +83,19 @@ def auth_redirect():
 
 @auth.route('/login')
 def login():
+    redirect_url = request.args.get('redirect')
     if current_user.is_authenticated:
-        return "Already logged in!"
+        # Already logged in
+        return redirect(redirect_url)
     return google_oauth.authorize(
       callback=url_for('auth.google_authorized',
-      next=request.args.get('next') or None, _external=True))
+      next=redirect_url or None, _external=True))
 
 # Checks whether authentication works or access is denied
 @auth.route('/login/authorized')
 @google_oauth.authorized_handler
 def google_authorized(resp):
+    next = request.args.get('next')
     if resp is None:
         return "Access denied: reason=%s error=%s" % (
                 request.args["error_reason"],
@@ -117,20 +122,23 @@ def google_authorized(resp):
     # TODO get email if we can
     g_user = user_utils.get_user(userID)
     if not g_user:
+        # Successfully registered new user
         user_utils.add_user(userID, userName, me.data['given_name'].title(), me.data['family_name'].title(), me.data['email'])
         user = User(userID)
         login_user(user)
-        return "Successfully registered new user!"
+        return "Successfully registered new user" if next == None else redirect(next)
     else:
+        # Successfully logged in
         users.update_user(userID)
         user = User(userID, g_user['account']['is_active'], g_user['account']['is_admin'])
         login_user(user)
-        return "Successfully logged in with Google!"
+        return "Successfully logged in" if next == None else redirect(next)
 
 # Log out user.
 # Will no longer be able to access any route decorated with @login_required
 @auth.route("/logout")
 @login_required
 def logout():
+    redirect_url = request.args.get('redirect')
     logout_user()
-    return "Successfully logged out!"
+    return "Successfully logged out!" if redirect_url == None else redirect(redirect_url)
