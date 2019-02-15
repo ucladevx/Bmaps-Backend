@@ -58,7 +58,7 @@ locations_collection = locations_db.locations
 unknown_locations_collection = locations_db.unknown_locations
 
 #### USERS
-users_collection = users_db.users
+users_collection = users_db.g_users
 dead_users_collection = users_db.dead_users
 
 #### TKINTER
