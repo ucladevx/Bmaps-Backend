@@ -1,4 +1,5 @@
 from mappening.auth.facebook import facebook_oauth
+from mappening.auth.google import google_oauth
 
 from flask import session
 from flask_login import UserMixin
@@ -35,4 +36,8 @@ class User(UserMixin):
 
 @facebook_oauth.tokengetter
 def get_facebook_oauth_token():
+    return session.get("oauth_token")
+
+@google_oauth.tokengetter
+def get_google_oauth_token():
     return session.get("oauth_token")
