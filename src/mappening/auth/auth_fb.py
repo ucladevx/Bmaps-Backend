@@ -1,7 +1,8 @@
+from mappening.utils.secrets import FACEBOOK_SECRET_KEY
 from mappening.api.utils import user_utils
 from mappening.api.models.user import User
 from mappening.api import users
-from google import google_oauth
+from facebook import facebook_oauth
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_login import UserMixin, LoginManager, login_required, current_user, login_user, logout_user
@@ -13,8 +14,10 @@ import json
 # Route Prefix: /auth
 auth = Blueprint('auth', __name__)
 
+# Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 DEBUG = True
 auth.debug = DEBUG
+auth.secret_key = FACEBOOK_SECRET_KEY
 
 # Flask-Login - configure application for login
 login_manager = LoginManager()
@@ -46,33 +49,12 @@ def user_loader(user_id):
 @auth.route('/current', methods=['GET'])
 def get_current_user():
     if not current_user.is_authenticated:
-      return jsonify({})
+      return "No user is logged in!"
 
     user = user_utils.get_user(current_user.get_id())
     if user:
         return jsonify(user)
-
-    # Could not get current user
-    return jsonify({})
-
-@auth.route('/events/favorites', methods=['GET', 'POST'])
-def user_events():
-    if current_user.is_authenticated:
-        currID = current_user.get_id()
-        user = user_utils.get_user(currID)
-        if not user:
-            return "Could not get current user!"
-        eventID = request.args.get('eid')
-        if request.method == 'POST':
-            # POST
-            return user_utils.add_favorite(currID, eventID)
-        elif request.method == 'DELETE':
-            # DELETE
-            return user_utils.remove_favorite(currID, eventID)
-        else:
-            # GET or anything else
-            return jsonify(user['app']['favorites'])
-    return redirect(url_for('auth.login'))
+    return "Could not get current user!"
 
 @auth.route('/')
 def auth_redirect():
@@ -83,19 +65,14 @@ def auth_redirect():
 
 @auth.route('/login')
 def login():
-    redirect_url = request.args.get('redirect')
-    if current_user.is_authenticated:
-        # Already logged in
-        return redirect(redirect_url)
-    return google_oauth.authorize(
-      callback=url_for('auth.google_authorized',
-      next=redirect_url or None, _external=True))
+    return facebook_oauth.authorize(
+      callback=url_for('auth.facebook_authorized',
+      next=request.args.get('next') or None, _external=True))
 
 # Checks whether authentication works or access is denied
 @auth.route('/login/authorized')
-@google_oauth.authorized_handler
-def google_authorized(resp):
-    next = request.args.get('next')
+@facebook_oauth.authorized_handler
+def facebook_authorized(resp):
     if resp is None:
         return "Access denied: reason=%s error=%s" % (
                 request.args["error_reason"],
@@ -105,40 +82,33 @@ def google_authorized(resp):
     session['expires'] = resp['expires_in']
     print("Token expires in " + str(resp['expires_in']))
 
-    me = google_oauth.get('userinfo')
-    print(me.data)
+    # me = facebook_oauth.get("/me")
+    # return str(me.data)
 
+    me = facebook_oauth.get('/me?fields=id,name,first_name,last_name,email,picture')
     userID = me.data['id']
-    userName = me.data['name'].title()
+    userName = me.data['name']
     accessToken = resp['access_token']
-    email = me.data['email']
-
-    domain = email.split('@')[1]
-    if domain != 'ucla.edu' and domain != 'g.ucla.edu':
-        return "Invalid email. UCLA email required."
 
     # If user exists in collection, logs them in
     # Otherwise, registers new user and logs them in
     # TODO get email if we can
-    g_user = user_utils.get_user(userID)
-    if not g_user:
-        # Successfully registered new user
-        user_utils.add_user(userID, userName, me.data['given_name'].title(), me.data['family_name'].title(), me.data['email'])
+    fb_user = user_utils.get_user(userID)
+    if not fb_user:
+        user_utils.add_user(userID, userName, me.data['first_name'], me.data['last_name'])
         user = User(userID)
         login_user(user)
-        return "Successfully registered new user" if next == None else redirect(next)
+        return "Successfully registered new user!"
     else:
-        # Successfully logged in
         users.update_user(userID)
-        user = User(userID, g_user['account']['is_active'], g_user['account']['is_admin'])
+        user = User(userID, fb_user['account']['is_active'], fb_user['account']['is_admin'])
         login_user(user)
-        return "Successfully logged in" if next == None else redirect(next)
+        return "Successfully logged in with Facebook!"
 
 # Log out user.
 # Will no longer be able to access any route decorated with @login_required
-@auth.route("/logout")
+@auth.route('/logout')
 @login_required
 def logout():
-    redirect_url = request.args.get('redirect')
     logout_user()
-    return "Successfully logged out!" if redirect_url == None else redirect(redirect_url)
+    return "Successfully logged out!"
