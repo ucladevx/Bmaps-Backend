@@ -1,79 +1,34 @@
-import requests
 from fuzzywuzzy import fuzz
 from all_locations import abbreviations_map
 import random
 import re
 import sys
+from mappening.utils.database import locations_collection
+from unidecode import unidecode
 
 
+def match_location(target, threshold=0.65):
+	target = unidecode(target.lower())
+	cursor = locations_collection.find({}, {'_id': False})
+	all_locations = [name for name in cursor]
+	locations = [unidecode(name['location']['name']).lower() for name in all_locations]
 
-def pretty(d, indent=0):
-	for key, value in d.items():
-		print('\t' * indent + str(key))
-		if isinstance(value, dict):
-			pretty(value, indent+1)
-		else:
-			print('\t' * (indent+1) + str(value))
+	best_score = -1
+	best_location = ""
+	best_index = -1
+	for index, location in enumerate(locations):
+		score = fuzz.ratio(target, location)
+		if score > best_score:
+			best_score = score
+			best_location = location
+			best_index = index
 
-url = 'http://api.mappening.io:5000/api/v2/locations/'
-def fetch_locations():
-	response = requests.get(url)
-	data = response.json()
-	locations = data['locations']
-	names = []
-	for location in locations:
-		location_name = location['location']['location']['name'].lower()
-		names.append(location_name)
-		alternative_names = [alternate.lower() for alternate in location['location']['location']['alternative_names']]
-		try:
-			abbreviations_map[location_name] += alternative_names
-		except KeyError:
-			abbreviations_map[location_name] = alternative_names
+	print("best score {}".format(best_score))
+	print(all_locations[best_index])
+	if best_score > threshold:
+		return all_locations[best_index]
+	return None
 
-	for name in abbreviations_map:
-		abbreviations_map[name] = set(abbreviations_map[name])
-
-	# pretty(abbreviations_map, 1)
-	print('...finished fetching all locations!')
-	return names
-
-def swap(string):
-	string = list(string)
-	index1 = random.randint(0, len(string) - 1)
-	index2 = None
-	while (True):
-		index2 = random.randint(0, len(string) - 1)
-		if index2 != index1:
-			break
-	
-	string[index1] = string[index2]
-	return ''.join(string)
-
-def test_swap(locations, iterations):
-	for i in range(iterations):
-		index = random.randint(0, len(locations))
-		name = locations[index]
-		original = name
-		del locations[index]
-		name = swap(name)
-		print(original)
-		print(name)
-		print(fuzz.ratio(original, name))
-
-def test_case(locations, iterations): #very low accuracy, should convert locations to lower case before trying to match
-	for i in range(iterations):
-		index = random.randint(0, len(locations) - 1)
-		name = locations[index]
-		original = name
-		del locations[index]
-		name = name.lower()
-		print(original)
-		print(name)
-		print(fuzz.ratio(original, name))
-		name = name.upper()
-		print(original)
-		print(name)
-		print(fuzz.ratio(original, name))
 
 def find_match_with_highest_accuracy(locations, iterations):
 	correct = 0
@@ -100,20 +55,3 @@ def find_match_with_highest_accuracy(locations, iterations):
 		print(highest_score)
 		print('\n')
 	return correct
-
-def print_all_locations(locations):
-	print(*locations, sep='\n')
-
-if __name__ == '__main__':
-	locations = fetch_locations()
-	locations = sorted(locations)
-	# print_all_locations(locations)
-
-	iterations = int(sys.argv[1])
-	# print('==========================================================')
-	# test_swap(locations, 5)	
-	# print('==========================================================')
-	# test_case(locations, 5)
-	# print('==========================================================')
-	correct = find_match_with_highest_accuracy(locations, iterations)
-	print('Accuracy: {}'.format(correct/iterations))
