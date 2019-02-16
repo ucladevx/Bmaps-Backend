@@ -144,7 +144,7 @@ def process_query(place_query):
     place_regex = re.sub(r'\|', ' ', place_regex, flags=re.IGNORECASE)
     place_regex = re.sub(r'[()]', '', place_regex, flags=re.IGNORECASE)
     place_regex = place_regex.strip()
-
+    print("place regex: {}".format(place_regex))
     return place_regex
 
 # Append location information to output

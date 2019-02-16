@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 import re
 import os
 from operator import itemgetter
-from '../../fuzzy_locations.py' import abbreviations_map 
+# from .. fuzzy_locations.py import abbreviations_map 
 
 # Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)
@@ -29,7 +29,7 @@ def get_all_locations():
       for loc in locations_cursor:
         output.append({"location": loc})
     else:
-        print 'Cannot find any locations!'
+        print('Cannot find any locations!')
 
     # Output typically contains name, city, country, latitude, longitude, state,
     # street, and zip for each location
@@ -60,6 +60,8 @@ def get_location_results():
     
     term = request.args.get('term')
     count = request.args.get('count')
+    print("term: {}".format(term))
+    print("count: {}".format(count))
 
     if count:
       try:
