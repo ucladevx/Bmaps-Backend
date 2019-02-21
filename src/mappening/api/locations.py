@@ -6,7 +6,6 @@ from flask_cors import CORS, cross_origin
 import re
 import os
 from operator import itemgetter
-# from .. fuzzy_locations.py import abbreviations_map 
 
 # Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)

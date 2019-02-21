@@ -33,7 +33,7 @@ def get_all_events():
 
 @events.route('/test')
 def test():
-    return jsonify("changed")
+    return jsonify("HELLO")
 
 # SEARCH
 @events.route('/search', methods=['GET'])
@@ -253,7 +253,6 @@ def get_event_categories(event_date):
         events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")
-        print('fetching categories')
         events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}})
     if events_cursor.count() > 0:
         for event in events_cursor:
