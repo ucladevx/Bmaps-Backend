@@ -12,7 +12,6 @@ from mappening.utils.database import events_fb_collection, events_eventbrite_col
 from mappening.utils.database import events_current_processed_collection
 
 import facebook_scraper, eventbrite_scraper
-# import mappening.api.utils.facebook_scraper, mappening.api.utils.eventbrite_scraper
 
 # each website source has its own database, where raw event info is stored
 all_raw_collections = {
