@@ -1,11 +1,16 @@
 from fuzzywuzzy import fuzz
-from all_locations import abbreviations_map
+from abbreviations_map import abbreviations_map
 import random
 import re
 import sys
 import requests
-from mappening.utils.database import locations_collection
+# from mappening.utils.database import locations_collection
 from unidecode import unidecode
+
+def get_location_data_from_name(name, locations_map, all_locations):
+	index = locations_map[name]
+	return all_locations[index]
+	
 
 def match_location(target, threshold=65):
 	target = unidecode(target.lower())
@@ -29,13 +34,23 @@ def match_location(target, threshold=65):
 		return all_locations[best_index]
 	return None
 
-def test(target, locations, threshold=65):
+def test(target, locations, locations_map, all_locations, threshold=65):
 	target = unidecode(target.lower())
 	best_score = -1
 	best_location = ""
 	best_index = -1
+	
+	name_from_abbreviation = None
+	for key, value in abbreviations_map.items():
+		for val in value:
+			if target == val:
+				name_from_abbreviation = key
+				break
 
-	for index, location in enumerate(locations):		
+	if name_from_abbreviation:
+		return get_location_data_from_name(name_from_abbreviation, locations_map, all_locations)
+
+	for index, location in enumerate(locations):
 		score = fuzz.token_set_ratio(target, location)
 		if score > best_score:
 			best_score = score
@@ -43,7 +58,7 @@ def test(target, locations, threshold=65):
 			best_index = index
 
 	print("best score {0}: {1}".format(best_score, locations[best_index]))
-	return locations[best_index]
+	return all_locations[best_index]
 
 
 def find_match_with_highest_accuracy(locations, iterations):
@@ -79,8 +94,9 @@ def main():
 	response = requests.get("http://localhost:5000/api/v2/locations")
 	data = response.json()
 	data = data['locations']
-	all_locations = [location['location']['location']['name'] for location in data]
-	test(target, all_locations)
+	all_locations = [unidecode(location['location']['location']['name'].lower()) for location in data]
+	locations_map = {key: value for value, key in enumerate(all_locations)}
+	print(test(target, all_locations, locations_map, data))
 
 if __name__ == '__main__':
 	main()
