@@ -142,8 +142,13 @@ def search_locations(place_query):
           output.append(location_helpers.append_location(place, True))
           output_places.append(place['location'].get('name', "NO NAME"))
 
-    another_location = fuzzy_locations.match_location(tokenized_query)
-    if another_location is not None:
-      output.append(another_location['location'])
+    fuzzy_location = fuzzy_locations.match_location(tokenized_query)
+    if fuzzy_location is not None:
+      fuzzy_name = fuzzy_location['location']['name']
+      for name in output:
+        print(name)
+        if fuzzy_name == name['name']:
+          return output
+      output.append(fuzzy_location['location'])
 
     return output

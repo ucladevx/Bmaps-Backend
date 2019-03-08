@@ -4,7 +4,7 @@ import random
 import re
 import sys
 import requests
-# from mappening.utils.database import locations_collection
+from mappening.utils.database import locations_collection
 from unidecode import unidecode
 
 def get_location_data_from_name(name, locations_map, all_locations):
@@ -17,6 +17,16 @@ def match_location(target, threshold=65):
 	cursor = locations_collection.find({}, {'_id': False})
 	all_locations = [name for name in cursor]
 	locations = [unidecode(name['location']['name']).lower() for name in all_locations]
+	locations_map = {key: value for value, key in enumerate(locations)}
+	name_from_abbreviation = None
+	for key, value in abbreviations_map.items():
+		for val in value:
+			if target == val:
+				name_from_abbreviation = key
+				break
+	
+	if name_from_abbreviation:
+		return get_location_data_from_name(name_from_abbreviation, locations_map, all_locations)
 
 	best_score = -1
 	best_location = ""
@@ -28,8 +38,6 @@ def match_location(target, threshold=65):
 			best_location = location
 			best_index = index
 
-	print("best score {}".format(best_score))
-	print(all_locations[best_index])
 	if best_score > threshold:
 		return all_locations[best_index]
 	return None
