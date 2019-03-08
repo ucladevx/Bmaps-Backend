@@ -98,7 +98,6 @@ def add_locations_from_collection():
 def search_locations(place_query):
     output = []
     output_places = []
-
     # Supplied string such as "Boelter Hall" for a location
     print("Original place query: " + place_query)
     # Remove leading/trailing white space

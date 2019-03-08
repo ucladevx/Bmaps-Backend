@@ -3,11 +3,11 @@ from all_locations import abbreviations_map
 import random
 import re
 import sys
+import requests
 from mappening.utils.database import locations_collection
 from unidecode import unidecode
 
-
-def match_location(target, threshold=0.65):
+def match_location(target, threshold=65):
 	target = unidecode(target.lower())
 	cursor = locations_collection.find({}, {'_id': False})
 	all_locations = [name for name in cursor]
@@ -17,7 +17,7 @@ def match_location(target, threshold=0.65):
 	best_location = ""
 	best_index = -1
 	for index, location in enumerate(locations):
-		score = fuzz.ratio(target, location)
+		score = fuzz.token_set_ratio(target, location)
 		if score > best_score:
 			best_score = score
 			best_location = location
@@ -28,6 +28,22 @@ def match_location(target, threshold=0.65):
 	if best_score > threshold:
 		return all_locations[best_index]
 	return None
+
+def test(target, locations, threshold=65):
+	target = unidecode(target.lower())
+	best_score = -1
+	best_location = ""
+	best_index = -1
+
+	for index, location in enumerate(locations):		
+		score = fuzz.token_set_ratio(target, location)
+		if score > best_score:
+			best_score = score
+			best_location = location
+			best_index = index
+
+	print("best score {0}: {1}".format(best_score, locations[best_index]))
+	return locations[best_index]
 
 
 def find_match_with_highest_accuracy(locations, iterations):
@@ -55,3 +71,16 @@ def find_match_with_highest_accuracy(locations, iterations):
 		print(highest_score)
 		print('\n')
 	return correct
+
+def main():
+	if len(sys.argv) != 2:
+		raise(ValueError("Script requires a single location to match"))
+	target = sys.argv[1]
+	response = requests.get("http://localhost:5000/api/v2/locations")
+	data = response.json()
+	data = data['locations']
+	all_locations = [location['location']['location']['name'] for location in data]
+	test(target, all_locations)
+
+if __name__ == '__main__':
+	main()
