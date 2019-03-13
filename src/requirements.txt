@@ -12,6 +12,8 @@ tqdm
 nltk==3.2.5
 shapely
 haversine
+fuzzywuzzy
+unidecode
 
 # Machine Learning
 scikit-learn
