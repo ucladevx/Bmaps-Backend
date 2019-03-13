@@ -28,7 +28,7 @@ def get_all_locations():
       for loc in locations_cursor:
         output.append({"location": loc})
     else:
-        print 'Cannot find any locations!'
+        print('Cannot find any locations!')
 
     # Output typically contains name, city, country, latitude, longitude, state,
     # street, and zip for each location
@@ -50,8 +50,17 @@ def get_location_results():
     :type count: int or None
 
     """
+
+    """
+    1) Check if term matches one of the names in the database
+    2) Check if term matches one of the names in the alternative locations and the abbreviations map
+    3) Use fuzzy matching on locations in database
+    """
+    
     term = request.args.get('term')
     count = request.args.get('count')
+    print("term: {}".format(term))
+    print("count: {}".format(count))
 
     if count:
       try:

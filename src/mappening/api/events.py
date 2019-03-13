@@ -247,7 +247,6 @@ def get_event_categories(event_date):
     # If date was passed in, only check events starting on that date
 
     uniqueCats = set()
-
     if event_date:
         print("Using date parameter: " + event_date)
         date_regex_obj = event_utils.construct_date_regex(event_date)
