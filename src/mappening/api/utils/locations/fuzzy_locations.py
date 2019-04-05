@@ -4,7 +4,7 @@ import random
 import re
 import sys
 import requests
-from mappening.utils.database import locations_collection
+# from mappening.utils.database import locations_collection
 from unidecode import unidecode
 
 def get_location_data_from_name(name, locations_map, all_locations):
@@ -68,6 +68,28 @@ def test(target, locations, locations_map, all_locations, threshold=65):
 	print("best score {0}: {1}".format(best_score, locations[best_index]))
 	return all_locations[best_index]
 
+def test_top(target, locations, locations_map, all_locations, num=5):
+	scored_locs = []
+	target = unidecode(target.lower())
+
+	name_from_abbreviation = None
+	for key, value in abbreviations_map.items():
+		for val in value:
+			if target == val:
+				name_from_abbreviation = key
+				break
+
+	if name_from_abbreviation:
+		return get_location_data_from_name(name_from_abbreviation, locations_map, all_locations)
+
+	for location in locations:		
+		score = fuzz.token_set_ratio(target, location)
+		scored_locs.append(tuple((location,score)))
+
+	sorted_locs = sorted(scored_locs, key=lambda tup: tup[1], reverse=True)
+
+	print(sorted_locs[:num])
+	return sorted_locs
 
 def find_match_with_highest_accuracy(locations, iterations):
 	correct = 0
@@ -105,6 +127,7 @@ def main():
 	all_locations = [unidecode(location['location']['location']['name'].lower()) for location in data]
 	locations_map = {key: value for value, key in enumerate(all_locations)}
 	print(test(target, all_locations, locations_map, data))
+	test_top(target, all_locations, locations_map, data)
 
 if __name__ == '__main__':
 	main()

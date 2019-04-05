@@ -35,6 +35,10 @@ def get_all_events():
 def test():
     return jsonify("HELLO")
 
+@events.route('/add', methods=['POST'])
+def add_event():
+    print("adding event")
+
 # SEARCH
 @events.route('/search', methods=['GET'])
 def search_events():
