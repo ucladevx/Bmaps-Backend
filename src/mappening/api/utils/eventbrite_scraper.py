@@ -13,6 +13,7 @@ from mappening.utils.secrets import EVENTBRITE_USER_KEY
 
 # to map all Eventbrite categories to Facebook ones
 from mappening.ml.autocategorization import categorizeEvents
+from mappening.ml.autofood import labelFreeFood
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, API_UTILS_PATH
 
@@ -162,23 +163,24 @@ def entire_eventbrite_retrieval(days_back_in_time):
 
         cleaned_events.append(one_event)
 
-    cleaned_events = categorizeEvents(cleaned_events)
+    categorized_clean_events = categorizeEvents(cleaned_events)
+    categorized_clean_events = labelFreeFood(categorized_clean_events)
 
     # autocategorization has a cleaner way to do this path switching
     savedPath = os.getcwd()
     os.chdir(API_UTILS_PATH)
     with open('evebr.json', 'w') as f:
-        json.dump(cleaned_events, f, sort_keys=True, indent=4, separators=(',', ': '))
+        json.dump(categorized_clean_events, f, sort_keys=True, indent=4, separators=(',', ': '))
     os.chdir(savedPath)
 
     events_current_processed_collection.delete_many({})
-    events_current_processed_collection.insert_many(cleaned_events)
-    return len(cleaned_events)
+    events_current_processed_collection.insert_many(categorized_clean_events)
+    return len(categorized_clean_events)
     # if not all_events:
     #     print(response.json())
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
 
-if __name__ == '__main__':
-    entire_eventbrite_retrieval(0)
+# if __name__ == '__main__':
+#     entire_eventbrite_retrieval(0)
