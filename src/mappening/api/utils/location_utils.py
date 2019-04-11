@@ -2,6 +2,7 @@
 
 from mappening.utils.database import events_fb_collection, locations_collection
 from mappening.api.utils import tokenizer, location_helpers
+from mappening.api.utils.locations import fuzzy_locations
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -97,7 +98,6 @@ def add_locations_from_collection():
 def search_locations(place_query):
     output = []
     output_places = []
-
     # Supplied string such as "Boelter Hall" for a location
     print("Original place query: " + place_query)
     # Remove leading/trailing white space
@@ -141,5 +141,9 @@ def search_locations(place_query):
         if place['location'].get('name', "NO NAME") not in output_places:
           output.append(location_helpers.append_location(place, True))
           output_places.append(place['location'].get('name', "NO NAME"))
+
+    another_location = fuzzy_locations.match_location(tokenized_query)
+    if another_location is not None:
+      output.append(another_location['location'])
 
     return output
