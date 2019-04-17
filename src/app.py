@@ -1,4 +1,4 @@
-# run this before anything else: checks for command line arguments
+# Run this before anything else: checks for command line arguments
 # default: no arguments, liked when using Makefile (normal API backend running)
 import argparse
 parser = argparse.ArgumentParser()
@@ -10,20 +10,20 @@ parser.add_argument('-c', '--clear', help='Clear out old database data to start 
 parser.add_argument('-p', '--prod', help='Run production version of Mappening backend', action='store_true')
 args = parser.parse_args()
 
-# if ever need to quit early, call sys.exit()
+# To quit early, call sys.exit()
 import sys
 
-# there's an 'app' Flask object in mappening's __init__.py, which also links to blueprints to other modules
-
+# There's an 'app' Flask object in mappening's __init__.py
+# App object also links to blueprints to other modules
 from mappening import app
 from mappening.utils import scheduler
 from mappening.api.utils import event_utils
 
 from flask import Flask
 import datetime
-
 from threading import Thread
 
+# Used to check app is running, visit http://api.mappening.io:5000/
 @app.route('/')
 def index():
     return "Mappening is running!"
@@ -53,6 +53,8 @@ def thread_scheduler(args):
                                             days_back_in_time=dbit,
                                             clear_old_db=args.clear)
 
+# Flask defaults to port 5000
+# If debug is true, runs 2 instances at once (so two copies of all threads)
 if __name__ == "__main__":
     print('Arguments passed: {0}'.format(args))
     if not args.prod:
@@ -61,15 +63,3 @@ if __name__ == "__main__":
     else:
         thread_scheduler(args)
         app.run(host='0.0.0.0', debug=False)
-
-    # sys.exit()
-
-    # GOOD TO KNOW
-    # to QUIT when not in Docker container: run Ctrl+\ (SIGQUIT, equivalent to kill -3 <pid>)
-    # FORCE QUIT: Ctrl-Z to pause + put in background + add to 'jobs' list
-    # THEN kill -9 %1 to UNCONDITIONALLY eliminate job #1, which is this python script
-
-    # Flask defaults to port 5000
-    # If debug is true, runs 2 instances at once (so two copies of all threads)
-    # app.run(host='0.0.0.0', debug=False)
-
