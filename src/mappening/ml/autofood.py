@@ -13,7 +13,7 @@ if __name__ == "__main__":
     
 # use this to change to this folder, since this might be run from anywhere in project...
 from definitions import ML_PATH
-from mappening.utils.database import events_current_processed_collection, events_current_processed_backup_collection
+from mappening.utils.database import events_current_processed_collection
 
 # https://stackoverflow.com/questions/431684/how-do-i-change-directory-cd-in-python/13197763#13197763
 # make a nice cd command that auto changes directory back when exited
