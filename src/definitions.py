@@ -10,5 +10,6 @@ API_UTILS_PATH = os.path.join(SRC_PATH, 'mappening', 'api', 'utils')
 CENTER_LATITUDE = '34.070966'
 CENTER_LONGITUDE = '-118.445'
 
-# the time period before now, IN DAYS, for finding and updating events instead of removing them 
+# the time period before now, IN DAYS
+# for finding and updating events instead of removing them 
 BASE_EVENT_START_BOUND = 0
