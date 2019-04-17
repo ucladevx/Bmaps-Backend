@@ -81,4 +81,4 @@ COPY . .
 RUN ls -l
 
 EXPOSE 5000
-CMD ["python3", "app.py", "-p"]
+CMD ["python", "app.py", "-p"]
