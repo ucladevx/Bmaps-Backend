@@ -1,6 +1,6 @@
 # Interacting with events collection in mlab
 
-from mappening.utils.database import events_current_processed_collection
+from mappening.utils.database import events_current_processed_collection, test_collection
 from mappening.api.utils import event_utils, event_filters
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -14,12 +14,16 @@ from dateutil.tz import tzlocal
 import json
 import re
 from tqdm import tqdm
+from datetime import datetime
+import dateutil.parser
+import uuid
+from collections import OrderedDict
 
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
 
 # Enable Cross Origin Resource Sharing (CORS)
-# cors = CORS(events)
+cors = CORS(events)
 
 @events.route('/', methods=['GET'])
 def get_all_events():
@@ -262,3 +266,53 @@ def get_event_categories(event_date):
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': list(uniqueCats)})
+
+@events.route('/add', methods=['POST'])
+def add_event():
+  data = request.get_json()
+  title = data['title']
+  description = data['description']
+  place = data['place']
+  organization = data['organization']
+  cover = data['cover']
+  category = data['category']
+  start_date = data['startDate']
+  end_date = data['endDate']
+  test_date = datetime.now()
+
+  start_date = datetime.strftime(dateutil.parser.parse(start_date), '%Y-%m-%dT%H:%M:%S-0700')
+  end_date = datetime.strftime(dateutil.parser.parse(end_date), '%Y-%m-%dT%H:%M:%S-0700')
+  event = OrderedDict()
+  event['description'] = description
+  event['start_time'] = start_date
+  event['noreply_count'] = 0
+  event['interested_count'] = None
+  event['attending_count'] = 0
+  event['id'] = uuid.uuid4().int>>96
+  event['categories'] = [category]
+  event['is_canceled'] = False
+  event['maybe_count'] = 0
+  event['name'] = title
+  event['cover'] = {
+    'source': cover,
+    'offset_x': 0,
+    'offset_y': 0
+  }
+  event['place'] = {
+    'id': uuid.uuid4().int>>96,
+    'location': {
+      'city': 'Los Angeles',
+      'country': 'United States',
+      'zipcode': '90095',
+      'longitude': -118.4468023,
+      "state": "CA",
+      "street": "301 Westwood Plaza",
+      "latitude": 34.0704818
+    },
+    'name': place
+  }
+  event['end_time'] = end_date
+
+  res = test_collection.insert_one(event)
+                                  
+  return jsonify({'id': str(res.inserted_id)})
