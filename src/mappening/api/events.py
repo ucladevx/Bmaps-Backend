@@ -2,6 +2,7 @@
 
 from mappening.utils.database import events_current_processed_collection, test_collection
 from mappening.api.utils import event_utils, event_filters
+from mappening.api.utils.location_helpers import google_textSearch 
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -18,6 +19,7 @@ from datetime import datetime
 import dateutil.parser
 import uuid
 from collections import OrderedDict
+from pytz import timezone
 
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
@@ -275,13 +277,19 @@ def add_event():
   place = data['place']
   organization = data['organization']
   cover = data['cover']
-  category = data['category']
+  categories = data['categories']
   start_date = data['startDate']
   end_date = data['endDate']
-  test_date = datetime.now()
+  street = data['street']
 
-  start_date = datetime.strftime(dateutil.parser.parse(start_date), '%Y-%m-%dT%H:%M:%S-0700')
-  end_date = datetime.strftime(dateutil.parser.parse(end_date), '%Y-%m-%dT%H:%M:%S-0700')
+  start_date = dateutil.parser.parse(start_date)
+  start_date = start_date.astimezone(timezone('US/Pacific'))
+  start_date = datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S-0700')
+
+  end_date = dateutil.parser.parse(end_date)
+  end_date = end_date.astimezone(timezone('US/Pacific'))
+  end_date = datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S-0700')
+
   event = OrderedDict()
   event['description'] = description
   event['start_time'] = start_date
@@ -289,7 +297,7 @@ def add_event():
   event['interested_count'] = None
   event['attending_count'] = 0
   event['id'] = uuid.uuid4().int>>96
-  event['categories'] = [category]
+  event['category'] = categories
   event['is_canceled'] = False
   event['maybe_count'] = 0
   event['name'] = title
@@ -306,12 +314,13 @@ def add_event():
       'zipcode': '90095',
       'longitude': -118.4468023,
       "state": "CA",
-      "street": "301 Westwood Plaza",
+      "street": street
       "latitude": 34.0704818
     },
     'name': place
   }
   event['end_time'] = end_date
+  res = google_textSearch(street)
 
   res = test_collection.insert_one(event)
                                   
