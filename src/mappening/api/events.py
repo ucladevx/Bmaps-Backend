@@ -1,7 +1,8 @@
 # Interacting with events collection in mlab
 
-from mappening.utils.database import events_current_processed_collection
+from mappening.utils.database import events_current_processed_collection, test_collection
 from mappening.api.utils import event_utils, event_filters
+from mappening.api.utils.location_helpers import google_nearbySearch
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -14,12 +15,17 @@ from dateutil.tz import tzlocal
 import json
 import re
 from tqdm import tqdm
+from datetime import datetime
+import dateutil.parser
+import uuid
+from collections import OrderedDict
+from pytz import timezone
 
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
 
 # Enable Cross Origin Resource Sharing (CORS)
-# cors = CORS(events)
+cors = CORS(events)
 
 @events.route('/', methods=['GET'])
 def get_all_events():
@@ -262,3 +268,78 @@ def get_event_categories(event_date):
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': list(uniqueCats)})
+
+@events.route('/add', methods=['POST'])
+def add_event():
+  data = request.get_json()
+  title = data['title']
+  description = data['description']
+  place = data['place']
+  organization = data['organization']
+  cover = data['cover']
+  categories = data['categories']
+  start_date = data['startDate']
+  end_date = data['endDate']
+  street = data['street']
+  latitude = data['latitude']
+  longitude = data['longitude']
+
+  try:
+    latitude = float(latitude)
+    longitude = float(longitude)
+  except ValueError:
+    return jsonify({'error': 'Please enter a valid latitude and longitude'})
+
+  # res = google_nearbySearch(street)
+  # if len(res) == 0:
+  #   return jsonify({'error': 'No location coordinates found!'})
+  
+  # latitude = res[0]['latitude']
+  # longitude = res[0]['longitude']
+  
+
+  start_date = dateutil.parser.parse(start_date)
+  start_date = start_date.astimezone(timezone('US/Pacific'))
+  start_date = datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S-0700')
+
+  end_date = dateutil.parser.parse(end_date)
+  end_date = end_date.astimezone(timezone('US/Pacific'))
+  end_date = datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S-0700')
+
+  event = OrderedDict()
+  event['description'] = description
+  event['start_time'] = start_date
+  event['noreply_count'] = 0
+  event['interested_count'] = None
+  event['attending_count'] = 0
+  event['id'] = uuid.uuid4().int >> 96
+  event['category'] = categories
+  event['is_canceled'] = False
+  event['maybe_count'] = 0
+  event['name'] = title
+  event['cover'] = {
+    'source': cover,
+    'offset_x': 0,
+    'offset_y': 0
+  }
+
+
+  event['place'] = {
+    'id': uuid.uuid4().int >> 96,
+    'location': {
+      'city': 'Los Angeles',
+      'country': 'United States',
+      'zipcode': '90095',
+      'state': 'CA',
+      'street': street,
+      'latitude': latitude,
+      'longitude': longitude
+    },
+    'name': place
+  }
+  event['end_time'] = end_date
+
+
+  res = events_current_processed_collection.insert_one(event)
+  
+  return jsonify({'error': None, 'id': str(res.inserted_id)})

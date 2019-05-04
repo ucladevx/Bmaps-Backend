@@ -7,6 +7,7 @@ events_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/events'.format(MLAB_USER
 locations_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/locations'.format(MLAB_USERNAME, MLAB_PASSWORD)
 users_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/users'.format(MLAB_USERNAME, MLAB_PASSWORD)
 tkinter_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/tkinter'.format(MLAB_USERNAME, MLAB_PASSWORD)
+test_uri ='mongodb://{0}:{1}@ds261828.mlab.com:61828/test_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connections
 events_client = MongoClient(events_uri)
@@ -20,6 +21,9 @@ users_db = users_client['users']
 
 tkinter_client = MongoClient(tkinter_uri)
 tkinter_db = tkinter_client['tkinter']
+
+test_client = MongoClient(test_uri)
+test_db = test_client['test_data']
 
 print("Connected to database!")
 
@@ -69,4 +73,5 @@ API_unknown_locations_collection = tkinter_db.API_unknown_locations
 API_known_locations_collection = tkinter_db.API_known_locations
 API_TODO_locations_collection = tkinter_db.API_TODO_locations
 
+test_collection = test_db.events
 print("Got database collections...")

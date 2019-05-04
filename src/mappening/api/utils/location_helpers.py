@@ -204,7 +204,7 @@ def google_nearbySearch(place_query):
 
     # Forming the request
     nearbySearch = NearbySearch_URL + "location=" + CENTER_LATITUDE + "," + CENTER_LONGITUDE + "&radius=" + RADIUS + "&keyword=" + place_query + "&key=" + GOOGLE_API_KEY
-
+    print(nearbySearch)
     # Getting result from URL and processing
     resultsPage = requests.get(nearbySearch)
     resultsJSON = json.loads(resultsPage.content)
