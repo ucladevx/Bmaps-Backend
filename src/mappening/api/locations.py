@@ -104,7 +104,7 @@ def get_google_search():
     api = request.args.get('api')
 
     output = []
-
+    print('term for search: ' + term)
     # Default is text search API
     if api and api == 'text' or not api:
       output = location_helpers.google_textSearch(term)

@@ -2,7 +2,7 @@
 
 from mappening.utils.database import events_current_processed_collection, test_collection
 from mappening.api.utils import event_utils, event_filters
-from mappening.api.utils.location_helpers import google_textSearch 
+from mappening.api.utils.location_helpers import google_nearbySearch
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -281,6 +281,22 @@ def add_event():
   start_date = data['startDate']
   end_date = data['endDate']
   street = data['street']
+  latitude = data['latitude']
+  longitude = data['longitude']
+
+  try:
+    latitude = float(latitude)
+    longitude = float(longitude)
+  except ValueError:
+    return jsonify({'error': 'Please enter a valid latitude and longitude'})
+
+  # res = google_nearbySearch(street)
+  # if len(res) == 0:
+  #   return jsonify({'error': 'No location coordinates found!'})
+  
+  # latitude = res[0]['latitude']
+  # longitude = res[0]['longitude']
+  
 
   start_date = dateutil.parser.parse(start_date)
   start_date = start_date.astimezone(timezone('US/Pacific'))
@@ -296,7 +312,7 @@ def add_event():
   event['noreply_count'] = 0
   event['interested_count'] = None
   event['attending_count'] = 0
-  event['id'] = uuid.uuid4().int>>96
+  event['id'] = uuid.uuid4().int >> 96
   event['category'] = categories
   event['is_canceled'] = False
   event['maybe_count'] = 0
@@ -306,22 +322,24 @@ def add_event():
     'offset_x': 0,
     'offset_y': 0
   }
+
+
   event['place'] = {
-    'id': uuid.uuid4().int>>96,
+    'id': uuid.uuid4().int >> 96,
     'location': {
       'city': 'Los Angeles',
       'country': 'United States',
       'zipcode': '90095',
-      'longitude': -118.4468023,
-      "state": "CA",
-      "street": street
-      "latitude": 34.0704818
+      'state': 'CA',
+      'street': street,
+      'latitude': latitude,
+      'longitude': longitude
     },
     'name': place
   }
   event['end_time'] = end_date
-  res = google_textSearch(street)
 
-  res = test_collection.insert_one(event)
-                                  
-  return jsonify({'id': str(res.inserted_id)})
+
+  res = events_current_processed_collection.insert_one(event)
+  
+  return jsonify({'error': None, 'id': str(res.inserted_id)})
