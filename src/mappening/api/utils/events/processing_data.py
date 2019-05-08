@@ -11,7 +11,7 @@ from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUN
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
 from mappening.utils.database import events_current_processed_collection
 
-from mappening.api.utils.facebook_scraper import get_fbscraper, process_fbscraper 
+from mappening.api.utils.facebook_scraper import get_data, process_data 
 
 from mappening.api.utils.eventbrite_scraper import eventbrite_scraper
 
