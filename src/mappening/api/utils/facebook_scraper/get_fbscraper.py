@@ -282,7 +282,6 @@ def get_events_from_pages(pages_by_id, days_before, page_debug_mode=False):
         ...
     }
     """
-    total_fs = {}
     for page_info in tqdm(id_jsons.values()):
         host_entity_info = {}
 
