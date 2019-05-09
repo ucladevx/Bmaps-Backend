@@ -277,26 +277,25 @@ def add_event():
   place = data['place']
   organization = data['organization']
   cover = data['cover']
+  if cover == '':
+    cover = '<NONE>'
   categories = data['categories']
   start_date = data['startDate']
   end_date = data['endDate']
   street = data['street']
   latitude = data['latitude']
   longitude = data['longitude']
+  free_food = data['freeFood']
 
   try:
     latitude = float(latitude)
     longitude = float(longitude)
+    if latitude < 34.056 or latitude > 34.079:
+      return jsonify({'error': 'Latitude out of bounds!'})
+    if longitude < -118.46 or longitude > -118.428:
+      return jsonify({'error': 'Longitude out of bounds!'})
   except ValueError:
-    return jsonify({'error': 'Please enter a valid latitude and longitude'})
-
-  # res = google_nearbySearch(street)
-  # if len(res) == 0:
-  #   return jsonify({'error': 'No location coordinates found!'})
-  
-  # latitude = res[0]['latitude']
-  # longitude = res[0]['longitude']
-  
+    return jsonify({'error': 'Please enter a valid latitude and longitude'})  
 
   start_date = dateutil.parser.parse(start_date)
   start_date = start_date.astimezone(timezone('US/Pacific'))
@@ -313,10 +312,11 @@ def add_event():
   event['interested_count'] = None
   event['attending_count'] = 0
   event['id'] = uuid.uuid4().int >> 96
-  event['category'] = categories
+  event['categories'] = categories
   event['is_canceled'] = False
   event['maybe_count'] = 0
   event['name'] = title
+  event['free_food'] = free_food
   event['cover'] = {
     'source': cover,
     'offset_x': 0,
@@ -338,8 +338,6 @@ def add_event():
     'name': place
   }
   event['end_time'] = end_date
-
-
   res = events_current_processed_collection.insert_one(event)
   
   return jsonify({'error': None, 'id': str(res.inserted_id)})
