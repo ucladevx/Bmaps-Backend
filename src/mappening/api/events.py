@@ -1,7 +1,7 @@
 # Interacting with events collection in mlab
 
 from mappening.utils.database import events_current_processed_collection
-from mappening.api.utils.events import getting, process, filters
+from mappening.api.utils.events import getting_data, process_data, filters
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
