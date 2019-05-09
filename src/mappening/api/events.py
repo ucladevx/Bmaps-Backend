@@ -277,6 +277,8 @@ def add_event():
   place = data['place']
   organization = data['organization']
   cover = data['cover']
+  if cover == '':
+    cover = '<NONE>'
   categories = data['categories']
   start_date = data['startDate']
   end_date = data['endDate']
@@ -288,6 +290,10 @@ def add_event():
   try:
     latitude = float(latitude)
     longitude = float(longitude)
+    if latitude < 34.056 or latitude > 34.079:
+      return jsonify({'error': 'Latitude out of bounds!'})
+    if longitude < -118.46 or longitude > -118.428:
+      return jsonify({'error': 'Longitude out of bounds!'})
   except ValueError:
     return jsonify({'error': 'Please enter a valid latitude and longitude'})
 
