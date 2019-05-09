@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS, cross_origin
+from flask_compress import Compress
 
 from mappening.api.events import events
 from mappening.api.locations import locations
@@ -8,6 +9,7 @@ from mappening.auth.auth import auth
 
 # Configure app and register blueprints
 app = Flask(__name__)
+Compress(app)
 
 app.register_blueprint(events, url_prefix='/api/v2/events')
 app.register_blueprint(locations, url_prefix='/api/v2/locations')
