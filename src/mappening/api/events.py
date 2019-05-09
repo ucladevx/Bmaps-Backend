@@ -283,6 +283,7 @@ def add_event():
   street = data['street']
   latitude = data['latitude']
   longitude = data['longitude']
+  free_food = data['freeFood']
 
   try:
     latitude = float(latitude)
@@ -314,9 +315,11 @@ def add_event():
   event['attending_count'] = 0
   event['id'] = uuid.uuid4().int >> 96
   event['category'] = categories
+  event['free']
   event['is_canceled'] = False
   event['maybe_count'] = 0
   event['name'] = title
+  event['free_food'] = free_food
   event['cover'] = {
     'source': cover,
     'offset_x': 0,
@@ -338,8 +341,6 @@ def add_event():
     'name': place
   }
   event['end_time'] = end_date
-
-
   res = events_current_processed_collection.insert_one(event)
   
   return jsonify({'error': None, 'id': str(res.inserted_id)})
