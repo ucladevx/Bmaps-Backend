@@ -295,15 +295,7 @@ def add_event():
     if longitude < -118.46 or longitude > -118.428:
       return jsonify({'error': 'Longitude out of bounds!'})
   except ValueError:
-    return jsonify({'error': 'Please enter a valid latitude and longitude'})
-
-  # res = google_nearbySearch(street)
-  # if len(res) == 0:
-  #   return jsonify({'error': 'No location coordinates found!'})
-  
-  # latitude = res[0]['latitude']
-  # longitude = res[0]['longitude']
-  
+    return jsonify({'error': 'Please enter a valid latitude and longitude'})  
 
   start_date = dateutil.parser.parse(start_date)
   start_date = start_date.astimezone(timezone('US/Pacific'))
