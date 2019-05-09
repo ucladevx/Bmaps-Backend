@@ -314,8 +314,7 @@ def add_event():
   event['interested_count'] = None
   event['attending_count'] = 0
   event['id'] = uuid.uuid4().int >> 96
-  event['category'] = categories
-  event['free']
+  event['categories'] = categories
   event['is_canceled'] = False
   event['maybe_count'] = 0
   event['name'] = title
