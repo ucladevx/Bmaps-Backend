@@ -9,7 +9,7 @@ import re
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
-from mappening.utils.database import events_current_processed_collection
+from mappening.utils.database import events_current_processed_collection, events_internal_added_collection
 
 import facebook_scraper, eventbrite_scraper
 
@@ -71,6 +71,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             print('No single event with attributes:' + str(find_dict))
     else:
         events_cursor = events_current_processed_collection.find(find_dict)
+        events_internal_cursor = events_internal_added_collection.find()
         if events_cursor.count() > 0:
             for event in events_cursor:
                 output.append(process_event_info(event))
@@ -83,6 +84,9 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
             print('No events found with attributes:' + str(find_dict))
+        
+        for event in events_internal_cursor:
+            output.append(process_event_info(event))
 
     return output
 
@@ -92,7 +96,6 @@ def process_event_info(event):
 
         :param str event_name: case-insensitive name string to search database for exact match
     """
-
     # Remove certain keys from dictionary
     event.pop('_id', None) # pop is basically get and remove; pop(key, default)
     event.get('place', {}).pop('id', None) # pop is basically used as if it exists, remove it

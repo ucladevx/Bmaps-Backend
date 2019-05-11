@@ -25,6 +25,7 @@ tkinter_db = tkinter_client['tkinter']
 test_client = MongoClient(test_uri)
 test_db = test_client['test_data']
 
+
 print("Connected to database!")
 
 # Get all the collections
@@ -49,6 +50,8 @@ events_fb_collection = events_db.events_fb
 events_test_collection = events_db.events_test
 # the final, aggregated database of all events from all sources, processed for frontend
 events_current_processed_collection = events_db.events_current_processed
+
+events_internal_added_collection = events_db.events_internal_added
 
 # a db for logs when running on AWS
 events_log_collection = events_db.events_log
