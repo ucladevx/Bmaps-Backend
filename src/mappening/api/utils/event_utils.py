@@ -71,7 +71,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             print('No single event with attributes:' + str(find_dict))
     else:
         events_cursor = events_current_processed_collection.find(find_dict)
-        events_internal_cursor = events_internal_added_collection.find()
+        events_internal_cursor = events_internal_added_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
                 output.append(process_event_info(event))
