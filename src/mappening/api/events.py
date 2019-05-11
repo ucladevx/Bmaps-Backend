@@ -1,6 +1,6 @@
 # Interacting with events collection in mlab
 
-from mappening.utils.database import events_internal_added_collection, test_collection
+from mappening.utils.database import events_internal_added_collection, events_current_processed_collection, test_collection
 from mappening.api.utils import event_utils, event_filters
 from mappening.api.utils.location_helpers import google_nearbySearch
 
