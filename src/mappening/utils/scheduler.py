@@ -1,4 +1,4 @@
-from mappening.api.utils.events import getting, process 
+from mappening.api.utils.events import getting_data, processing_data
 from mappening.utils.database import events_log_collection
 
 import schedule
