@@ -36,7 +36,11 @@ Hobbies & Special Interest [Hobbies] | Other | School Activities
 
 # TODO: like other APIs, split this method up
 # 1st part = get raw data and put in DB (updating repeats), 2nd part = process for events_current_processed
-def entire_eventbrite_retrieval(days_back_in_time):
+
+#Get the raw data 
+#Put in DB and update repeats 
+#Process events 
+def get_raw(days_back_in_time):
     days_back = days_back_in_time
     days_forward = 90
     now = datetime.datetime.now()
@@ -54,6 +58,7 @@ def entire_eventbrite_retrieval(days_back_in_time):
     # most events on 1 page = 50, want more
     page_num = 1
     request_new_results = True
+
 
     events_search_ep = '/events/search'
     search_args = {
@@ -90,8 +95,8 @@ def entire_eventbrite_retrieval(days_back_in_time):
     return all_events
     # raw event data insert
 
-# Processing eventbrite
-def process_eventbrite(all_events):
+#Database updating 
+def database_updates(all_events):
     # TODO: the dumb complete reinsertion thing again
     # this should be removed completely: eventbrite_collection accumulates, never deletes
 
@@ -119,9 +124,13 @@ def process_eventbrite(all_events):
         used_name = raw_cat['short_name']
         all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
 
-    all_venues = {}
 
+#Process for frontend to use it 
+def process_events(all_events):
+
+    all_venues = {}
     cleaned_events = []
+    
     for event_info in tqdm(all_events):
         one_event = {
             'id': event_info.get('id', -1),
