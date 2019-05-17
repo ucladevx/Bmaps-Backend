@@ -124,7 +124,6 @@ def database_updates(all_events):
         used_name = raw_cat['short_name']
         all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
 
-
 #Process for frontend to use it 
 def process_events(all_events):
 
