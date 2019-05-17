@@ -1,5 +1,5 @@
 from mappening.utils.database import events_fb_collection
-from mappening.api.utils.events import process, getting 
+from mappening.api.utils.events import processing_data, getting_data
 
 from flask import Flask, jsonify, request, json, Blueprint
 import requests

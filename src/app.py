@@ -17,7 +17,7 @@ import sys
 # App object also links to blueprints to other modules
 from mappening import app
 from mappening.utils import scheduler
-from mappening.api.utils.events import getting, process 
+from mappening.api.utils.events import get_data, process_data
 
 from flask import Flask
 import datetime

@@ -87,9 +87,20 @@ def entire_eventbrite_retrieval(days_back_in_time):
             request_new_results = False
 
     print('done getting eventbrite events!')
+    return all_events
     # raw event data insert
+
+# Processing eventbrite
+def process_eventbrite(all_events):
     # TODO: the dumb complete reinsertion thing again
     # this should be removed completely: eventbrite_collection accumulates, never deletes
+
+    personal_token = EVENTBRITE_USER_KEY
+    base_endpoint = 'https://www.eventbriteapi.com/v3'
+    sample_headers = {
+        'Authorization': 'Bearer ' + personal_token
+    }
+    
     events_eventbrite_collection.delete_many({})
     events_eventbrite_collection.insert_many(all_events)
 
