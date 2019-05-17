@@ -1,7 +1,8 @@
 # TODO some more testing before integration
 
 from mappening.utils.database import events_fb_collection, locations_collection
-from mappening.api.utils import tokenizer, location_helpers
+from mappening.api.utils.locations import location_helpers
+from mappening.api.utils import tokenizer
 from mappening.api.utils.locations import fuzzy_locations
 
 from flask import Flask, jsonify, request, json, Blueprint
