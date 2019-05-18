@@ -1,17 +1,13 @@
-from flask import Flask, jsonify, request, json, Blueprint
-from flask_cors import CORS, cross_origin
-import requests
-import re
-import json
-import os
-from operator import itemgetter
-
-# UH make sure this does not break anything!
-from definitions import CENTER_LATITUDE, CENTER_LONGITUDE
-
 from mappening.utils.database import events_fb_collection, locations_collection
 from mappening.api.utils import tokenizer
 from mappening.utils.secrets import GOOGLE_API_KEY
+
+from flask import Flask, jsonify, request, json, Blueprint
+import requests
+import re
+
+# UH make sure this does not break anything!
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE
 
 # Latitude and Longitude range from (-90, 90) and (-180, 180)
 INVALID_COORDINATE = 420

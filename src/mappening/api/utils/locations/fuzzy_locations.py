@@ -1,16 +1,14 @@
-from fuzzywuzzy import fuzz
 from abbreviations_map import abbreviations_map
+from fuzzywuzzy import fuzz
+from unidecode import unidecode
 import random
 import re
 import sys
 import requests
-# from mappening.utils.database import locations_collection
-from unidecode import unidecode
 
 def get_location_data_from_name(name, locations_map, all_locations):
 	index = locations_map[name]
 	return all_locations[index]
-	
 
 def match_location(target, threshold=65):
 	target = unidecode(target.lower())

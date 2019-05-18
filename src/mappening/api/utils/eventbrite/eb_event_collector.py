@@ -1,21 +1,19 @@
+from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection
+from mappening.utils.secrets import EVENTBRITE_USER_KEY
+from mappening.ml.autocategorization import categorizeEvents
+from mappening.ml.autofood import labelFreeFood
+
+import os
+import sys
 import time, datetime
 from pprint import pprint
 from tqdm import tqdm
 import json
 import requests
 
-import os
-
-import sys
-sys.path.insert(0, './../../..')
-from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection
-from mappening.utils.secrets import EVENTBRITE_USER_KEY
-
-# to map all Eventbrite categories to Facebook ones
-from mappening.ml.autocategorization import categorizeEvents
-from mappening.ml.autofood import labelFreeFood
-
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, API_UTILS_PATH
+
+sys.path.insert(0, './../../..')
 
 # use this as reference for now
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',

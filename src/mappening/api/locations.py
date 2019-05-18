@@ -1,18 +1,11 @@
 from mappening.utils.database import locations_collection
-from mappening.api.utils.locations import location_utils, location_helpers
 from mappening.api.utils import tokenizer
+from mappening.api.utils.locations import location_collector, location_processor
 
 from flask import Flask, jsonify, request, json, Blueprint
-from flask_cors import CORS, cross_origin
-import re
-import os
-from operator import itemgetter
 
 # Route Prefix: /api/v2/locations
 locations = Blueprint('locations', __name__)
-
-# Enable Cross Origin Resource Sharing (CORS)
-# cors = CORS(locations)
 
 @locations.route('/', methods=['GET'])
 def get_all_locations():
@@ -69,7 +62,7 @@ def get_location_results():
       except:
         return 'Invalid count parameter, needs to be integer!'
 
-    search_results = location_utils.search_locations(term)
+    search_results = location_collector.search_locations(term)
 
     if not search_results:
       return "There were no results!"
@@ -108,9 +101,9 @@ def get_google_search():
 
     # Default is text search API
     if api and api == 'text' or not api:
-      output = location_helpers.google_textSearch(term)
+      output = location_processor.google_textSearch(term)
     elif api and api == 'nearby':
-      output = location_helpers.google_nearbySearch(term)
+      output = location_processor.google_nearbySearch(term)
   
 
     return jsonify({'results': output})

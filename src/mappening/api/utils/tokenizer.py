@@ -5,8 +5,6 @@ nltk.download('stopwords')
 nltk.download('punkt')
 
 from nltk.tokenize.moses import MosesTokenizer, MosesDetokenizer
-from nltk.corpus import wordnet as wn
-from tqdm import tqdm
 import string
 import re
 

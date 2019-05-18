@@ -1,21 +1,19 @@
 from mappening.utils.database import events_fb_collection
-from mappening.api.utils.events import processing_data, getting_data
+from mappening.api.utils.events import event_collector, event_processor
 
 from flask import Flask, jsonify, request, json, Blueprint
-import requests
-import json
-import dateutil.parser
-from datetime import datetime, timedelta
+import os
 import pytz
 from pytz import timezone
+import dateutil.parser
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from shapely.geometry import shape, Point
-import os
 from haversine import haversine
 
 # Get the day's events
 def get_day_events(search_dict, day):
-  date_regex = event_utils.construct_date_regex(day)
+  date_regex = event_collector.construct_date_regex(day)
   search_dict['start_time'] = date_regex
 
 # Get current time and get all events whose start time <= current time < end time
@@ -114,7 +112,7 @@ def filter_by_popular(search_dict, threshold=50):
   if events_cursor.count() > 0:
     print("filter_by_popular with threshold {0}".format(threshold))
     for event in events_cursor:
-      processed_event = event_utils.process_event_info(event)
+      processed_event = event_processor.process_event_info(event)
       if processed_event['properties']['stats'].get('attending', 0) >= threshold or processed_event['properties']['stats'].get('interested', 0) >= threshold:
         sorted_events.append(processed_event)
   else:

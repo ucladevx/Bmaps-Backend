@@ -1,17 +1,9 @@
-# TODO some more testing before integration
-
 from mappening.utils.database import events_fb_collection, locations_collection
-from mappening.api.utils.locations import location_helpers
 from mappening.api.utils import tokenizer
-from mappening.api.utils.locations import fuzzy_locations
+from mappening.api.utils.locations import fuzzy_locations, location_processor
 
 from flask import Flask, jsonify, request, json, Blueprint
-from flask_cors import CORS, cross_origin
-import requests
 import re
-import json
-import os
-from operator import itemgetter
 
 # Latitude and Longitude range from (-90, 90) and (-180, 180)
 INVALID_COORDINATE = 420
@@ -41,7 +33,7 @@ def get_locations_from_collection():
       if 'name' in event['place']:
         place['location']['name'] = event['place']['name']
 
-      place = location_helpers.process_event_location_info(place, places)
+      place = location_processor.process_event_location_info(place, places)
 
     return places      
 
@@ -77,9 +69,9 @@ def add_locations_from_collection():
       if coord_loc or alt_name_loc:
         loc_result = None
         if coord_loc and not alt_name_loc:
-          loc_result = location_helpers.handle_keys(coord_loc, new_loc, place_name)
+          loc_result = location_processor.handle_keys(coord_loc, new_loc, place_name)
         else:
-          loc_result = location_helpers.handle_keys(alt_name_loc, new_loc, place_name, True)
+          loc_result = location_processor.handle_keys(alt_name_loc, new_loc, place_name, True)
         
         if loc_result:
           updated_locations.append(loc_result)
@@ -106,7 +98,7 @@ def search_locations(place_query):
 
     # Search for exact match first
     # Sometimes regency village weighted more than sunset village due to repetition of village
-    processed_query = location_helpers.process_query(place_query)
+    processed_query = location_processor.process_query(place_query)
     print("Processed place query: " + processed_query)
     place_regex = re.compile("^" + processed_query + "$", re.IGNORECASE)
     places_cursor = locations_collection.find({'location.alternative_names': place_regex})
@@ -114,7 +106,7 @@ def search_locations(place_query):
     # Places that match the name are appended to output
     if places_cursor.count() > 0:
       for place in places_cursor:
-        output.append(location_helpers.append_location(place))
+        output.append(location_processor.append_location(place))
         output_places.append(place['location'].get('name', "NO NAME"))
       return output
 
@@ -140,7 +132,7 @@ def search_locations(place_query):
       for place in places_cursor:
         # Check if already added by maintaining list of places added by name
         if place['location'].get('name', "NO NAME") not in output_places:
-          output.append(location_helpers.append_location(place, True))
+          output.append(location_processor.append_location(place, True))
           output_places.append(place['location'].get('name', "NO NAME"))
 
     another_location = fuzzy_locations.match_location(tokenized_query)
