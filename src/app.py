@@ -15,7 +15,7 @@ args = parser.parse_args()
 from mappening import app
 from mappening.utils import scheduler
 from mappening.api.utils.events import event_collector
-from mappening.api.utils.eventbrite import eb_event_collector
+from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
 
 from flask import Flask
 import datetime
@@ -44,9 +44,9 @@ def thread_scheduler(args):
     event_collector.update_ucla_events_database(use_test=args.test,
                                             days_back_in_time=dbit,
                                             clear_old_db=args.clear)
-    events = eb_event_collector.get_raw(days_back_in_time)
-    eb_event_collector.database_updates(events)
-    eb_event_collector.process_events(events)
+    events = eb_event_collector.get_raw_events(days_back_in_time)
+    eb_event_collector.update_database(events)
+    eb_event_processor.process_events(events)
 
 # Flask defaults to port 5000
 # If debug is true, runs 2 instances at once (so two copies of all threads)

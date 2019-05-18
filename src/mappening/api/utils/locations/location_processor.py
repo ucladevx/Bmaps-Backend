@@ -6,15 +6,7 @@ from flask import Flask, jsonify, request, json, Blueprint
 import requests
 import re
 
-# UH make sure this does not break anything!
-from definitions import CENTER_LATITUDE, CENTER_LONGITUDE
-
-# Latitude and Longitude range from (-90, 90) and (-180, 180)
-INVALID_COORDINATE = 420
-
-# For comprehension: School of Theater, Film, TV within radius 700
-# Hammer Museum within radius 1300, Saffron and Rose within radius 1800
-RADIUS = "2000"
+from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, INVALID_COORDINATE, RADIUS
 
 # Use location coordinates to process event location
 def process_location_coordinates(place, loc):
