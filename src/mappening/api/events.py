@@ -1,16 +1,18 @@
 # Interacting with events collection in mlab
-from mappening.utils.database import events_current_processed_collection
+from mappening.utils.database import events_current_processed_collection, test_collection
 from mappening.api.utils.events import event_collector, event_processor, event_filter
 
 from flask import Flask, jsonify, request, json, Blueprint
 import requests, urllib
 import re
-
 import pytz
 from pytz import timezone
 import time, dateutil.parser
 from dateutil.tz import tzlocal
 from datetime import datetime
+import dateutil.parser
+import uuid
+from collections import OrderedDict
 
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
@@ -254,3 +256,76 @@ def get_event_categories(event_date):
     else:
         print('Cannot find any events with categories!')
     return jsonify({'categories': list(uniqueCats)})
+
+@events.route('/add', methods=['POST'])
+def add_event():
+  data = request.get_json()
+  title = data['title']
+  description = data['description']
+  place = data['place']
+  organization = data['organization']
+  cover = data['cover']
+  if cover == '':
+    cover = '<NONE>'
+  categories = data['categories']
+  start_date = data['startDate']
+  end_date = data['endDate']
+  street = data['street']
+  latitude = data['latitude']
+  longitude = data['longitude']
+  free_food = data['freeFood']
+
+  try:
+    latitude = float(latitude)
+    longitude = float(longitude)
+    if latitude < 34.056 or latitude > 34.079:
+      return jsonify({'error': 'Latitude out of bounds!'})
+    if longitude < -118.46 or longitude > -118.428:
+      return jsonify({'error': 'Longitude out of bounds!'})
+  except ValueError:
+    return jsonify({'error': 'Please enter a valid latitude and longitude'})  
+
+  start_date = dateutil.parser.parse(start_date)
+  start_date = start_date.astimezone(timezone('US/Pacific'))
+  start_date = datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S-0700')
+
+  end_date = dateutil.parser.parse(end_date)
+  end_date = end_date.astimezone(timezone('US/Pacific'))
+  end_date = datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S-0700')
+
+  event = OrderedDict()
+  event['description'] = description
+  event['start_time'] = start_date
+  event['noreply_count'] = 0
+  event['interested_count'] = None
+  event['attending_count'] = 0
+  event['id'] = uuid.uuid4().int >> 96
+  event['categories'] = categories
+  event['is_canceled'] = False
+  event['maybe_count'] = 0
+  event['name'] = title
+  event['free_food'] = free_food
+  event['cover'] = {
+    'source': cover,
+    'offset_x': 0,
+    'offset_y': 0
+  }
+
+
+  event['place'] = {
+    'id': uuid.uuid4().int >> 96,
+    'location': {
+      'city': 'Los Angeles',
+      'country': 'United States',
+      'zipcode': '90095',
+      'state': 'CA',
+      'street': street,
+      'latitude': latitude,
+      'longitude': longitude
+    },
+    'name': place
+  }
+  event['end_time'] = end_date
+  res = events_current_processed_collection.insert_one(event)
+  
+  return jsonify({'error': None, 'id': str(res.inserted_id)})
