@@ -51,9 +51,6 @@ if __name__ == "__main__":
     print('Arguments passed: {0}'.format(args))
     if not args.prod:
         print("\n~~~~~~~~~~~~~~~~~~~\n~~~ IN DEV MODE ~~~\n~~~~~~~~~~~~~~~~~~~\n")
-        event_collector.update_ucla_events_database(use_test=args.test,
-                                            days_back_in_time=0,
-                                            clear_old_db=args.clear)
         app.run(host='0.0.0.0', debug=True)
     else:
         thread_scheduler(args)

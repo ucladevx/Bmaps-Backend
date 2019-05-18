@@ -6,6 +6,7 @@ from dateutil.tz import tzlocal
 from tqdm import tqdm   # a progress bar, pretty
 import json
 import os
+import re
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
