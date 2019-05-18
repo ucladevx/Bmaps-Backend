@@ -87,6 +87,8 @@ def search_locations(place_query):
     output = []
     output_places = []
     # Supplied string such as "Boelter Hall" for a location
+    if not place_query:
+      place_query = ""
     print("Original place query: " + place_query)
     # Remove leading/trailing white space
     place_query = place_query.strip()
