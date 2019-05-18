@@ -44,9 +44,6 @@ def thread_scheduler(args):
     event_collector.update_ucla_events_database(use_test=args.test,
                                             days_back_in_time=dbit,
                                             clear_old_db=args.clear)
-    events = eb_event_collector.get_raw_events(days_back_in_time)
-    eb_event_collector.update_database(events)
-    eb_event_processor.process_events(events)
 
 # Flask defaults to port 5000
 # If debug is true, runs 2 instances at once (so two copies of all threads)
@@ -54,6 +51,9 @@ if __name__ == "__main__":
     print('Arguments passed: {0}'.format(args))
     if not args.prod:
         print("\n~~~~~~~~~~~~~~~~~~~\n~~~ IN DEV MODE ~~~\n~~~~~~~~~~~~~~~~~~~\n")
+        event_collector.update_ucla_events_database(use_test=args.test,
+                                            days_back_in_time=0,
+                                            clear_old_db=args.clear)
         app.run(host='0.0.0.0', debug=True)
     else:
         thread_scheduler(args)

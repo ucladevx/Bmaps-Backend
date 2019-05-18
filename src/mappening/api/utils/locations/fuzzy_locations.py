@@ -1,3 +1,4 @@
+from mappening.utils.database import locations_collection
 from abbreviations_map import abbreviations_map
 from fuzzywuzzy import fuzz
 from unidecode import unidecode

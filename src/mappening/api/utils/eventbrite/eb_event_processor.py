@@ -1,6 +1,7 @@
 from mappening.utils.database import events_current_processed_collection
 from mappening.ml.autocategorization import categorizeEvents
 from mappening.ml.autofood import labelFreeFood
+from mappening.utils.secrets import EVENTBRITE_USER_KEY
 
 import os
 import sys
@@ -36,6 +37,13 @@ def process_events(all_events):
 
     all_venues = {}
     cleaned_events = []
+    session = requests.Session()
+
+    personal_token = EVENTBRITE_USER_KEY
+    base_endpoint = 'https://www.eventbriteapi.com/v3'
+    sample_headers = {
+        'Authorization': 'Bearer ' + personal_token
+    }
     
     for event_info in tqdm(all_events):
         one_event = {
