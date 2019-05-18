@@ -1,26 +1,19 @@
-
 # Interacting with events collection in mlab
-
 from mappening.utils.database import events_current_processed_collection
-from mappening.api.utils.events import get_data, process_data, filters
+from mappening.api.utils.events import event_collector, event_filter
 
 from flask import Flask, jsonify, request, json, Blueprint
-from flask_cors import CORS, cross_origin
 import requests, urllib
-import time, dateutil.parser
-from datetime import datetime, timedelta
+import re
+
 import pytz
 from pytz import timezone
+import time, dateutil.parser
 from dateutil.tz import tzlocal
-import json
-import re
-from tqdm import tqdm
+from datetime import datetime
 
 # Route Prefix: /api/v2/events
 events = Blueprint('events', __name__)
-
-# Enable Cross Origin Resource Sharing (CORS)
-# cors = CORS(events)
 
 @events.route('/', methods=['GET'])
 def get_all_events():
@@ -30,7 +23,7 @@ def get_all_events():
     :Description: Returns a GeoJSON of all events within a few miles of UCLA
 
     """
-    return get_data.find_events_in_database(print_results=True)
+    return event_collector.find_events_in_database(print_results=True)
 
 @events.route('/test')
 def test():
@@ -74,25 +67,25 @@ def search_events():
         term_regex = re.compile('.*' + term + '.*', re.IGNORECASE)
         search_dict["$or"] = [ {"name":term_regex}, {"description":term_regex} ] # MongoDB's syntax for find name in name or description
     if date:
-        date_regex = get_data.construct_date_regex(date)
+        date_regex = event_collector.construct_date_regex(date)
         search_dict['start_time'] = date_regex
     if category:
         cat_regex_obj = re.compile('^{0}|{0}$'.format(category.upper()))
         search_dict['category'] = cat_regex_obj
         print(search_dict)
-    if month and get_data.get_month(month):
+    if month and event_collector.get_month(month):
         year_str = 2018
         if year and len(year) == 4:
             year_str = year
         else:
             now = datetime.now(tzlocal()).astimezone(pytz.timezone('America/Los_Angeles'))
             year_str = datetime.strftime(now, '%Y')
-        month_str = get_data.get_month(month)
+        month_str = event_collector.get_month(month)
         date_regex_str = '^{0}-{1}.*'.format(year_str, month_str)
         date_regex = re.compile(date_regex_str)
         search_dict['start_time'] = date_regex
 
-    return get_data.find_events_in_database(search_dict)
+    return event_collector.find_events_in_database(search_dict)
 
 @events.route('/filter', methods=['GET'])
 def filter_events():
@@ -145,21 +138,21 @@ def filter_events():
     # Sets search dict to appropriate parameters for date
     if when and (when == 'now' or when == 'upcoming'):
       if when == 'now':
-        filters.filter_by_happening_now(search_dict)
+        event_filter.filter_by_happening_now(search_dict)
       elif when == 'upcoming':
-        filters.filter_by_upcoming(search_dict)
+        event_filter.filter_by_upcoming(search_dict)
     elif date:
-      filters.get_day_events(search_dict, date)
+      event_filter.get_day_events(search_dict, date)
 
     # Use current search dict and get events depending on whether or not
     # popularity filtering is occuring.
     if popularity:
         try:
-          unfiltered_events = filters.filter_by_popular(search_dict, int(popularity))
+          unfiltered_events = event_filter.filter_by_popular(search_dict, int(popularity))
         except:
           return 'Invalid popularity, needs to be integer!'
     else:
-      unfiltered_events = get_data.get_events_in_database(search_dict)
+      unfiltered_events = event_collector.get_events_in_database(search_dict)
 
     # Add to search dict
     # Time filtering
@@ -169,7 +162,7 @@ def filter_events():
       elif when == 'period':
         if time_period:
           # Updates events to be filtered by time period
-          unfiltered_events = filters.filter_by_time(unfiltered_events, time_period)
+          unfiltered_events = event_filter.filter_by_time(unfiltered_events, time_period)
         else:
           return 'Expected time period to be set!'
       else:
@@ -178,28 +171,27 @@ def filter_events():
     # Location filtering
     if where:
       if where == 'nearby':
-        if latitude and longitude and filters.is_valid_coords(latitude, longitude):
-          unfiltered_events = filters.filter_by_nearby(unfiltered_events, float(latitude), float(longitude))
+        if latitude and longitude and event_filter.is_valid_coords(latitude, longitude):
+          unfiltered_events = event_filter.filter_by_nearby(unfiltered_events, float(latitude), float(longitude))
         else:
           return 'Expected valid coordinates to be passed!'
       elif where == 'oncampus':
-        unfiltered_events = filters.filter_by_oncampus(unfiltered_events)
+        unfiltered_events = event_filter.filter_by_oncampus(unfiltered_events)
       elif where == 'offcampus':
-        unfiltered_events = filters.filter_by_offcampus(unfiltered_events)
+        unfiltered_events = event_filter.filter_by_offcampus(unfiltered_events)
       else:
         return 'Invalid value passed to `where` parameter.'
 
     # Other filters
     # TODO JORGE IMPLEMENT ML
     # if food and food.lower() == "true":
-    #   filters.filter_by_free_food(search_dict)
+    #   event_filter.filter_by_free_food(search_dict)
 
     # return 'Success!'
 
     return jsonify({'features': unfiltered_events, 'type': 'FeatureCollection'})
 
 # SINGLE EVENT
-#TODO: Combine into one
 @events.route('/name/<event_name>', methods=['GET'])
 def get_event_by_name(event_name):
     """
@@ -212,7 +204,7 @@ def get_event_by_name(event_name):
     """
     name_regex = re.compile(event_name, re.IGNORECASE)
     search_dict = {'name': name_regex}
-    return get_data.find_events_in_database(search_dict, name_regex, True )
+    return event_collector.find_events_in_database(search_dict, name_regex, True )
 
 @events.route('/id/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
@@ -225,13 +217,12 @@ def get_event_by_id(event_id):
 
     """
     search_dict = {'id': event_id}
-    return get_data.find_events_in_database(search_dict, True)
+    return event_collector.find_events_in_database(search_dict, True)
 
 # MULTIPLE EVENTS
-#TODO: Allow all events to be returned on date not just those that start on that datetime
-#TODO: Change this to search for category list when you implement ml category model
 
- # CATEGORIES
+# CATEGORIES
+# TODO: Change this to search for category list when you implement ml category model
 @events.route('/categories', defaults={'event_date': None}, methods=['GET'])
 @events.route('/categories/<event_date>', methods=['GET'])
 def get_event_categories(event_date):
@@ -250,7 +241,7 @@ def get_event_categories(event_date):
     uniqueCats = set()
     if event_date:
         print("Using date parameter: " + event_date)
-        date_regex_obj = get_data.construct_date_regex(event_date)
+        date_regex_obj = event_collector.construct_date_regex(event_date)
         events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")

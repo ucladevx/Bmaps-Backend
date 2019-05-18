@@ -1,19 +1,13 @@
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
+
 from flask import jsonify
 import time, datetime, dateutil.parser, pytz
 from dateutil.tz import tzlocal
 from tqdm import tqdm   # a progress bar, pretty
 import json
 import os
-import re
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
-
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
-from mappening.utils.database import events_current_processed_collection
-
-from mappening.api.utils.facebook import get_data, process_data 
-
-from mappening.api.utils.eventbrite import eventbrite_scraper
 
 # each website source has its own database, where raw event info is stored
 all_raw_collections = {

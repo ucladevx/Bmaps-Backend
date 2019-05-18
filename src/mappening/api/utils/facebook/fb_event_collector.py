@@ -1,3 +1,8 @@
+from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
+from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
+
+import os
+import sys
 import requests
 import json
 import time, datetime, dateutil.parser, pytz
@@ -5,17 +10,10 @@ from dateutil.tz import tzlocal
 from pprint import pprint
 from tqdm import tqdm   # a progress bar, pretty
 
-# for sys.exit()
-import os
-
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
-# need this to run file locally, or else won't know where to find mappening.utils.*
-import sys
+# Need this to run file locally, or else won't know where to find mappening.utils.*
 sys.path.insert(0, './../../..')
-
-from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
-from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 # Specify version in case most updated version (default if not specified) removes functionality, causing errors
 API_VERSION_STR = 'v2.10/'

@@ -1,20 +1,14 @@
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
+from mappening.api.utils.eventbrite import eb_event_collector
+from mappening.api.utils.events import event_processor 
+
 from flask import jsonify
 import time, datetime, dateutil.parser, pytz
 from dateutil.tz import tzlocal
-from tqdm import tqdm   # a progress bar, pretty
 import json
-import os
 import re
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
-
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
-from mappening.utils.database import events_current_processed_collection
-
-from mappening.api.utils.facebook import get_data, process_data
-
-from mappening.api.utils.eventbrite import eventbrite_scraper
-from mappening.api.utils.events import process_data 
 
 # each website source has its own database, where raw event info is stored
 all_raw_collections = {
@@ -40,7 +34,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
     if one_result_expected:
         single_event = events_current_processed_collection.find_one(find_dict)
         if single_event:
-            output.append(process_data.process_event_info(single_event))
+            output.append(event_processor.process_event_info(single_event))
             if print_results:
                 print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
         else:
@@ -51,7 +45,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
         events_cursor = events_current_processed_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                output.append(process_data.process_event_info(event))
+                output.append(event_processor.process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
@@ -136,9 +130,9 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     
     clean_up_existing_events(days_back_in_time)
 
-    events = eventbrite_scraper.get_raw(days_back_in_time)
-    eventbrite_scraper.database_updates(events)
-    eb_count = eventbrite_scraper.process_events(events)
+    events = eb_event_collector.get_raw(days_back_in_time)
+    eb_event_collector.database_updates(events)
+    eb_count = eb_event_collector.process_events(events)
 
     # processed_db_events 'todo'
     new_events_data = {'metadata': {'events': eb_count}}
