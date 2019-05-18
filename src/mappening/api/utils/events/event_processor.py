@@ -1,4 +1,4 @@
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection, events_internal_added_collection
 
 from flask import jsonify
 import time, datetime, dateutil.parser, pytz
@@ -9,21 +9,12 @@ import os
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
-# each website source has its own database, where raw event info is stored
-all_raw_collections = {
-    'eventbrite': events_eventbrite_collection,
-    'facebook': events_fb_collection,
-    'test': events_test_collection
-}
-#Processing events 
-
 def process_event_info(event):
     """
         :Description: Returns GeoJSON of singular event matching event name
 
         :param str event_name: case-insensitive name string to search database for exact match
     """
-
     # Remove certain keys from dictionary
     event.pop('_id', None) # pop is basically get and remove; pop(key, default)
     event.get('place', {}).pop('id', None) # pop is basically used as if it exists, remove it

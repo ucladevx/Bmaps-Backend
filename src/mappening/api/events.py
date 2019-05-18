@@ -1,5 +1,5 @@
 # Interacting with events collection in mlab
-from mappening.utils.database import events_current_processed_collection, test_collection
+from mappening.utils.database import events_internal_added_collection, events_current_processed_collection, test_collection
 from mappening.api.utils.events import event_collector, event_processor, event_filter
 
 from flask import Flask, jsonify, request, json, Blueprint
@@ -25,7 +25,7 @@ def get_all_events():
     :Description: Returns a GeoJSON of all events within a few miles of UCLA
 
     """
-    return event_collector.find_events_in_database(print_results=True)
+    return event_collector.find_events_in_database(print_results=False)
 
 @events.route('/test')
 def test():
@@ -326,6 +326,6 @@ def add_event():
     'name': place
   }
   event['end_time'] = end_date
-  res = events_current_processed_collection.insert_one(event)
+  res = events_internal_added_collection.insert_one(event)
   
   return jsonify({'error': None, 'id': str(res.inserted_id)})
