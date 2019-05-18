@@ -18,6 +18,7 @@ import sys
 from mappening import app
 from mappening.utils import scheduler
 from mappening.api.utils.events import get_data, process_data
+from mappening.api.utils.eventbrite import eventbrite_scraper
 
 from flask import Flask
 import datetime
@@ -49,9 +50,12 @@ def thread_scheduler(args):
     # pass in args from command line, need to check it's there
     if not dbit or dbit < 1:
         dbit = 0
-    event_utils.update_ucla_events_database(use_test=args.test,
+    get_data.update_ucla_events_database(use_test=args.test,
                                             days_back_in_time=dbit,
                                             clear_old_db=args.clear)
+    events = eventbrite_scraper.get_raw(days_back_in_time)
+    eventbrite_scraper.database_updates(events)
+    eventbrite_scraper.process_events(events)
 
 # Flask defaults to port 5000
 # If debug is true, runs 2 instances at once (so two copies of all threads)

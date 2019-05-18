@@ -14,6 +14,7 @@ from mappening.utils.database import events_current_processed_collection
 from mappening.api.utils.facebook import get_data, process_data
 
 from mappening.api.utils.eventbrite import eventbrite_scraper
+from mappening.api.utils.events import process_data 
 
 # each website source has its own database, where raw event info is stored
 all_raw_collections = {
@@ -39,7 +40,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
     if one_result_expected:
         single_event = events_current_processed_collection.find_one(find_dict)
         if single_event:
-            output.append(process_event_info(single_event))
+            output.append(process_data.process_event_info(single_event))
             if print_results:
                 print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
         else:
@@ -50,7 +51,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
         events_cursor = events_current_processed_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
-                output.append(process_event_info(event))
+                output.append(process_data.process_event_info(event))
                 if print_results:
                     # Python 2 sucks
                     # event['name'] returns unicode string
