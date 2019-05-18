@@ -1,6 +1,6 @@
 # Interacting with events collection in mlab
 from mappening.utils.database import events_current_processed_collection
-from mappening.api.utils.events import event_collector, event_filter
+from mappening.api.utils.events import event_collector, event_processor, event_filter
 
 from flask import Flask, jsonify, request, json, Blueprint
 import requests, urllib
@@ -67,7 +67,7 @@ def search_events():
         term_regex = re.compile('.*' + term + '.*', re.IGNORECASE)
         search_dict["$or"] = [ {"name":term_regex}, {"description":term_regex} ] # MongoDB's syntax for find name in name or description
     if date:
-        date_regex = event_collector.construct_date_regex(date)
+        date_regex = event_processor.construct_date_regex(date)
         search_dict['start_time'] = date_regex
     if category:
         cat_regex_obj = re.compile('^{0}|{0}$'.format(category.upper()))
@@ -241,7 +241,7 @@ def get_event_categories(event_date):
     uniqueCats = set()
     if event_date:
         print("Using date parameter: " + event_date)
-        date_regex_obj = event_collector.construct_date_regex(event_date)
+        date_regex_obj = event_processor.construct_date_regex(event_date)
         events_cursor = events_current_processed_collection.find({"categories": {"$exists": True}, "start_time": date_regex_obj})
     else:
         print("No date parameter given...")

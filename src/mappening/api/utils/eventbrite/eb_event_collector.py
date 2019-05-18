@@ -103,6 +103,7 @@ def update_database(all_events):
     events_eventbrite_collection.insert_many(all_events)
 
     all_cat_ep = '/categories'
+    session = requests.Session()
     cat_resp = session.get(
         base_endpoint + all_cat_ep,
         headers = sample_headers,

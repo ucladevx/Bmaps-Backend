@@ -13,7 +13,7 @@ from haversine import haversine
 
 # Get the day's events
 def get_day_events(search_dict, day):
-  date_regex = event_collector.construct_date_regex(day)
+  date_regex = event_processor.construct_date_regex(day)
   search_dict['start_time'] = date_regex
 
 # Get current time and get all events whose start time <= current time < end time
