@@ -5,12 +5,7 @@ from mappening.api.utils.locations import fuzzy_locations, location_processor
 from flask import Flask, jsonify, request, json, Blueprint
 import re
 
-# Latitude and Longitude range from (-90, 90) and (-180, 180)
-INVALID_COORDINATE = 420
-
-# For comprehension: School of Theater, Film, TV within radius 700
-# Hammer Museum within radius 1300, Saffron and Rose within radius 1800
-RADIUS = "2000"
+from definitions import INVALID_COORDINATE, RADIUS
 
 # Go through all events in given events db and extract unique locations from the events
 # Return the array of locations discovered

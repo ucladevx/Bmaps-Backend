@@ -1,5 +1,5 @@
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
-from mappening.api.utils.eventbrite import eb_event_collector
+from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
 from mappening.api.utils.events import event_processor 
 
 from flask import jsonify
@@ -8,7 +8,7 @@ from dateutil.tz import tzlocal
 import json
 import re
 
-from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
+from definitions import BASE_EVENT_START_BOUND
 
 # each website source has its own database, where raw event info is stored
 all_raw_collections = {
@@ -127,12 +127,11 @@ def time_in_past(time_str, days_before=BASE_EVENT_START_BOUND):
 
 # Get all UCLA-related events from sources (Eventbrite, FB, etc.) and add to database
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
-    
     clean_up_existing_events(days_back_in_time)
 
     events = eb_event_collector.get_raw(days_back_in_time)
-    eb_event_collector.database_updates(events)
-    eb_count = eb_event_collector.process_events(events)
+    eb_event_collector.update_database(events)
+    eb_count = eb_event_processor.process_events(events)
 
     # processed_db_events 'todo'
     new_events_data = {'metadata': {'events': eb_count}}
