@@ -18,8 +18,9 @@ import sys
 from mappening import app
 from mappening.utils import scheduler
 from mappening.api.utils import event_utils
+from mappening.models import User
 
-from flask import Flask
+from flask import Flask, jsonify
 import datetime
 from threading import Thread
 
@@ -27,6 +28,11 @@ from threading import Thread
 @app.route('/')
 def index():
     return "Mappening is running!"
+
+
+@app.route('/db')
+def test():
+    return jsonify(users=[user.serialize() for user in User.query.all()])
 
 # https://www.jordanbonser.com/flask-session-timeout.html
 # @app.before_request

@@ -3,6 +3,8 @@ id_rsa_mappening.pem
 scraping/data/
 src/mappening/api/*/*.json
 src/mappening/api/*.json
+database/postgres/
+database/temp/
 
 # Mac Stuff
 .DS_Store

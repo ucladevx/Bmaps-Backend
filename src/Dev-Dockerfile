@@ -69,6 +69,8 @@ RUN apk add --update-cache wget
 RUN apk add --update-cache freetype-dev 
 RUN apk add --update-cache libpng-dev 
 RUN apk add --update-cache expat
+RUN apk add --update-cache postgresql-dev
+RUN apk add --update-cache musl-dev
 RUN pip install --upgrade pip
 RUN pip install numpy scipy gensim
 
