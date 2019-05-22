@@ -1,7 +1,7 @@
 from mappening.api.utils import user_utils
 from mappening.api.models.user import User
 from mappening.api import users
-from google import google_oauth
+from mappening.auth.google import google_oauth
 
 from flask import Flask, jsonify, redirect, url_for, session, request, Blueprint
 from flask_login import UserMixin, LoginManager, login_required, current_user, login_user, logout_user

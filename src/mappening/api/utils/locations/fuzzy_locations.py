@@ -1,5 +1,5 @@
 from fuzzywuzzy import fuzz
-from abbreviations_map import abbreviations_map
+from mappening.api.utils.locations.abbreviations_map import abbreviations_map
 import random
 import re
 import sys
