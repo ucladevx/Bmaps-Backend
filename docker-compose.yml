@@ -16,7 +16,7 @@ services:
     build: ./src
     ports:
       - ${API_SERVER_PORT}:${API_SERVER_PORT}
-    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done; python app.py'
+    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 2; done; python app.py'
     environment:
       - POSTGRES_URL=${POSTGRES_URL}
     depends_on:
