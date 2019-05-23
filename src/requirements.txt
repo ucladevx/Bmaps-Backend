@@ -20,3 +20,4 @@ scikit-learn
 numpy
 scipy
 pandas
+facebook-sdk
