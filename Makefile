@@ -2,10 +2,12 @@
 include .env 
 
 ECR_REPO=698514710897.dkr.ecr.us-west-1.amazonaws.com
+BASE_NAME=mappening/base
 APP_NAME=mappening/backend
 DEV_NAME=mappening/dev
 PROD_DOCKERFILE=./src/Dockerfile
-DEV_DOCKERFILE=./src/Dev-Dockerfile
+BASE_DOCKERFILE=./src/Base-Dockerfile
+DEV_DOCKER_COMPOSE=./docker-compose-dev.yml
 
 ##########################      AWS / PRODUCTION      ##########################
 
@@ -36,6 +38,10 @@ dora: ecr-login build-dora
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
 # Build backend image
+build-base:
+	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
+
+# Build backend image
 build-dev:
 	docker build ./src -t $(APP_NAME) -f $(DEV_DOCKERFILE)
 
@@ -56,7 +62,10 @@ stop:
 
 ##################     			  IN PROGRESS: POSTGRES 			    ##################
 
-up:
+up-dev:
+	docker-compose up -f $(DEV_DOCKER_COMPOSE) --build
+
+up-prod:
 	docker-compose up --build
 
 # Stops the stack. Can also Ctrl+C in the same terminal window stack was run.
