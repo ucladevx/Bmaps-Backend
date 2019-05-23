@@ -12,12 +12,13 @@ args = parser.parse_args()
 
 # There's an 'app' Flask object in mappening's __init__.py
 # App object also links to blueprints to other modules
-from mappening import app
+from mappening import app, db
+from mappening.models import Address
 from mappening.utils import scheduler
 from mappening.api.utils.events import event_collector
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
 
-from flask import Flask
+from flask import Flask, jsonify, request
 import datetime
 from threading import Thread
 
@@ -25,6 +26,17 @@ from threading import Thread
 @app.route('/')
 def index():
     return "The Mappening API is running!"
+
+# Sample database route
+@app.route('/db')
+def test():
+    return jsonify(addresses=[address.serialize() for address in Address.query.all()])
+
+# https://www.jordanbonser.com/flask-session-timeout.html
+# @app.before_request
+# def before_request():
+#     flask.session.permanent = True
+#     app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 
 # Runs threads to periodically update events. Also updates database. 
 # For dev purposes, only call this when we are in prod.

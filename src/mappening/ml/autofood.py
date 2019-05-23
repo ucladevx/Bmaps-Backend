@@ -1,5 +1,5 @@
 # Run this file to backfill/rerun the algorithm for events_current_processed_collection
-import cPickle as pickle
+import pickle
 import pandas as pd
 from scipy.sparse import hstack
 import itertools
