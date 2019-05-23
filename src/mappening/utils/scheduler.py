@@ -8,7 +8,7 @@ from threading import Thread
 
 # "return a StringIO-like stream for reading and writing"
 # basically allows stdoutput to be saved into a stream
-from cStringIO import StringIO
+from io import StringIO
 import sys, traceback
 
 # (hour, minute) pairs for when to refresh events every day (using 24 hour clock), IN LA TIME

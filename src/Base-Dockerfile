@@ -1,0 +1,96 @@
+# Takes around 15-20 minutes to run the first time (depending on your computer)
+FROM python:3.7-alpine3.8
+
+LABEL maintainer="kwijaya@gmail.com"
+
+ENV ALPINE_VERSION=3.8 \
+  PACKAGES="bash ca-certificates python3 py-setuptools curl"
+
+# Set the PYTHON UNICODE
+ENV PYTHONIOENCODING UTF-8
+
+# # WARNING: The repository tag for world dependency 'openblas-dev@community' does not exist
+# # # Replacing default repositories with edge ones
+# RUN echo \
+# #   # && echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" > /etc/apk/repositories \
+#   && echo "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_VERSION/community" >> /etc/apk/repositories
+# #   # && echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
+
+# # # Add the packages, with a CDN-breakage fallback if needed
+# RUN echo \
+#   && apk add --no-cache $PACKAGES || \
+#   (sed -i -e 's/dl-cdn/dl-4/g' /etc/apk/repositories && apk add --no-cache $PACKAGES)
+
+# # turn back the clock - hacky lmao
+# RUN echo \
+#   # && echo "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_VERSION/main/" > /etc/apk/repositories
+#   # && echo "@edge-testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+#   # && echo "@edge-community http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+#   # && echo "@edge-main http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories \
+
+#   # make some useful symlinks that are expected to exist
+#   RUN echo \
+#   && if [[ ! -e /usr/bin/python ]];        then ln -sf /usr/bin/python3.7 /usr/bin/python; fi \
+#   && if [[ ! -e /usr/bin/python-config ]]; then ln -sf /usr/bin/python3.7-config /usr/bin/python-config; fi \
+#   && if [[ ! -e /usr/bin/easy_install ]];  then ln -sf /usr/bin/easy_install-3.7 /usr/bin/easy_install; fi
+
+# Install and upgrade Pip
+# RUN echo \
+#   && easy_install pip3 \
+#   && pip3 install --upgrade pip3 \
+#   && if [[ ! -e /usr/bin/pip3 ]]; then ln -sf /usr/bin/pip3.7 /usr/bin/pip3; fi
+
+# Install geos-dev and some other packages for shapely
+RUN apk update && apk upgrade && apk add --no-cache --update build-base git
+
+# Add GEOS for shapely
+RUN echo "http://mirror.leaseweb.com/alpine/edge/testing/" >> /etc/apk/repositories
+RUN apk add --no-cache geos-dev
+# RUN apk add --no-cache geos-dev openblas-dev@community expat@community
+
+# Install needed packages
+# https://github.com/jfloff/alpine-python/issues/24?fbclid=lwAR08KeopkO3ET6hz8iZ6bV0hEljjpHZaKR2bXMZAUjJsKnauzDLflzeTdpTY
+RUN set -ex ;\
+  echo "@community http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_VERSION/community" >> /etc/apk/repositories ;\
+  apk add --no-cache --update \
+  openblas-dev@community \
+  expat@community;
+  # rm /var/cache/apk/*
+
+# Install numpy and scipy for ml categories
+# Takes 5 years to run... building this part as the base image
+# It is cached but just in case we're adding this image
+# https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
+# Dmaa split these into separate lines for debugging
+RUN apk add --update-cache gcc 
+RUN apk add --update-cache gfortran
+RUN apk add --update-cache python 
+RUN apk add --update-cache python-dev 
+RUN apk add --update-cache py-pip 
+# RUN apk add --update-cache build-base 
+RUN apk add --update-cache wget 
+RUN apk add --update-cache freetype-dev 
+RUN apk add --update-cache libpng-dev 
+RUN apk add --update-cache expat
+RUN apk add --update-cache postgresql-dev
+RUN apk add --update-cache musl-dev
+
+# RUN apk add py3-numpy@community py3-scipy@community py-pandas@community
+# RUN pip3 install --upgrade pip
+RUN pip3 install git+https://github.com/mitsuhiko/flask-oauth
+RUN pip3 install numpy scipy gensim
+RUN pip3 install Cython
+RUN pip3 install scikit-learn
+RUN pip3 install pandas
+
+# # Install the rest of the packages
+# COPY requirements.txt /tmp
+# RUN cd /tmp && pip3 install -r requirements.txt
+
+# WORKDIR /app
+# COPY . .
+# RUN ls -l
+
+# EXPOSE 5000
+# CMD ["python3", "app.py"]
+# # CMD ["python3", "app.py", "-p"]
