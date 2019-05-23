@@ -1,18 +1,12 @@
 id,name,street,latitude,longitude,updated_at,created_at
-"Bruin Bear",,"Bruin Statue, Los Angeles, CA 90095",,34.0709621,-118.4449902
-"Boelter Hall",,"580 Portola Plaza, Los Angeles, CA 90095",34.0692387,-118.4432394
+"Bruin Bear","Bruin Statue, Los Angeles, CA 90095",34.0709621,-118.4449902
 "Janss Steps","UCLA Janss Steps, Los Angeles, CA 90095",34.0721839,-118.4431435
 "Bruin Plaza","6 Bruin Walk, Los Angeles, CA 90095",34.0708449,-118.4447706
-"Engr IV","420 Westwood Plaza, Los Angeles, CA 90095",34.0687994,-118.4440275
-"Engr VI","404 Westwood Plaza, Los Angeles, CA 90095",34.0694996,-118.4445256
-"Bunche Hall","11282 Portola Plaza, Los Angeles, CA 90095",34.0741507,-118.4400738
-"Court of Sciences","617 Charles E Young Dr E, Los Angeles, CA 90095",34.0683494,-118.4422517
+"The Hill Top Shop",,34.0724605,-118.4508848
 "John Wooden Center","221 Westwood Plaza, Los Angeles, CA 90095",34.0712267,-118.4457251
 "Pauley Pavilion","301 Westwood Plaza, Los Angeles, CA 90095",34.0704818,-118.4468023
 "Kerckhoff Hall","308 Westwood Plaza, Los Angeles, CA 90095",34.0704371,-118.4436004
 "Sunset Village","330 De Neve Drive, Los Angeles, California 90095",34.0729717,-118.4510504
-"Rieber Hall","Rieber Hall, UCLA, De Neve Dr, Los Angeles, CA 90024",34.0716799,-118.4514988
-"Hedrick Hall","250 De Neve Dr, Los Angeles, CA 90024",34.0731836,-118.4523152
 "Central Ticket Office","325 Westwood Plaza, Los Angeles, CA 9009",34.070159,-118.4456222
 "Parking Structure 1","701 Gayley Ave, Los Angeles, CA 90024",34.0647715,-118.4473936
 "Parking Structure 2","719 Hilgard Ave, Los Angeles, CA 90024",34.0686012,-118.4398581
@@ -34,13 +28,13 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Bruin Plate (Bplate) Dining Hall","350 Charles E Young Drive West, Los Angeles, CA 90095",34.0717884,-118.4497225
 "Café 1919","330 De Neve Dr, Los Angeles, CA 90095",34.0724645,-118.450
 "Bruin Café (Bcaf)","350 De Neve Dr, Los Angeles, CA 90095",34.0726066,-118.4503324
-"Rieber Hall","310 De Neve Dr, Los Angeles, CA 90095",34.0716799-118.4514988
-"Rieber Vista","280 De Neve Dr, Los Angeles, CA 90095",34.0721404-118.4520156
-"Rieber Terrace","270 De Neve Dr, Los Angeles, CA 90095",34.0725264-118.4522147
+"Rieber Hall","310 De Neve Dr, Los Angeles, CA 90095",34.0716799,-118.4514988
+"Rieber Vista","280 De Neve Dr, Los Angeles, CA 90095",34.0721404,-118.4520156
+"Rieber Terrace","270 De Neve Dr, Los Angeles, CA 90095",34.0725264,-118.4522147
 "Rieber Turnaround",,34.072292,-118.452604
-"Hedrick Hall","250 De Neve Dr, Los Angeles, CA 90095",34.0731835-118.4523152
-"Hedrick Summit","250 De Neve Dr, Los Angeles, CA 90095",34.0739617-118.4527217
-"Hedrick Turnaround",,34.0734451-118.4528347
+"Hedrick Hall","250 De Neve Dr, Los Angeles, CA 90095",34.0731835,-118.4523152
+"Hedrick Summit","250 De Neve Dr, Los Angeles, CA 90095",34.0739617,-118.4527217
+"Hedrick Turnaround",,34.0734451,-118.4528347
 "Sproul Hall","350 De Neve Dr, Los Angeles, CA 90095",34.0724491,-118.4501209
 "Sproul Cove","330 De Neve Dr, Los Angeles, CA 90095",34.0716938,-118.4508788
 "Sproul Landing","380 De Neve Dr, Los Angeles, CA 90095",34.0714711,-118.4501347
@@ -65,7 +59,6 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Canyon Point","200 De Neve Dr, Los Angeles, CA 90095",34.0734057,-118.4510124
 "Courtside","200 De Neve Dr, Los Angeles, CA 90095",34.0738975,-118.4499689
 "Delta Terrace","200 De Neve Dr, Los Angeles, CA 90095",34.0729716,-118.4510503
-"Sunset Village",,34.073089,-118.450587
 "Housing Mail Center","330 De Neve Dr, Los Angeles, CA 90095",34.0728541,-118.450812
 "Sunset Canyon Recreation Center","111 Easton Dr, Los Angeles, CA 90024",34.0752325,-118.451058
 "Sunset Canyon Recreation Center Pool","111 Easton Dr, Los Angeles, CA 90024",34.0745904,-118.452198
@@ -98,7 +91,7 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Southern Regional Library Facility","305 De Neve Dr, Los Angeles, CA 90095",34.0710284,-118.4541895
 "Los Angeles Public Library","1246 Glendon Ave, Los Angeles, CA 90024",34.0579224,-118.4418236
 "East Asian Library (Richard C. Rudolph)","21617 Research Library Bldg, Los Angeles, CA 90095",34.0749691,-118.441466
-"Gonda Family Library","330 Charles E Young Dr N, Los Angeles, CA 90095","34.0753258,-118.4440334",
+"Gonda Family Library","330 Charles E Young Dr N, Los Angeles, CA 90095",34.0753258,-118.4440334
 "American Indian Studies Center Library","3220 Portola Plaza, Los Angeles, CA 90095",34.0738602,-118.4413171
 "Asian American Studies Center Library","3230 Campbell Hall, Los Angeles, CA 90095",34.0738602,-118.4413171
 "Chicano Studies Research Center Library","144 Haines Hall, Los Angeles, CA 90095",34.0728933,-118.4412545
@@ -110,7 +103,6 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Flagpole",,34.0721968,-118.4408979
 "Founder's Rock",,34.0721365,-118.4378213
 "Inverted Fountain",,34.0700765,-118.4407628
-"Janss Steps",,34.0721839,-118.4431435
 "Kinsey Science Teaching Pavilion","Portola Plaza Bldg, 460 Portola Plaza, Los Angeles, CA 90095",34.0701066,-118.4412542
 "La Kretz Garden Pavilion","707 Tiverton Dr, Los Angeles, CA 90095",34.0665843,-118.4415215
 "Marshall Field",,34.0719897,-118.4482644
@@ -118,7 +110,6 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Murphy Sculpture Garden","245 Charles E Young Dr E, Los Angeles, CA 90095",34.0751149,-118.4400683
 "Shapiro Fountain","340 Royce Dr, Los Angeles, CA 90024",34.0721971,-118.4425548
 "Spaulding Field","309 Westwood Plaza, Los Angeles, CA 90095",34.0694729,-118.4468853
-"Schoenberg Music Building","445 Charles E. Young Dr E, Los Angeles, CA 90095",34.0706907,-118.4401321
 "Anderson School of Management","110 Westwood Plaza, Los Angeles, CA 90095",34.0738084,-118.4436511
 "Career Center","501 Westwood Plaza, Los Angeles, CA 90095",34.0685739,-118.4451727
 "Counseling and Psychological Services (CAPS)","221 Westwood Plaza, Los Angeles, CA 90095",34.071321,-118.4460267
@@ -181,9 +172,9 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Drake Track & Field Stadium","340 Charles E. Young Dr. North, Los Angeles, CA 90024",34.0716229,-118.4482597
 "EH&S Services Building","550 Charles E. Young Dr. West, Los Angeles, CA 90024",34.0684202,-118.447633
 "Emergency Department","757 Westwood Plaza, Los Angeles, CA 90024",34.0666437,-118.4467989
-"Engineering IV","420 Westwood Plaza, Los Angeles, CA 90024",34.0687994,-118.4440275
-"Engineering V","410 Westwood Plaza, Los Angeles, CA 90024",34.0694535,-118.4437824
-"Engineering VI","404 Westwood Plaza, Los Angeles, CA 90024",34.0694996,-118.4445256
+"Engineering IV (EIV)","420 Westwood Plaza, Los Angeles, CA 90024",34.0687994,-118.4440275
+"Engineering V (EV)","410 Westwood Plaza, Los Angeles, CA 90024",34.0694535,-118.4437824
+"Engineering VI (EVI)","404 Westwood Plaza, Los Angeles, CA 90024",34.0694996,-118.4445256
 "Facilities Management Building","731 Charles E. Young Dr. South, Los Angeles, CA 90024",34.067192,-118.4469286
 "Factor Health Sciences Building","700 Tiverton Ave., Los Angeles, CA 90024",34.066771,-118.441982
 "Faculty Center","480 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0703209,-118.4392384
@@ -200,10 +191,9 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Geffen Playhouse","10886 Le Conte Ave., Los Angeles, CA 90024",34.0635118,-118.4443932
 "Geology Building","595 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0692135,-118.44059
 "Goldberg Medical Building","300 Medical Plaza, Los Angeles, CA 90024",34.0645258,-118.4460644
-"Gonda (Goldschmeid) Center","695 Charles E. Young Dr. South, Los Angeles, CA 90024",34.0673704,-118.4446824
+"Gonda (Goldschmeid) Research Center","695 Charles E. Young Dr. South, Los Angeles, CA 90024",34.0673704,-118.4446824
 "Graduate School of Education & Information Studies (GSE&IS)","290 Charles E. Young Dr. North, Los Angeles, CA 90024",34.0750904,-118.4421242
 "Haines Hall","375 Portola Plaza, Los Angeles, CA 90024",34.0728785,-118.4411359
-"Hammer Museum","10889 Wilshire Blvd., Los Angeles, CA 90024",34.0594678,-118.4436623
 "Hershey Hall","612 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0669353,-118.4400312
 "Hillblom Islet Research Center","900 Weyburn Place North, Los Angeles, CA 90024",34.062928,-118.4496577
 "Hilgard Bus Terminal","403 Hilgard Ave., Los Angeles, CA 90024",34.071141,-118.43842
@@ -212,13 +202,12 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Jules Stein Eye Institute","100 Stein Plaza, Los Angeles, CA 90024",34.0651092,-118.4439674
 "Renee And David Kaplan Hall (Humanities)","415 Portola Plaza, Los Angeles, CA 90024",34.0713898,-118.4411799
 "Kaufman Hall","120 Westwood Plaza, Los Angeles, CA 90024",34.0728633,-118.4440614
-"Kerckhoff Hall","308 Westwood Plaza, Los Angeles, CA 90024",34.0704371,-118.4436004
 "Kinross Recreation Center","11100 Kinross Ave., Los Angeles, CA 90024",34.059165,-118.4481586
 "Kinross South","11020 Kinross Ave., Los Angeles, CA 90024",34.0587068,-118.4463456
 "Knudsen Hall","475 Portola Plaza, Los Angeles, CA 90024",34.0705889,-118.4410971
 "La Kretz Hall (Botany Building)","619 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0675862,-118.4426849
 "School of Law","385 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0730485,-118.4384322
-"Life Sciences Building","621 Charles E. Young Dr. South, Los Angeles, CA 90024",34.0672324,-118.442194
+"Terisaki Life Sciences Building","610 Charles E. Young Dr. South, Los Angeles, CA 90024",34.0672324,-118.442194
 "Los Angeles Tennis Center (Straus Stadium)","420 Charles E. Young Dr. West, Los Angeles, CA 90024",34.0703932,-118.4484099
 "Meyer & Renee Luskin Conference Center","425 Westwood Plaza, Los Angeles, CA 90024",34.069179,-118.445718
 "Luskin School of Public Affairs","337 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0744024,-118.4390865
@@ -247,13 +236,11 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Orthopaedic Hospital Research Center (OHRC)","615 Charles E. Young Dr., South, Los Angeles, CA 90024",34.0671588,-118.4413307
 "Oppenheimer Tower","10880 Wilshire Blvd., Los Angeles, CA 90024",34.0585179,-118.4429337
 "Ostin Music Center","445 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0702448,-118.4403208
-"Pauley Pavilion","301 Westwood Plaza, Los Angeles, CA 90024",34.0704818,-118.4468023
 "Perloff Hall","365 Portola Plaza, Los Angeles, CA 90024",34.073456,-118.4401909
 "Physics & Astronomy Building (PAB)","430 Portola Plaza, Los Angeles, CA 90024",34.0706955,-118.44158
 "Plant Growth Center","614 Charles E. Young Dr. South, Los Angeles, CA 90024",34.0663022,-118.4402734
 "Police Station","601 Westwood Plaza, Los Angeles, CA 90024",34.0673085,-118.4454037
 "Portola Plaza Building","460 Portola Plaza, Los Angeles, CA 90024",34.0702173,-118.4418507
-"Powell Library","10740 Dickson Plaza, Los Angeles, CA 90024",34.0716126,-118.4421809
 "Reed Neurological Research Center","710 Westwood Plaza, Los Angeles, CA 90024",34.0662753,-118.44477
 "Rehabilitation Center","1000 Veteran Ave., Los Angeles, CA 90024",34.0604386,-118.4489856
 "Resnick Neuropsychiatric Hospital","150 UCLA Medical Plaza, Los Angeles, CA 90024",34.0661681,-118.4464463
@@ -265,10 +252,8 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Semel Institute","760 Westwood Plaza, Los Angeles, CA 90024",34.0658662,-118.4446615
 "Slichter Hall","603 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0689305,-118.4407805
 "Southern Regional Library Facility (SRLF)","305 De Neve Dr., Los Angeles, CA 90024",34.0710282,-118.4541896
-"Spieker Aquatics Center","114 Easton Dr., Los Angeles, CA 90024",34.0749062,-118.450578
 "Strathmore Building","501 - 555 Westwood Plaza, Los Angeles, CA 90024",34.0682478,-118.4452144
 "Student Activities Center (SAC)","220 Westwood Plaza, Los Angeles, CA 90024",34.0715644,-118.4440863
-"Sunset Canyon Recreation Center","111 Easton Dr., Los Angeles, CA 90024",34.0752324,-118.4510578
 "Terasaki Life Sciences Building","610 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0671903,-118.4403727
 "Tiverton Patient Family Guest House","900 Tiverton Ave., Los Angeles, CA 90024",34.0630925,-118.4421359
 "Transit Operations Maintenance Yard","11075 Kinross Ave., Los Angeles, CA 90024",34.0594811,-118.4483717
@@ -289,10 +274,17 @@ id,name,street,latitude,longitude,updated_at,created_at
 "West Medical Building","1010 Veteran Ave., Los Angeles, CA 90024",34.0604168,-118.4472229
 "West Medical Steam Plant","1021 Weyburn Place South, Los Angeles, CA 90024",34.061004,-118.4482162
 "Weyburn Terrace Housing Complex",,34.0631587,-118.4508505
+"Aloe Court","740 Weyburn Terrace, Los Angeles, CA 90024",34.0635462,-118.4512627
+"Cypress Court","725 Weyburn Terrace, Los Angeles, CA 90024",34.0633481,-118.4520113
+"Jacaranda Court","785 Weyburn Terrace, Los Angeles, CA 90024",34.0628004,-118.4514998
+"Magnolia Court","765 Weyburn Terrace, Los Angeles, CA 90024",34.0637379,-118.450633
+"Olive Court","825 Weyburn Terrace, Los Angeles, CA 90024",34.0621111,-118.450844
+"Palm Court","945 Weyburn Terrace, Los Angeles, CA 90024",34.0613578,-118.4501121
+"Sycamore Court","925 Weyburn Terrace, Los Angeles, CA 90024",34.0621787,-118.4490299
+"Weyburn Graduate Student Housing","1020 Weyburn Drive, Los Angeles, CA 90024",34.0619014,-118.4501911
 "Wilshire Center","10920 Wilshire Blvd., Los Angeles, CA 90024",34.0581942,-118.4444166
 "Wooden Recreation and Sports Center","221 Westwood Plaza, Los Angeles, CA 90024",34.0715969,-118.4452261
 "Young Hall","607 Charles E. Young Dr. East, Los Angeles, CA 90024",34.0685828,-118.4415114
-"Young Research Library (YRL)","280 Charles E. Young Dr. North, Los Angeles, CA 90024",34.0749691,-118.441466
 "700 Westwood Plaza","700 Westwood Plaza, Los Angeles, CA 90024",34.0667059,-118.4447794
 "W Los Angeles","930 Hilgard Ave, Los Angeles, CA 90024",34.063259,-118.441103
 "The Hideout","930 Hilgard Ave., Los Angeles, CA 90024",34.0633123,-118.440862
@@ -524,6 +516,6 @@ id,name,street,latitude,longitude,updated_at,created_at
 "Westwood Village Ambassadors","10887 Weyburn Ave., Los Angeles, CA 90024",34.0588444,-118.4421313
 "Westwood Driving School","1093 Broxton Ave. #218, Los Angeles, CA 90024",34.0607344,-118.4459499
 "Christian Science Reading Room","1125 Glendon Ave., Los Angeles, CA 90024",34.0603854,-118.4442438
-"Jews for Jesus","10962 Le Conte Ave., Los Angeles, CA 90024",34.0635145,-118.4475063
 "Westwood Village Synagogue","1148 Westwood Blvd., Los Angeles, CA 90024",34.0598454,-118.4445929
 "Westwood Hills Christian Church","10808 Le Conte Ave., Los Angeles, CA 90024",34.0635325,-118.4417749
+"Jews for Jesus","10962 Le Conte Ave., Los Angeles, CA 90024",34.0635145,-118.4475063
