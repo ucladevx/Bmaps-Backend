@@ -53,7 +53,7 @@ CREATE TABLE organizer (
 CREATE TABLE address (
     id SERIAL PRIMARY KEY,
     name VARCHAR (255) UNIQUE NOT NULL,
-    street VARCHAR (255) NOT NULL,
+    street VARCHAR (255),
     latitude DECIMAL NOT NULL,
     longitude DECIMAL NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
