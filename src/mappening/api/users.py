@@ -4,9 +4,7 @@ from mappening.api.utils import user_utils
 
 from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_login import current_user
-from flask_cors import CORS, cross_origin
 from datetime import datetime
-import json
 
 # Route Prefix: /api/v2/users
 users = Blueprint('users', __name__)

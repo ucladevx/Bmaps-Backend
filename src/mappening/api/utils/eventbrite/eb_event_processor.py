@@ -1,23 +1,21 @@
+from mappening.utils.database import events_current_processed_collection
+from mappening.ml.autocategorization import categorizeEvents
+from mappening.ml.autofood import labelFreeFood
+from mappening.utils.secrets import EVENTBRITE_USER_KEY
+
+import os
+import sys
 import time, datetime
 from pprint import pprint
 from tqdm import tqdm
 import json
 import requests
 
-import os
+from definitions import API_UTILS_PATH
 
-import sys
 sys.path.insert(0, './../../..')
-from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection
-from mappening.utils.secrets import EVENTBRITE_USER_KEY
 
-# to map all Eventbrite categories to Facebook ones
-from mappening.ml.autocategorization import categorizeEvents
-from mappening.ml.autofood import labelFreeFood
-
-from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, API_UTILS_PATH
-
-# use this as reference for now
+# Use this as reference for now
 EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
                 'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
                 'ticket_uri', 'cover']
@@ -34,15 +32,11 @@ Government & Politics [Government] | Fashion & Beauty [Fashion] | Home & Lifesty
 Hobbies & Special Interest [Hobbies] | Other | School Activities
 """
 
-# TODO: like other APIs, split this method up
-# 1st part = get raw data and put in DB (updating repeats), 2nd part = process for events_current_processed
-def entire_eventbrite_retrieval(days_back_in_time):
-    days_back = days_back_in_time
-    days_forward = 90
-    now = datetime.datetime.now()
-    past_bound = (now - datetime.timedelta(days=days_back)).strftime('%Y-%m-%dT%H:%M:%S')
-    future_bound = (now + datetime.timedelta(days=days_forward)).strftime('%Y-%m-%dT%H:%M:%S')
+# Process for frontend to use it 
+def process_events(all_events):
 
+    all_venues = {}
+    cleaned_events = []
     session = requests.Session()
 
     personal_token = EVENTBRITE_USER_KEY
@@ -50,67 +44,7 @@ def entire_eventbrite_retrieval(days_back_in_time):
     sample_headers = {
         'Authorization': 'Bearer ' + personal_token
     }
-
-    # most events on 1 page = 50, want more
-    page_num = 1
-    request_new_results = True
-
-    events_search_ep = '/events/search'
-    search_args = {
-        'location.latitude': CENTER_LATITUDE,
-        'location.longitude': CENTER_LONGITUDE,
-        'location.within': '1mi',
-        'start_date.range_start': past_bound,
-        'start_date.range_end': future_bound,
-        'sort_by': 'best'
-    }
-
-    all_events = []
-    # loop through returned pages of events until no more, or enough
-    while request_new_results and page_num <= 20:
-        search_args['page'] = str(page_num)  # there's always a 1st page result that works
-
-        response = session.get(
-            base_endpoint + events_search_ep,
-            headers = sample_headers,
-            verify = True,  # Verify SSL certificate
-            params = search_args,
-        ).json()
-        
-        # extend, not append!
-        # combines elements of two lists as expected vs adds in the new list as ONE element (no)
-        all_events.extend(response.get('events'))
-        if 'pagination' in response and response['pagination']['has_more_items']:
-            request_new_results = True
-            page_num += 1
-        else:
-            request_new_results = False
-
-    print('done getting eventbrite events!')
-    # raw event data insert
-    # TODO: the dumb complete reinsertion thing again
-    # this should be removed completely: eventbrite_collection accumulates, never deletes
-    events_eventbrite_collection.delete_many({})
-    events_eventbrite_collection.insert_many(all_events)
-
-    all_cat_ep = '/categories'
-    cat_resp = session.get(
-        base_endpoint + all_cat_ep,
-        headers = sample_headers,
-        verify = True,
-    )
-    # list of dicts, 1 per category (with ID and name, full and shorthand)
-    all_categories = {}
-    raw_categories = cat_resp.json().get('categories')
-
-    # TODO: temp solution: throw away Eventbrite category to use ML model trained on Facebook
-    for raw_cat in raw_categories:
-        used_name = raw_cat['short_name']
-        all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
-
-    all_venues = {}
-
-    cleaned_events = []
+    
     for event_info in tqdm(all_events):
         one_event = {
             'id': event_info.get('id', -1),
@@ -166,7 +100,7 @@ def entire_eventbrite_retrieval(days_back_in_time):
     categorized_clean_events = categorizeEvents(cleaned_events)
     categorized_clean_events = labelFreeFood(categorized_clean_events)
 
-    # autocategorization has a cleaner way to do this path switching
+    # Autocategorization has a cleaner way to do this path switching
     savedPath = os.getcwd()
     os.chdir(API_UTILS_PATH)
     with open('evebr.json', 'w') as f:
@@ -181,6 +115,3 @@ def entire_eventbrite_retrieval(days_back_in_time):
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
-
-# if __name__ == '__main__':
-#     entire_eventbrite_retrieval(0)

@@ -1,12 +1,12 @@
-from mappening.utils.secrets import MLAB_USERNAME, MLAB_PASSWORD
+from mappening.utils.secrets import MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST
 
 from pymongo import MongoClient
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-events_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/events'.format(MLAB_USERNAME, MLAB_PASSWORD)
-locations_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/locations'.format(MLAB_USERNAME, MLAB_PASSWORD)
-users_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/users'.format(MLAB_USERNAME, MLAB_PASSWORD)
-tkinter_uri = 'mongodb://{0}:{1}@ds014388.mlab.com:14388/tkinter'.format(MLAB_USERNAME, MLAB_PASSWORD)
+events_uri = 'mongodb://{0}:{1}@{2}/events'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
+locations_uri = 'mongodb://{0}:{1}@{2}/locations'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
+users_uri = 'mongodb://{0}:{1}@{2}/users'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
+tkinter_uri = 'mongodb://{0}:{1}@{2}/tkinter'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
 test_uri ='mongodb://{0}:{1}@ds261828.mlab.com:61828/test_data'.format(MLAB_USERNAME, MLAB_PASSWORD)
 
 # Set up database connections
