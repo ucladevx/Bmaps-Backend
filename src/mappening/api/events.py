@@ -1,7 +1,7 @@
 # Interacting with events collection in mlab
 
 from mappening.utils.database import events_current_processed_collection
-from mappening.api.utils import event_utils, event_filters
+from mappening.api.utils import event_utils, event_filters, facebook_puppeteer_scraper
 
 from flask import Flask, jsonify, request, json, Blueprint
 from flask_cors import CORS, cross_origin
@@ -20,6 +20,13 @@ events = Blueprint('events', __name__)
 
 # Enable Cross Origin Resource Sharing (CORS)
 # cors = CORS(events)
+
+@events.route('/facebook', methods=['GET'])
+def get_fb_events():
+  """
+  hakan added for facebook events testing
+  """
+  return facebook_puppeteer_scraper.facebook_scrape()
 
 @events.route('/', methods=['GET'])
 def get_all_events():
