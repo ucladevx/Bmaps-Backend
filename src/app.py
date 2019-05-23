@@ -13,7 +13,7 @@ args = parser.parse_args()
 # There's an 'app' Flask object in mappening's __init__.py
 # App object also links to blueprints to other modules
 from mappening import app, db
-from mappening.models import User
+from mappening.models import Address
 from mappening.utils import scheduler
 from mappening.api.utils.events import event_collector
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
@@ -30,7 +30,7 @@ def index():
 # Sample database route
 @app.route('/db')
 def test():
-    return jsonify(users=[user.serialize() for user in User.query.all()])
+    return jsonify(addresses=[address.serialize() for address in Address.query.all()])
 
 # https://www.jordanbonser.com/flask-session-timeout.html
 # @app.before_request

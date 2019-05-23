@@ -81,6 +81,7 @@ pg: check-id
 
 # Copy current db data and store in temp folder. Will overwrite subsequent attempts.
 copy:
+	rm -r ./database/temp/
 	cp -r ./database/postgres/ ./database/temp/
 
 # Restore saved data.

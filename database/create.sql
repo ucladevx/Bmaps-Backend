@@ -12,7 +12,7 @@ CREATE DATABASE devxdb;
 -- -- DROP TYPE type_name;
 -- DROP TABLE IF EXISTS test;
 
--- DROP TABLE IF EXISTS g_user;
+-- DROP TABLE IF EXISTS user_account;
 -- DROP TABLE IF EXISTS address;
 -- DROP TABLE IF EXISTS location;
 -- DROP TABLE IF EXISTS event;
@@ -30,7 +30,7 @@ CREATE TABLE test (id INT PRIMARY KEY, name VARCHAR (100) NOT NULL);
 
 -- Create all tables and types
 
-CREATE TABLE g_user (
+CREATE TABLE user_account (
     id SERIAL PRIMARY KEY,
     g_id VARCHAR (100) NOT NULL,
     name VARCHAR (100) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE event (
     starts_at TIMESTAMP NOT NULL,
     ends_at TIMESTAMP NOT NULL,
     quarter academic_quarter NOT NULL,
-    organizer_id INT REFERENCES g_user(id),
+    organizer_id INT REFERENCES user_account(id),
     venue_id INT REFERENCES location(id),
     description text,
     picture_url text,
@@ -89,7 +89,7 @@ CREATE TABLE category (
 
 CREATE TABLE event_interest (
     event_id INT REFERENCES event(id),
-    user_id INT REFERENCES g_user(id),
+    user_id INT REFERENCES user_account(id),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (event_id, user_id)
@@ -114,7 +114,7 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_timestamp BEFORE UPDATE
-    ON g_user FOR EACH ROW EXECUTE PROCEDURE update_timestamp_column();
+    ON user_account FOR EACH ROW EXECUTE PROCEDURE update_timestamp_column();
 
 CREATE TRIGGER update_timestamp BEFORE UPDATE
     ON event FOR EACH ROW EXECUTE PROCEDURE update_timestamp_column();
@@ -136,7 +136,7 @@ CREATE TRIGGER update_timestamp BEFORE UPDATE
 
 -- Populate all tables
 
-\copy g_user (g_id,first_name,last_name,email,picture_url,last_login_at) FROM '/docker-entrypoint-initdb.d/data/g_user.csv' DELIMITER ',' CSV HEADER;
+\copy user_account (g_id,name,email,picture_url,is_organizer,last_login_at) FROM '/docker-entrypoint-initdb.d/data/user_account.csv' DELIMITER ',' CSV HEADER;
 
 -- SELECT location.name, address.name FROM location, address WHERE location.address_id = address.id;
 \copy address (name,street,latitude,longitude) FROM '/docker-entrypoint-initdb.d/data/address.csv' DELIMITER ',' CSV HEADER;
@@ -152,7 +152,7 @@ CREATE TRIGGER update_timestamp BEFORE UPDATE
 -- SELECT c.relname FROM pg_class c WHERE c.relkind = 'S';
 -- SELECT last_value FROM *_id_seq;
 
-SELECT setval('g_user_id_seq', (SELECT MAX(id) FROM g_user));
+SELECT setval('user_account_id_seq', (SELECT MAX(id) FROM user_account));
 SELECT setval('event_id_seq', (SELECT MAX(id) FROM event));
 SELECT setval('category_id_seq', (SELECT MAX(id) FROM category));
 SELECT setval('location_id_seq', (SELECT MAX(id) FROM location));
