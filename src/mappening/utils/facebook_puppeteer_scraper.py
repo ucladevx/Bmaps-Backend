@@ -1,4 +1,4 @@
-accessToken = 'EAAFB1Et4EnkBAEbG2jpySE1LaXB8eL9FNmI4ouaFoGyIoso1UxeAnfhNawFdTgBla2CJso5ZAk0gABhrzW1r0pYQssR0A4cIoVuLNzoNOE4VRet8tOid3slVLJSGzcfkJabhJ3izUuZCuZAy1Ashlm7QymxZC5xaQuXIll4Y21cfRUAR8MwPTSZBNjkAFqSH8Kjqk8SZC3YIzkUrVafDnJDcW0yjlFMpPpYFW6lZBqaPgZDZD'
+accessToken = 'EAAFB1Et4EnkBAORaxZBTxcCuBNZBCVt7U2hF7R2Lhn832ZC8cSF0FSwLLNaXxHtYkhFDpm6ieux7TwgZB1igYa0Sejy8wxRZAA8xxxuyMQZB4qj6HZAwRU6FbezcSSeaJkih4NvcPB3DB3tcITEjGgwzwjt3MdkA8cEsskruNxCWW8ctjFSUYvO3M3WOtiDlPgweQ8OQUos4KR6oXZC3PLLgVqWs0H10jv3u7tVQNque1gZDZD'
 
 '''
 In this file, I want to query the Facebook Graph API to get the event objects that the Mappening Facebook Account (Selim Alpay) is interested in.
@@ -22,7 +22,7 @@ import os
 import sys
 sys.path.insert(0, './../../..')
 
-from mappening.utils.database import events_fb_test_collection
+from mappening.utils.database import events_fb_puppeteer_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import facebook
@@ -31,12 +31,17 @@ def facebook_scrape():
 
     # graph = facebook.GraphAPI(access_token=accessToken) 
 
-    # haki's facebook id
-    event = graph.get_object(id='100003804778237',
+    # selim's facebook id
+    event = graph.get_object(id='100035494397802',
                             fields='events')
 
-    print('events from haki')
+    print('events from selim')
     print(event['events'])
 
     # insert_one a event object
-    # events_fb_test_collection.insert_one({'id': page_id, 'name': page_name})
+    # events_fb_puppeteer_collection.insert_one({'id': page_id, 'name': page_name})
+
+    # TODO change it
+    return 1
+
+

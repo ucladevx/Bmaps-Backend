@@ -37,6 +37,9 @@ and add to a single processed database of events from all sources
 the website uses this processed database's info directly (no processing needed when pulling it out)
 """
 
+# get events from facebook scraped with puppeteer 
+events_fb_puppeteer_collection = events_db.events_facebook_puppeteer
+
 # the eventbrite accumulating db
 events_eventbrite_collection = events_db.events_eventbrite
 # the facebook accumulating db, used to be events_ml_collection

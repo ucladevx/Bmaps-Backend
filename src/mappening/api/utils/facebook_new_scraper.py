@@ -1,3 +1,5 @@
+## DONT USE THIS ONE
+
 '''
 In this file, I want to query the Facebook Graph API to get the event objects that the Mappening Facebook Account (Selim Alpay) is interested in.
 Once I have those event objects, I want to push them to the test data facebook collection
