@@ -49,14 +49,7 @@ def thread_scheduler(args):
 # If debug is true, runs 2 instances at once (so two copies of all threads)
 if __name__ == "__main__":
     print('Arguments passed: {0}'.format(args))
-    dbit = args.days_before
     if not args.prod:
-        '''
-        Test to see if evenbrite is working 
-        events = eb_event_collector.get_raw_events(0)
-        eb_event_collector.update_database(events)
-        eb_count = eb_event_processor.process_events(events)
-        '''
         print("\n~~~~~~~~~~~~~~~~~~~\n~~~ IN DEV MODE ~~~\n~~~~~~~~~~~~~~~~~~~\n")
         app.run(host='0.0.0.0', debug=True)
     else:
