@@ -1,15 +1,86 @@
 id,name,address_id,updated_at,created_at
-Bruin Bear,1
-Rice Room (Boelter Hall 6764),2
-UCLA ACM (Boelter Hall 2763),2
-ESUC Lounge (Boelter Hall 5800),2
-Boelter Penthouse (Boelter Hall 8500),2
-Tesla Room (Engr IV 53-125),5
-Maxwell Room (Engr IV 57-124),5
-Mong Learning Center (Engr VI 180),6
-Bunche Hall 1209B,7
-John Wooden Gold Room,8
-Kerckhoff Art Gallery,10
-Sunset Village Learning Center,12
-UCLA MakerSpace (Rieber Hall),13
-Hedrick Fireside Lounge,14
+"Bruin Bear",1
+"Rice Room (Boelter Hall 6764)",2
+"UCLA ACM (Boelter Hall 2763)",2
+"ESUC Lounge (Boelter Hall 5800)",2
+"Boelter Penthouse (Boelter Hall 8500)",2
+"Tesla Room (Engr IV 53-125)",5
+"Maxwell Room (Engr IV 57-124)",5
+"Mong Learning Center (Engr VI 180)",6
+"Bunche Hall 1209B",7
+"John Wooden Gold Room",8
+"Kerckhoff Art Gallery",10
+"Sunset Village Learning Center",12
+"UCLA MakerSpace (Rieber Hall)",13
+"Hedrick Fireside Lounge",14
+
+"Undergraduate Research Center–Humanities, Arts, and Social Sciences",TODO:Murphy Hall
+"Collegiate Recovery Program",TODO:Student Activities Center
+Parking Structure 1 = Visitor Parking
+Parking Structure RC = Sunset Recreation Center
+Parking Structure SV = Sunset Village
+
+"Covel Dining Hall",,34.0730094!4d-118.4499881
+"Feast Dining Hall","310 De Neve Dr, Los Angeles, CA 90024",34.071727!4d-118.451394
+"De Neve Dining Hall","351 Charles E Young Drive West, Los Angeles, CA 90024",34.0704055!4d-118.4501706
+"Rendezvous","330 De Neve Dr, Los Angeles, CA 90024",34.0726222!4d-118.4517442
+"De Neve Late Night",,
+"The Study at Hedrick",,
+"Bruin Plate Grap & Go Breakfast",,
+
+"Rieber Learning Center",,
+"Rieber Music Rooms",,
+"Rieber Study Rooms",,
+"Rieber Hall Fireside Lounge (FSL)",,
+"Hedrick Music Rooms",,
+"Hedrick Study Rooms",,
+"Hedrick Movement Studio",,
+"Sproul Lecture Room",,
+"Sproul Music Rooms",,
+"Sproul Study Rooms",,
+"De Neve Learning Center",,
+"De Neve Meeting Rooms",,
+
+"Sunset Village Learning Center",,
+"Transfer Student Center",
+"IEEE Lab",
+"ACM Clubhouse",
+"Blackstone LaunchPad",
+Ackerman Student Store
+"De Neve Auditorium",,
+De Neve Magnolia Room
+De Neve Jaqaranda Room
+De Neve Sycamore Room
+Sunset Rec Mesa Lawn
+Ackerman Union Viewpoint
+Ackerman Grand Ballroom
+
+"Spieker Aquatics Pool",,
+Bruin Fitness Center (BFIT)
+Dashew Center
+"Office of Residential Life",,
+Sunken Gardens
+UCLA Radio Station
+Fraternity and Sorority Relations Office  105 Kerckhoff Hall, Los Angeles, CA 90024
+https://asucla.ucla.edu/where-to-eat/#1457972215694-ecfaf190-4d12
+
+Collins Executive Education Center  E3  110 Westwood Plaza 
+Cornell Hall    E3  110   Westwood Plaza
+Entrepreneurs Hall  E3  110 Westwood  Plaza
+Korn Convocation Hall  E3  110 Westwood Plaza
+Gold Hall    E3  110  Westwood  Plaza
+Mullin Management Commons  E3  110 Westwood Plaza 
+Rosenfeld Library  E3  110 Westwood Plaza
+Kerckhoff Coffee House  E4  308 Westwood Plaza
+
+Aloe   Court   C7   740  Weyburn Terrace
+Cypress Court  B7  725 Weyburn Terrace
+Jacaranda Court  C7  785 Weyburn Terrace
+Magnolia Court  C7  765 Weyburn Terrace
+Olive   Court  C7   825   Weyburn Terrace
+Palm   Court   C7   945  Weyburn Terrace
+Sycamore Court  C7  925 Weyburn Terrace
+Weyburn Graduate Student Housing  C7  1020 Weyburn Drive 
+
+https://asucla.ucla.edu/where-to-eat/#1457972215468-a89ef06e-68d9
+JOIN locations + addresses db to serve venues
