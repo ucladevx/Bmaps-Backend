@@ -149,8 +149,11 @@ CREATE TRIGGER update_timestamp BEFORE UPDATE
 
 \copy g_user (g_id,first_name,last_name,email,picture_url,last_login_at) FROM '/docker-entrypoint-initdb.d/data/g_user.csv' DELIMITER ',' CSV HEADER;
 \copy organizer (name) FROM '/docker-entrypoint-initdb.d/data/organizer.csv' DELIMITER ',' CSV HEADER;
+
+-- SELECT location.name, address.name FROM location, address WHERE location.address_id = address.id;
 \copy address (name,street,latitude,longitude) FROM '/docker-entrypoint-initdb.d/data/address.csv' DELIMITER ',' CSV HEADER;
 \copy location (name,address_id) FROM '/docker-entrypoint-initdb.d/data/location.csv' DELIMITER ',' CSV HEADER;
+
 \copy event (external_id,external_source,external_url,name,starts_at,ends_at,quarter,organizer_id,venue_id,description,picture_url,free_food) FROM '/docker-entrypoint-initdb.d/data/event.csv' DELIMITER ',' CSV HEADER;
 \copy category (name) FROM '/docker-entrypoint-initdb.d/data/category.csv' DELIMITER ',' CSV HEADER;
 \copy event_interest (event_id,user_id) FROM '/docker-entrypoint-initdb.d/data/event_interest.csv' DELIMITER ',' CSV HEADER;
