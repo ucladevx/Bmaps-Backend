@@ -20,6 +20,8 @@ MLAB_USERNAME = os.getenv('MLAB_USERNAME')
 MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
 MLAB_HOST = os.getenv('MLAB_HOST')
 
+POSTGRES_URI = os.getenv('POSTGRES_URI')
+
 APP_SECRET_KEY = os.getenv('APP_SECRET_KEY')
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY_3')

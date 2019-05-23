@@ -1,5 +1,6 @@
+from fuzzywuzzy import fuzz
+from mappening.api.utils.locations.abbreviations_map import abbreviations_map
 from mappening.utils.database import locations_collection
-from abbreviations_map import abbreviations_map
 from fuzzywuzzy import fuzz
 from unidecode import unidecode
 import random
