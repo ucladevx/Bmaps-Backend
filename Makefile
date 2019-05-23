@@ -79,12 +79,14 @@ endif
 pg: check-id
 	docker exec -ti $(CONTAINER_ID) psql -U $(POSTGRES_USER)
 
-# Copy current db data and store in temp folder. Will overwrite subsequent attempts.
-copy:
-	rm -r ./database/temp/
-	cp -r ./database/postgres/ ./database/temp/
+# Zip current db data.
+zip:
+	cd ./database/; \
+	zip -ru ./postgres.zip ./postgres/ -x *.DS_Store; \
+	echo "To unzip and restore run: make restore"
 
 # Restore saved data.
 restore:
-	rm -r ./database/postgres/
-	cp -r ./database/temp/ ./database/postgres/
+	cd ./database/; \
+	-rm -r ./database/postgres/; \
+	unzip -o ./postgres.zip
