@@ -1,4 +1,4 @@
-from mappening.api.utils import event_utils
+from mappening.api.utils.events import event_collector
 from mappening.utils.database import events_log_collection
 
 import schedule
@@ -36,7 +36,7 @@ def get_new_events_with_logs():
     # save all output of event updating call only
     sys.stdout = saved_output
     try:
-        event_utils.update_ucla_events_database()
+        event_collector.update_ucla_events_database()
     except KeyboardInterrupt:
         print('Received KeyboardInterrupt somehow.')
     except SystemExit:
@@ -76,7 +76,7 @@ def event_thread_func():
     schedule.every().day.at('00:00').do(update_for_today).tag('daily-refresh')
 
     # old way: this is time inside Docker container, which is UTC!
-    # schedule.every().day.at('21:10').do(event_utils.update_ucla_events_database)
+    # schedule.every().day.at('21:10').do(event_collector.update_ucla_events_database)
     
     while True:
         schedule.run_pending()

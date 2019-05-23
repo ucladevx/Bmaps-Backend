@@ -1,8 +1,8 @@
 # Run this before anything else: checks for command line arguments
-# default: no arguments, liked when using Makefile (normal API backend running)
+# Default: no arguments, liked when using Makefile (normal API backend running)
 import argparse
 parser = argparse.ArgumentParser()
-# to turn option into flag, use action= parameter: calls a predefined function
+# To turn option into flag, use action= parameter: calls a predefined function
 # store_true is one of many default functions for action=, later can check args.test = True
 parser.add_argument('-t', '--test', help='Use a test database, to protect live data.', action='store_true')
 parser.add_argument('-d', '--days-before', help='Specify # of days to go back in time for past events.', type=int)
@@ -10,14 +10,12 @@ parser.add_argument('-c', '--clear', help='Clear out old database data to start 
 parser.add_argument('-p', '--prod', help='Run production version of Mappening backend', action='store_true')
 args = parser.parse_args()
 
-# To quit early, call sys.exit()
-import sys
-
 # There's an 'app' Flask object in mappening's __init__.py
 # App object also links to blueprints to other modules
 from mappening import app, db
 from mappening.utils import scheduler
-from mappening.api.utils import event_utils
+from mappening.api.utils.events import event_collector
+from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
 from mappening.models import User, Address, Location
 
 from flask import Flask, jsonify, request
@@ -27,7 +25,7 @@ from threading import Thread
 # Used to check app is running, visit http://api.mappening.io:5000/
 @app.route('/')
 def index():
-    return "Mappening is running!"
+    return "The Mappening API is running!"
 
 
 @app.route('/db')
@@ -74,7 +72,7 @@ def thread_scheduler(args):
     # pass in args from command line, need to check it's there
     if not dbit or dbit < 1:
         dbit = 0
-    event_utils.update_ucla_events_database(use_test=args.test,
+    event_collector.update_ucla_events_database(use_test=args.test,
                                             days_back_in_time=dbit,
                                             clear_old_db=args.clear)
 
