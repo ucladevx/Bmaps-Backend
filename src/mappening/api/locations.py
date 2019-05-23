@@ -9,7 +9,7 @@ locations = Blueprint('locations', __name__)
 
 @locations.route('/', methods=['GET'])
 def get_all_locations():
-    """ 
+    """
     :Route: /
 
     :Description: Returns a JSON of all UCLA/Westwood locations in the database
@@ -32,7 +32,7 @@ def get_all_locations():
 
 @locations.route('/search', methods=['GET'])
 def get_location_results():
-    """ 
+    """
     :Route: /search?term=str&count=0
 
     :Description: Returns a JSON of all UCLA/Westwood locations filtered by the case-insensitive search `term` and limited by `count` in the number of returned results.
@@ -50,7 +50,7 @@ def get_location_results():
     2) Check if term matches one of the names in the alternative locations and the abbreviations map
     3) Use fuzzy matching on locations in database
     """
-    
+
     term = request.args.get('term')
     count = request.args.get('count')
     print("term: {}".format(term))
@@ -82,7 +82,7 @@ def get_location_results():
 # Print all results in JSON, a wrapper for Google's API
 @locations.route('/google/search', methods=['GET'])
 def get_google_search():
-    """ 
+    """
     :Route: /google/search?api=text&term=str
 
     :Description: Returns a JSON of location results given by the Google Maps TextSearch or NearbySearch API on a given query. Essentially a wrapper for Google's Places API. The NearbySearch returns more results than TextSearch.
@@ -98,12 +98,15 @@ def get_google_search():
     api = request.args.get('api')
 
     output = []
-    print('term for search: ' + term)
-    # Default is text search API
-    if api and api == 'text' or not api:
-      output = location_processor.google_textSearch(term)
-    elif api and api == 'nearby':
-      output = location_processor.google_nearbySearch(term)
-  
+    if not term:
+        print('no search term')
+    else:
+        print('term for search: ' + term)
+        # Default is text search API
+        if api and api == 'text' or not api:
+            output = location_processor.google_textSearch(term)
+        elif api and api == 'nearby':
+            output = location_processor.google_nearbySearch(term)
+
 
     return jsonify({'results': output})
