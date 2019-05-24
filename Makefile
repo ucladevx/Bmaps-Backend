@@ -63,7 +63,7 @@ stop:
 ##################     			  IN PROGRESS: POSTGRES 			    ##################
 
 up-dev:
-	docker-compose up -f $(DEV_DOCKER_COMPOSE) --build
+	docker-compose -f $(DEV_DOCKER_COMPOSE) up --build
 
 up-prod:
 	docker-compose up --build

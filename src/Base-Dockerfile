@@ -22,9 +22,6 @@ RUN set -ex ;\
   openblas-dev@community \
   expat@community;
 
-# https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
-RUN apk add --update-cache gcc gfortran python python-dev py-pip wget freetype-dev libpng-dev expat postgresql-dev musl-dev
-
 # Install pip packages to:
 #   1) deal with order dependencies
 #   2) save us a ton of time for future requirements.txt modifications
@@ -33,3 +30,6 @@ RUN pip3 install numpy scipy gensim
 RUN pip3 install Cython
 RUN pip3 install scikit-learn
 RUN pip3 install pandas
+
+# https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
+RUN apk add --update-cache bash gcc gfortran python python-dev py-pip wget freetype-dev libpng-dev expat postgresql-dev musl-dev
