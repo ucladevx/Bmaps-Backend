@@ -1,0 +1,35 @@
+# Takes around 15-20 minutes to run the first time (depending on your computer)
+FROM python:3.7-alpine3.8
+
+LABEL maintainer="kwijaya@gmail.com"
+
+ENV ALPINE_VERSION=3.8 \
+  PACKAGES="bash ca-certificates python3 py-setuptools curl"
+
+# Set the PYTHON UNICODE
+ENV PYTHONIOENCODING UTF-8
+
+# Install geos-dev and some other packages for shapely
+RUN apk update && apk upgrade && apk add --no-cache --update build-base git
+RUN echo "http://mirror.leaseweb.com/alpine/edge/testing/" >> /etc/apk/repositories
+RUN apk add --no-cache geos-dev
+
+# Install needed packages
+# https://github.com/jfloff/alpine-python/issues/24?fbclid=lwAR08KeopkO3ET6hz8iZ6bV0hEljjpHZaKR2bXMZAUjJsKnauzDLflzeTdpTY
+RUN set -ex ;\
+  echo "@community http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_VERSION/community" >> /etc/apk/repositories ;\
+  apk add --no-cache --update \
+  openblas-dev@community \
+  expat@community;
+
+# Install pip packages to:
+#   1) deal with order dependencies
+#   2) save us a ton of time for future requirements.txt modifications
+RUN pip3 install git+https://github.com/mitsuhiko/flask-oauth
+RUN pip3 install numpy scipy gensim
+RUN pip3 install Cython
+RUN pip3 install scikit-learn
+RUN pip3 install pandas
+
+# https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
+RUN apk add --update-cache bash gcc gfortran python python-dev py-pip wget freetype-dev libpng-dev expat postgresql-dev musl-dev

@@ -1,6 +1,5 @@
 flask
 flask_cors
-flask-oauth
 flask_compress
 flask_login
 pymongo
@@ -17,9 +16,3 @@ fuzzywuzzy
 unidecode
 psycopg2
 Flask-SQLAlchemy
-
-# Machine Learning
-scikit-learn
-numpy
-scipy
-pandas
