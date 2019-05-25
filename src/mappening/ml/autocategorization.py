@@ -1,4 +1,4 @@
-import pickle
+import _pickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
 import itertools
@@ -51,11 +51,11 @@ def categorizeEvents(events, threshold=.1):
     X = pd.DataFrame(events)
     # change path to load these files, for sure (correct directory)
     with cd(ML_PATH):
-        with open(r"categorizationModel.pickle", "r") as model:
+        with open(r"categorizationModel.pickle", "rb") as model:
             rf = pickle.load(model)
-        with open(r"nameVectorizer.pickle", "r") as model:
+        with open(r"nameVectorizer.pickle", "rb") as model:
             nameVectorizer = pickle.load(model)
-        with open(r"detailVectorizer.pickle", "r") as model:
+        with open(r"detailVectorizer.pickle", "rb") as model:
             detailVectorizer = pickle.load(model)
 
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)

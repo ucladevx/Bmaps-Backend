@@ -1,5 +1,5 @@
 # Run this file to backfill/rerun the algorithm for events_current_processed_collection
-import pickle
+import _pickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
 import itertools
@@ -46,11 +46,11 @@ def labelFreeFood(events):
     X = pd.DataFrame(events)
     # change path to load these files, for sure (correct directory)
     with cd(ML_PATH):
-        with open(r"foodModel.pickle", "r") as model:
+        with open(r"foodModel.pickle", "rb") as model:
             classifier = pickle.load(model)
-        with open(r"nameFoodVectorizer.pickle", "r") as model:
+        with open(r"nameFoodVectorizer.pickle", "rb") as model:
             nameVectorizer = pickle.load(model)
-        with open(r"detailFoodVectorizer.pickle", "r") as model:
+        with open(r"detailFoodVectorizer.pickle", "rb") as model:
             detailVectorizer = pickle.load(model)
 
     X_name_transform = nameVectorizer.transform(X['name'])
