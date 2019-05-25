@@ -38,10 +38,6 @@ dora: ecr-login build-dora
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
 # Build backend image
-build-base:
-	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
-
-# Build backend image
 build-dev:
 	docker build ./src -t $(APP_NAME) -f $(DEV_DOCKERFILE)
 
@@ -56,11 +52,12 @@ dev: build-dev
 prod: build-prod
 	docker run --rm --name backend-dev -v $(shell pwd)/src:/app -p "5000:5000" -it $(APP_NAME)
 
-# Stop running containers
-stop:
-	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
-
 ##################     			  IN PROGRESS: POSTGRES 			    ##################
+
+# TODO: DELETE EVERYTHING ABOVE THIS POINT
+# Build backend image
+build-base:
+	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
 up-dev:
 	docker-compose -f $(DEV_DOCKER_COMPOSE) up --build
@@ -71,6 +68,10 @@ up-prod:
 # Stops the stack. Can also Ctrl+C in the same terminal window stack was run.
 down:
 	docker-compose down
+
+# Stop running containers
+stop:
+	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
 
 # Sets CONTAINER_ID variable with ID of postgres container.
 # := means CONTAINER_ID will only be set if output is non-empty.
