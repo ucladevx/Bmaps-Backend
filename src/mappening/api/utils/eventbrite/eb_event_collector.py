@@ -99,8 +99,8 @@ def update_database(all_events):
     
     # TODO: replace deleting all events and then reinserting events with smart
     # updating. Delete those not present, update those that already exist.
-    events_eventbrite_collection.delete_many({})
-    events_eventbrite_collection.insert_many(all_events)
+    # events_eventbrite_collection.delete_many({})
+    # events_eventbrite_collection.insert_many(all_events)
 
     all_cat_ep = '/categories'
     session = requests.Session()

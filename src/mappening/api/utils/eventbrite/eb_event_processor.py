@@ -96,9 +96,9 @@ def process_events(all_events):
         cleaned_events.append(one_event)
 
     # TODO: hangs on pickle.load(model)
-    categorized_clean_events = cleaned_events
-    # categorized_clean_events = categorizeEvents(cleaned_events)
-    # categorized_clean_events = labelFreeFood(categorized_clean_events)
+    # categorized_clean_events = cleaned_events
+    categorized_clean_events = categorizeEvents(cleaned_events)
+    categorized_clean_events = labelFreeFood(categorized_clean_events)
 
     # Autocategorization has a cleaner way to do this path switching
     savedPath = os.getcwd()
@@ -107,8 +107,8 @@ def process_events(all_events):
         json.dump(categorized_clean_events, f, sort_keys=True, indent=4, separators=(',', ': '))
     os.chdir(savedPath)
 
-    events_current_processed_collection.delete_many({})
-    events_current_processed_collection.insert_many(categorized_clean_events)
+    # events_current_processed_collection.delete_many({})
+    # events_current_processed_collection.insert_many(categorized_clean_events)
     return len(categorized_clean_events)
     # if not all_events:
     #     print(response.json())

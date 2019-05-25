@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import hstack
 import pandas as pd
-import cPickle as pickle
+import _pickle as pickle
 
 ##Needed to get access to mappening.utils.database since this is under mappening.ml
 import sys
@@ -30,7 +30,7 @@ def gatherFreeFoodEvents():
         e['hoster'] = e['hoster']['name']
         if 'free_food' in e and 'description' in e and 'name' in e:
             allFreeFoodLabeledEvents.append(e)
-    print count, "total events, learning from the", len(allFreeFoodLabeledEvents), "well labeled events"
+    print(count, "total events, learning from the", len(allFreeFoodLabeledEvents), "well labeled events")
     return pd.DataFrame(allFreeFoodLabeledEvents)
 
 def trainFoodModel():

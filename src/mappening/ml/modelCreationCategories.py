@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import hstack
 import pandas as pd
-import cPickle as pickle
+import _pickle as pickle
 
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
@@ -26,7 +26,7 @@ def gatherCategorizedEvents():
         if 'category' in e and 'description' in e and 'name' in e:
             allCategorizedEvents.append(e)
     modernEvents = reduceCategories(allCategorizedEvents)
-    print count, "total events, learning from the", len(modernEvents), "well categorized events"
+    print(count, "total events, learning from the", len(modernEvents), "well categorized events")
     return pd.DataFrame(modernEvents)
 
 def reduceCategories(events):
