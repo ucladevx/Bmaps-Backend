@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = POSTGRES_URI
 db = SQLAlchemy(app)
 db.Model.metadata.reflect(db.engine)
 
-app.register_blueprint(events, url_prefix='/events')
+app.register_blueprint(events, url_prefix='/v2/events')
 app.register_blueprint(locations, url_prefix='/locations')
 app.register_blueprint(auth, url_prefix='/auth') # Not actually public API
 app.register_blueprint(users, url_prefix='/users')
