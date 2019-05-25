@@ -2,7 +2,6 @@
 import _pickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
-import itertools
 import os
 import numpy as np
 
@@ -44,6 +43,7 @@ def labelFreeFood(events):
 
     # Load data
     X = pd.DataFrame(events)
+
     # change path to load these files, for sure (correct directory)
     with cd(ML_PATH):
         with open(r"foodModel.pickle", "rb") as model:
