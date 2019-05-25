@@ -55,7 +55,7 @@ prod: build-prod
 ##################     			  IN PROGRESS: POSTGRES 			    ##################
 
 # TODO: DELETE EVERYTHING ABOVE THIS POINT
-# Build backend image
+# Build backend image. Must be built before dev work (and only once unless changed)
 build-base:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 

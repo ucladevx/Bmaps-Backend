@@ -54,7 +54,7 @@ Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
 
 ## More Info
 - Check out the [frontend](https://github.com/ucladevx/Mappening-Frontend) repository
-- Check out the [deployment](https://github.com/ucladevx/Mappening-Deployment) repository
+- Check out the [deployment](https://github.com/ucladevx/Mappening) repository
   - Contains instructions for local development and production
 
 ## Repo Breakdown

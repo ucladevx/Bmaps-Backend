@@ -34,7 +34,6 @@ Hobbies & Special Interest [Hobbies] | Other | School Activities
 
 # Process for frontend to use it 
 def process_events(all_events):
-
     all_venues = {}
     cleaned_events = []
     session = requests.Session()
@@ -44,7 +43,6 @@ def process_events(all_events):
     sample_headers = {
         'Authorization': 'Bearer ' + personal_token
     }
-    
     for event_info in tqdm(all_events):
         one_event = {
             'id': event_info.get('id', -1),
@@ -97,8 +95,10 @@ def process_events(all_events):
 
         cleaned_events.append(one_event)
 
-    categorized_clean_events = categorizeEvents(cleaned_events)
-    categorized_clean_events = labelFreeFood(categorized_clean_events)
+    # TODO: hangs on pickle.load(model)
+    categorized_clean_events = cleaned_events
+    # categorized_clean_events = categorizeEvents(cleaned_events)
+    # categorized_clean_events = labelFreeFood(categorized_clean_events)
 
     # Autocategorization has a cleaner way to do this path switching
     savedPath = os.getcwd()
@@ -115,3 +115,4 @@ def process_events(all_events):
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
+    print('Finished processing Eventbrite events!')
