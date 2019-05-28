@@ -19,7 +19,7 @@ Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
 - Navigate to [http://localhost](http://localhost)
 - Access flask api directly at port [5000](http://localhost:5000/)
   - Use `localhost:5000/api/<insert_api_route_here>`
-  - e.g. `localhost:5000/api/v2/events`
+  - e.g. `localhost:5000/api/events`
 - Stop running with `CTRL+C` or `make stop` in a separate terminal window
 
 ## Repo Breakdown
