@@ -39,7 +39,7 @@ endif
 
 # Connects to psql shell of Postgres container when running `dev` target.
 pg: check-id
-	docker exec -ti $(CONTAINER_ID) psql -U $(POSTGRES_USER)
+	docker exec -ti $(CONTAINER_ID) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # Zip current db data.
 zip:
