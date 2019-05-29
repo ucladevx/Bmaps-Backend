@@ -95,7 +95,6 @@ def process_events(all_events):
 
         cleaned_events.append(one_event)
 
-    # TODO: hangs on pickle.load(model)
     categorized_clean_events = categorizeEvents(cleaned_events)
     categorized_clean_events = labelFreeFood(categorized_clean_events)
 

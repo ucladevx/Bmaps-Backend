@@ -2,9 +2,9 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.externals import joblib 
 from scipy.sparse import hstack
 import pandas as pd
-import _pickle as pickle
 
 ##Needed to get access to mappening.utils.database since this is under mappening.ml
 import sys
@@ -50,16 +50,10 @@ def trainFoodModel():
     rf = RandomForestClassifier(n_estimators=10, max_depth=60)
     rf.fit(X_total_transform, X['free_food'])
 
-    #save model
-    with open(r"foodModel.pickle", "wb") as output_file:
-        pickle.dump(rf, output_file)
-
-    with open(r"nameFoodVectorizer.pickle", "wb") as output_file:
-        pickle.dump(nameVectorizer, output_file)
-
-    with open(r"detailFoodVectorizer.pickle", "wb") as output_file:
-        pickle.dump(detailVectorizer, output_file)
-
+    # save model
+    joblib.dump(rf, 'foodModel.jl')
+    joblib.dump(nameVectorizer, 'nameFoodVectorizer.jl')
+    joblib.dump(detailVectorizer, 'detailFoodVectorizer.jl')
     print("Successfully trained and saved categorization models")
 
 if __name__ == "__main__":
