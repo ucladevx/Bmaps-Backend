@@ -3,9 +3,9 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.externals import joblib 
 from scipy.sparse import hstack
 import pandas as pd
-import _pickle as pickle
 
 # Needed to get access to mappening.utils.database when running just this file since this is under mappening.ml
 import sys
@@ -74,15 +74,9 @@ def trainModels():
     rf.fit(X_total_transform, X['category'])
 
     #save model
-    with open(r"categorizationModel.pickle", "wb") as output_file:
-        pickle.dump(rf, output_file)
-
-    with open(r"nameVectorizer.pickle", "wb") as output_file:
-        pickle.dump(nameVectorizer, output_file)
-
-    with open(r"detailVectorizer.pickle", "wb") as output_file:
-        pickle.dump(detailVectorizer, output_file)
-
+    joblib.dump(rf, 'categorizationModel.jl')
+    joblib.dump(nameVectorizer, 'nameVectorizer.jl')
+    joblib.dump(detailVectorizer, 'detailVectorizer.jl')
     print("Successfully trained and saved categorization models")
 
 if __name__ == "__main__":

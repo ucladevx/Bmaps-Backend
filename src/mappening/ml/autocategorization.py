@@ -1,6 +1,6 @@
-import _pickle as pickle
 import pandas as pd
 from scipy.sparse import hstack
+from sklearn.externals import joblib 
 
 import os
 # use this to change to this folder, since this might be run from anywhere in project...
@@ -50,15 +50,12 @@ def categorizeEvents(events, threshold=.1):
     X = pd.DataFrame(events)
     # change path to load these files, for sure (correct directory)
     with cd(ML_PATH):
-        with open(r"categorizationModel.pickle", "rb") as model:
-            rf = pickle.load(model)
-        with open(r"nameVectorizer.pickle", "rb") as model:
-            nameVectorizer = pickle.load(model)
-        with open(r"detailVectorizer.pickle", "rb") as model:
-            detailVectorizer = pickle.load(model)
+        rf = joblib.load('categorizationModel.jl')
+        nameVectorizer = joblib.load('nameVectorizer.jl')
+        detailVectorizer = joblib.load('detailVectorizer.jl')
 
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
-    
+
     # basically if the event already has a category put that first and then ensure no duplicates
     for (event, catList) in zip(events, catLists):
         curCategory = event.get('category', None)

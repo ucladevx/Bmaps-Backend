@@ -28,7 +28,7 @@ RUN set -ex ;\
 RUN pip3 install git+https://github.com/mitsuhiko/flask-oauth
 RUN pip3 install numpy scipy gensim
 RUN pip3 install Cython
-RUN pip3 install scikit-learn
+RUN pip3 install scikit-learn==0.20.3
 RUN pip3 install pandas
 
 # https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
