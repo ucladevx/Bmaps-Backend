@@ -29,7 +29,7 @@ import json
 
 import facebook
 
-accessToken = 'EAAFB1Et4EnkBAORaxZBTxcCuBNZBCVt7U2hF7R2Lhn832ZC8cSF0FSwLLNaXxHtYkhFDpm6ieux7TwgZB1igYa0Sejy8wxRZAA8xxxuyMQZB4qj6HZAwRU6FbezcSSeaJkih4NvcPB3DB3tcITEjGgwzwjt3MdkA8cEsskruNxCWW8ctjFSUYvO3M3WOtiDlPgweQ8OQUos4KR6oXZC3PLLgVqWs0H10jv3u7tVQNque1gZDZD'
+accessToken = 'EAAFB1Et4EnkBAOgKBCSkBbzWph4g6YTSOnZAjsjmGktzJp5rwuebyoZC3xVm18jZBDDaDcMPHSIQVsgvuaF6e0HDguw2i5x8OI3eVO0q45lSGeDlYDEZCY5nwmnZCxu2nomWYLgTpdlBDrLtgoaTrGIZBOae6yA2muyu9xuMj1PLnIjJQCdKSbrkHDESwgvg3qSl3BCkAdWaj9klJ0cbbKe37XOfIbDv1U2Jlv9vNWyQZDZD'
 
 def facebook_scrape():
 
@@ -45,8 +45,16 @@ def facebook_scrape():
     print('got following events from Selim Alpay, mappening test account')
     # print(type(events))
     print(events_json)
+    # print(type(json.loads(events_json)))
 
-    # insert_one a event object
-    events_fb_puppeteer_collection.insert_one(events_json)
+    datastore = json.loads(events_json)
+    print(type(datastore))
+
+    for event in datastore:
+        # insert_one a event object
+        events_fb_puppeteer_collection.insert_one(event)
+        
+    print(len(datastore))
+
 
     return events_json

@@ -111,3 +111,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# npm stuff like puppeteer
+node_modules/
