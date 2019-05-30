@@ -9,7 +9,7 @@ import re
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, fb_pages_saved_collection
-from mappening.utils.database import events_current_processed_collection
+from mappening.utils.database import events_current_processed_collection, events_fb_puppeteer_collection
 
 import eventbrite_scraper
 import facebook_puppeteer_scraper
@@ -72,6 +72,7 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
             print('No single event with attributes:' + str(find_dict))
     else:
         events_cursor = events_current_processed_collection.find(find_dict)
+        events_fb_cursor = events_fb_puppeteer_collection.find(find_dict)
         if events_cursor.count() > 0:
             for event in events_cursor:
                 output.append(process_event_info(event))
@@ -84,6 +85,9 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
         else:
             print('No events found with attributes:' + str(find_dict))
+
+        for event in events_fb_cursor:
+            output.append(process_event_info(event))
 
     return output
 

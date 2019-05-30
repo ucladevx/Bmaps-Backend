@@ -29,7 +29,8 @@ import json
 
 import facebook
 
-accessToken = 'EAAFB1Et4EnkBAOgKBCSkBbzWph4g6YTSOnZAjsjmGktzJp5rwuebyoZC3xVm18jZBDDaDcMPHSIQVsgvuaF6e0HDguw2i5x8OI3eVO0q45lSGeDlYDEZCY5nwmnZCxu2nomWYLgTpdlBDrLtgoaTrGIZBOae6yA2muyu9xuMj1PLnIjJQCdKSbrkHDESwgvg3qSl3BCkAdWaj9klJ0cbbKe37XOfIbDv1U2Jlv9vNWyQZDZD'
+# Problem 1: need to refresh accesstoken each time
+accessToken = 'EAAFB1Et4EnkBANsx5VBfZBF25ZA86XLV5tXj7ZAaHsFkZB9m0wZC1NHGp5yISVP30eqa69903kMVmH5toZC3YzByOCZAtFwnLlnewLCfUw9MHDMDmiLQR95IJlZBqoMglXMaVs3dLa6qZAVSVJjhiG61cnuCcZBXsiCZCuhZBeVS23Q2cQzYvZA2EZAQdXwA1ZC1rUvkZB6kdYfqOaCjZACGu2rRZAEH1ZCOsFY3n7EFwCmACfMS6DWQgZDZD'
 
 def facebook_scrape():
 
@@ -47,14 +48,29 @@ def facebook_scrape():
     print(events_json)
     # print(type(json.loads(events_json)))
 
-    datastore = json.loads(events_json)
+    # datastore = json.loads(events_json)
+    datastore = events['data']
     print(type(datastore))
 
+    # change "zip" to "zipcode" to align data with backend!!
     for event in datastore:
-        # insert_one a event object
+        if 'location' in event['place'] and 'zip' in event['place']['location']:
+            event['place']['location']['zipcode'] = event['place']['location'].pop('zip')
+            print(event['place']['location'])
+
+    # get all cover images
+    event_covers = graph.get_connections("me", "events{cover}")
+
+
+
+    # remove all the events from collection hehe
+    events_fb_puppeteer_collection.remove( {} )
+
+    for event in datastore:
+        # insert_one all events object
         events_fb_puppeteer_collection.insert_one(event)
         
-    print(len(datastore))
+    # print(len(datastore))
 
 
     return events_json
