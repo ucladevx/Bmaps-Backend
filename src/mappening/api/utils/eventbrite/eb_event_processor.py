@@ -34,7 +34,6 @@ Hobbies & Special Interest [Hobbies] | Other | School Activities
 
 # Process for frontend to use it 
 def process_events(all_events):
-
     all_venues = {}
     cleaned_events = []
     session = requests.Session()
@@ -44,7 +43,6 @@ def process_events(all_events):
     sample_headers = {
         'Authorization': 'Bearer ' + personal_token
     }
-    
     for event_info in tqdm(all_events):
         one_event = {
             'id': event_info.get('id', -1),
@@ -115,3 +113,4 @@ def process_events(all_events):
     # else:
     #     pprint(all_events[:3])
     #     print('# EVENTS: ' + str(len(all_events)))
+    print('Finished processing Eventbrite events!')

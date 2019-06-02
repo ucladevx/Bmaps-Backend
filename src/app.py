@@ -65,5 +65,7 @@ if __name__ == "__main__":
         print("\n~~~~~~~~~~~~~~~~~~~\n~~~ IN DEV MODE ~~~\n~~~~~~~~~~~~~~~~~~~\n")
         app.run(host='0.0.0.0', debug=True)
     else:
+        print("\n~~~~~~~~~~~~~~~~~~~~\n~~~ IN PROD MODE ~~~\n~~~~~~~~~~~~~~~~~~~~\n")
+        # TODO: Breaks EB deployment. cron jobs?
         thread_scheduler(args)
         app.run(host='0.0.0.0', debug=False)

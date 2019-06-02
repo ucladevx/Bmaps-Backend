@@ -14,7 +14,7 @@ import dateutil.parser
 import uuid
 from collections import OrderedDict
 
-# Route Prefix: /api/v2/events
+# Route Prefix: /api/events
 events = Blueprint('events', __name__)
 
 @events.route('/', methods=['GET'])

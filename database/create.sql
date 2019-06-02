@@ -1,5 +1,5 @@
-CREATE DATABASE devxdb;
-\c devxdb;
+CREATE DATABASE mapdb;
+\c mapdb;
 
 -- List all tables and types
 

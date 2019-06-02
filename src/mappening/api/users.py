@@ -6,7 +6,7 @@ from flask import Flask, jsonify, redirect, url_for, request, Blueprint
 from flask_login import current_user
 from datetime import datetime
 
-# Route Prefix: /api/v2/users
+# Route Prefix: /api/users
 users = Blueprint('users', __name__)
 
 @users.before_request
