@@ -5,6 +5,5 @@ services:
     build: ./src
     ports:
       - ${API_SERVER_PORT}:${API_SERVER_PORT}
-    command: python3 app.py -p
     environment:
-      - POSTGRES_URL=${AWS_PG_URL}
+      - ENV=production

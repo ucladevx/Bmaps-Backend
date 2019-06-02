@@ -4,7 +4,7 @@ from mappening.api.utils.locations import location_collector, location_processor
 
 from flask import Flask, jsonify, request, json, Blueprint
 
-# Route Prefix: /api/v2/locations
+# Route Prefix: /api/locations
 locations = Blueprint('locations', __name__)
 
 @locations.route('/', methods=['GET'])

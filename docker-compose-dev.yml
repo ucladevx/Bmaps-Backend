@@ -18,6 +18,6 @@ services:
       - ${API_SERVER_PORT}:${API_SERVER_PORT}
     command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 2; done; python3 app.py'
     environment:
-      - POSTGRES_URL=${POSTGRES_URL}
+      - ENV=development
     depends_on:
       - postgres

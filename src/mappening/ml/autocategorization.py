@@ -1,7 +1,6 @@
-import pickle
 import pandas as pd
 from scipy.sparse import hstack
-import itertools
+from sklearn.externals import joblib 
 
 import os
 # use this to change to this folder, since this might be run from anywhere in project...
@@ -51,17 +50,14 @@ def categorizeEvents(events, threshold=.1):
     X = pd.DataFrame(events)
     # change path to load these files, for sure (correct directory)
     with cd(ML_PATH):
-        with open(r"categorizationModel.pickle", "r") as model:
-            rf = pickle.load(model)
-        with open(r"nameVectorizer.pickle", "r") as model:
-            nameVectorizer = pickle.load(model)
-        with open(r"detailVectorizer.pickle", "r") as model:
-            detailVectorizer = pickle.load(model)
+        rf = joblib.load('categorizationModel.jl')
+        nameVectorizer = joblib.load('nameVectorizer.jl')
+        detailVectorizer = joblib.load('detailVectorizer.jl')
 
     catLists = predictCategories(nameVectorizer, detailVectorizer, rf, X, threshold)
 
     # basically if the event already has a category put that first and then ensure no duplicates
-    for (event, catList) in itertools.izip(events, catLists):
+    for (event, catList) in zip(events, catLists):
         curCategory = event.get('category', None)
         if curCategory not in LIST_OF_CATEGORIES:
             event['categories'] = catList
@@ -70,7 +66,6 @@ def categorizeEvents(events, threshold=.1):
             for cat in catList:
                 if cat != curCategory:
                     event['categories'].append(cat)
-
         # UNDO initial empty desctiption and name adds and base category
         if 'category' in event:
             del event['category']
@@ -78,7 +73,6 @@ def categorizeEvents(events, threshold=.1):
             del event['name']
         if event['description'] == '':
             del event['description']
-
     return events
 
 def predictCategories(nameVectorizer, detailVectorizer, classifier, X, threshold=.1):

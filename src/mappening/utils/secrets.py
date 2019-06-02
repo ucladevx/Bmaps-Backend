@@ -8,6 +8,8 @@ load_dotenv(dotenv_path)
 
 print("Opening the secret door...")
 
+ENV = os.getenv('ENV')
+
 FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 FACEBOOK_SECRET_KEY = os.getenv('FACEBOOK_SECRET_KEY')
@@ -20,7 +22,10 @@ MLAB_USERNAME = os.getenv('MLAB_USERNAME')
 MLAB_PASSWORD = os.getenv('MLAB_PASSWORD')
 MLAB_HOST = os.getenv('MLAB_HOST')
 
-POSTGRES_URI = os.getenv('POSTGRES_URI')
+if ENV == 'development':
+  POSTGRES_URI = os.getenv('POSTGRES_URI')
+else:
+  POSTGRES_URI = os.getenv('AWS_PG_URI')
 
 APP_SECRET_KEY = os.getenv('APP_SECRET_KEY')
 

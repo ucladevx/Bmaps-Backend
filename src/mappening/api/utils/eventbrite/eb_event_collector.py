@@ -117,3 +117,5 @@ def update_database(all_events):
     for raw_cat in raw_categories:
         used_name = raw_cat['short_name']
         all_categories[raw_cat['id']] = {'full_name': raw_cat['name'], 'short_name': used_name}
+
+    print('Finished updating Eventbrite events!')
