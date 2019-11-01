@@ -16,3 +16,4 @@ fuzzywuzzy
 unidecode
 psycopg2
 Flask-SQLAlchemy
+eventbrite
