@@ -47,21 +47,21 @@ def get_raw_events(days_back_in_time):
     past_bound = (now - datetime.timedelta(days=days_back)).strftime('%Y-%m-%dT%H:%M:%S')
     future_bound = (now + datetime.timedelta(days=days_forward)).strftime('%Y-%m-%dT%H:%M:%S')
 
-    session = requests.Session()
+    # session = requests.Session()
 
-    eventbrite2 = eventbrite.Eventbrite("GUD57Y44YXYVNP4VMQII")
+    eb = eventbrite.Eventbrite(EVENTBRITE_USER_KEY)
 
-    personal_token = EVENTBRITE_USER_KEY
-    base_endpoint = 'https://www.eventbriteapi.com/v3'
-    sample_headers = {
-        'Authorization': 'Bearer ' + personal_token,
-    }
+    # personal_token = EVENTBRITE_USER_KEY
+    # base_endpoint = 'https://www.eventbriteapi.com/v3'
+    # sample_headers = {
+    #     'Authorization': 'Bearer ' + personal_token,
+    # }
 
     # Most events on 1 page = 50, want more
-    # page_num = 3
-    request_new_results = True
+    # page_num = 1
+    # request_new_results = True
 
-    events_search_ep = '/events/search'
+    # events_search_ep = '/events/search'
     search_args = {
         "location.latitude": CENTER_LATITUDE,
         "location.longitude": CENTER_LONGITUDE,
@@ -71,26 +71,17 @@ def get_raw_events(days_back_in_time):
         "sort_by": "best"
     }
 
-    # response = eventbrite2.event_search(**search_args)
-
-    # print(response)
-
-    # Loop through returned pages of events until no more, or enough
-    # all_events = response['events']
-
-    # request_more_events = response['pagination']['has_more_items']
-
-    # while request_more_events:
-
-        #  search_args["page"]
-
-        # request_more_events = response['pagination']['has_more_items']
-
-    response = eventbrite2.event_search(**search_args)
+    response = eb.event_search(**search_args)
 
     print(response)
 
     all_events = response.get('events')
+
+    # TODO: We need to add pagination back. Cindy can try scheduling this to get
+    # each page after every 10 minutes until has_more_items is false
+    # to get around rate limiting.
+
+    # Loop through returned pages of events until no more, or enough
     # while request_new_results and page_num <= 20:
 
     #     response = eventbrite2.event_search(**search_args)
