@@ -1,5 +1,5 @@
 # Include Environment Variables from .env file
-include .env 
+include .env
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
