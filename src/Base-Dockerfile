@@ -35,7 +35,7 @@ RUN pip3 install pandas
 # https://gist.github.com/orenitamar/f29fb15db3b0d13178c1c4dd611adce2
 RUN apk add --no-cache bash gcc gfortran python python-dev py-pip freetype-dev libpng-dev expat postgresql-dev musl-dev automake autoconf libtool
 
-# Workaround for issue here: https://stackoverflow.com/questions/19742406/could-not-find-library-geos-c-or-load-any-of-its-variants
+## Workaround for issue here: https://stackoverflow.com/questions/19742406/could-not-find-library-geos-c-or-load-any-of-its-variants ##
 # I could not easily roll back geos-version using apk because of geos's location in the edge repo and it only being 3.7.x there
 # Therefore, build from source an old geos-3.6.4 dist that does work with shapely.
 # TODO: remove shapely (which uses geos) in favor of alternatives
