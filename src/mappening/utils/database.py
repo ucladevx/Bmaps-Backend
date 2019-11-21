@@ -3,7 +3,7 @@ from mappening.utils.secrets import MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST
 from pymongo import MongoClient
 
 # Standard URI format: mongodb://[dbuser:dbpassword@]host:port/dbname
-events_uri = 'mongodb://{0}:{1}@{2}/events'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
+events_uri = 'mongodb://{0}:{1}@{2}/events?retryWrites=false'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
 locations_uri = 'mongodb://{0}:{1}@{2}/locations'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
 users_uri = 'mongodb://{0}:{1}@{2}/users'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
 tkinter_uri = 'mongodb://{0}:{1}@{2}/tkinter'.format(MLAB_USERNAME, MLAB_PASSWORD, MLAB_HOST)
