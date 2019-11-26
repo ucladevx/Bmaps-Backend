@@ -1,5 +1,6 @@
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
+from mappening.api.utils.facebook2 import fb2_event_collector
 from mappening.api.utils.events import event_processor 
 
 from flask import jsonify
@@ -66,9 +67,13 @@ def find_events_in_database(find_dict={}, one_result_expected=False, print_resul
 def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_db=False):
     event_processor.clean_up_existing_events(days_back_in_time)
 
+    # Eventbrite events
     events = eb_event_collector.get_raw_events(days_back_in_time)
     eb_event_collector.update_database(events)
     eb_count = eb_event_processor.process_events(events)
+
+    # Facebook Events
+    # TODO
 
     # processed_db_events 'todo'
     new_events_data = {'metadata': {'events': eb_count}}
