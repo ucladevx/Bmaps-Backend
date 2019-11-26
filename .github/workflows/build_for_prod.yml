@@ -4,7 +4,6 @@ on: [pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     env:
       BASE_NAME: ${{ secrets.BASE_NAME }}
       BASE_DOCKERFILE: ${{ secrets.BASE_DOCKERFILE }}
@@ -17,6 +16,7 @@ jobs:
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_IMAGE: ${{ secrets.POSTGRES_IMAGE }}
       RUNNER: ${{ GITHUB }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     # can't really use caching here AFAIK as pip doesn't store installed packages in repo
