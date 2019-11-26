@@ -9,7 +9,6 @@ endif
 
 # Build backend image. Must be built before dev work (and only once unless changed)
 build-base:
-install:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
 # Run backend in dev mode with local Postgres database
