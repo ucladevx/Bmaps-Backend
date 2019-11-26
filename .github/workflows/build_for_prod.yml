@@ -6,19 +6,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    # can't really use caching here AFAIK as pip doesn't store installed packages in repo
-    - name: Build Production Server
-      env:
-        RUNNER: ${{ GITHUB }}
-        BASE_NAME: ${{ secrets.BASE_NAME }}
-        BASE_DOCKERFILE: ${{ secrets.BASE_DOCKERFILE }}
-        DEV_DOCKER_COMPOSE: ${{ secrets.DEV_DOCKER_COMPOSE }}
-        AWS_PG_URL: ${{ secrets.AWS_PG_URL }}
-        POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
-        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_IMAGE: ${{ secrets.POSTGRES_IMAGE }}
-      run: make prod
+      - uses: actions/checkout@v1
+      # can't really use caching here AFAIK as pip doesn't store installed packages in repo
+      - name: Build Production Server
+        env:
+          RUNNER: ${{ GITHUB }}
+          BASE_NAME: ${{ secrets.BASE_NAME }}
+          BASE_DOCKERFILE: ${{ secrets.BASE_DOCKERFILE }}
+          DEV_DOCKER_COMPOSE: ${{ secrets.DEV_DOCKER_COMPOSE }}
+          AWS_PG_URL: ${{ secrets.AWS_PG_URL }}
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_IMAGE: ${{ secrets.POSTGRES_IMAGE }}
+        run: make prod
