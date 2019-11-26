@@ -10,7 +10,7 @@ jobs:
       # can't really use caching here AFAIK as pip doesn't store installed packages in repo
       - name: Build Production Server
         env:
-          RUNNER: ${{ GITHUB }}
+          RUNNER: GITHUB
           BASE_NAME: ${{ secrets.BASE_NAME }}
           BASE_DOCKERFILE: ${{ secrets.BASE_DOCKERFILE }}
           DEV_DOCKER_COMPOSE: ${{ secrets.DEV_DOCKER_COMPOSE }}
