@@ -46,5 +46,5 @@ RUN tar -xjf geos-3.6.4.tar.bz2
 RUN cd geos-3.6.4 ; \
   autoreconf -fim ; \
   ./configure ; \
-  make -j3 ; \
-  make install ;
+  make -j3 -s ; \
+  make -s install ;
