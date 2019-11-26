@@ -21,4 +21,5 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_IMAGE: ${{ secrets.POSTGRES_IMAGE }}
+          API_SERVER_PORT: ${{ secrets.API_SERVER_PORT }}
         run: make prod
