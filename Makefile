@@ -13,9 +13,9 @@ build-base:
 
 get-base:
 ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
-#ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)
-#	docker pull $(BASE_NAME)
-#else
+ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)
+  docker pull "$(BASE_NAME)"
+else
 	make build-base
 endif
 
