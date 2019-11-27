@@ -11,17 +11,20 @@ endif
 build-base:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
+get-base:
+ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
+#ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)
+#	docker pull $(BASE_NAME)
+#else
+	make build-base
+endif
+
 # Run backend in dev mode with local Postgres database
-dev:
+dev: get-base
 	docker-compose -f $(DEV_DOCKER_COMPOSE) up --build
 
 # Run backend in prod mode with AWS Postgres database
-prod:
-# Needed to be able to use docker-compose, since that relies on our base image.
-# If we're running this as a user, then we've already built it as part of the initial repo installation
-ifeq ($(RUNNER), GITHUB)
-	make build-base
-endif
+prod: get-base
 	docker-compose up --build
 
 # Stops the stack. Can also Ctrl+C in the same terminal window stack was run.
