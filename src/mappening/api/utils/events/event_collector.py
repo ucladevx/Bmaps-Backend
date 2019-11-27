@@ -1,6 +1,6 @@
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection, events_facebook_processed_collection
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
-from mappening.api.utils.facebook2 import fb2_event_collector
+from mappening.api.utils.facebook2 import fb2_event_collector, fb2_event_processor
 from mappening.api.utils.events import event_processor 
 
 from flask import jsonify
@@ -33,17 +33,36 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
     output = []
 
     if one_result_expected:
+        # check if it is in eventbrite database
         single_event = events_current_processed_collection.find_one(find_dict)
         if single_event:
             output.append(event_processor.process_event_info(single_event))
             if print_results:
                 print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
         else:
-            # careful: output is still empty here; make sure output list never set ANYWHERE else
-            # i.e. no other conditional branch is entered after this one, same with multiple event case below
-            print('No single event with attributes:' + str(find_dict))
+            # if not, check if it's in facebook database
+            single_event = events_facebook_processed_collection.find_one(find_dict)
+            if single_event:
+                output.append(event_processor.process_event_info(single_event))
+                if print_results:
+                    print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
+            else:
+                # not in either database
+
+                # careful: output is still empty here; make sure output list never set ANYWHERE else
+                # i.e. no other conditional branch is entered after this one, same with multiple event case below
+                print('No single event with attributes:' + str(find_dict))
     else:
+        # eventbrite database
         events_cursor = events_current_processed_collection.find(find_dict)
+
+        # facebook database
+        events_fb_cursor = events_facebook_processed_collection.find(find_dict)
+
+        if events_cursor.count() <= 0 and events_fb_cursor.count() <= 0:
+            print('No events found with attributes:' + str(find_dict))
+            return []
+
         if events_cursor.count() > 0:
             for event in events_cursor:
                 output.append(event_processor.process_event_info(event))
@@ -54,9 +73,17 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
                     # unicode strings have 'u' in the front, as below
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
-        else:
-            print('No events found with attributes:' + str(find_dict))
-
+        
+        if events_fb_cursor.count() > 0:
+            for event in events_fb_cursor:
+                output.append(event_processor.process_event_info(event))
+                if print_results:
+                    # Python 2 sucks
+                    # event['name'] returns unicode string
+                    # to use with format(), another unicode string must be parent
+                    # unicode strings have 'u' in the front, as below
+                    # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
+                    print(u'Event: {0}'.format(event.get('name', '<NONE>')))
     return output
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
@@ -74,9 +101,12 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
 
     # Facebook Events
     # TODO
+    fb_events = fb2_event_collector.get_interested_events(days_back_in_time)
+    # fb2_event_collector.update_database(events)
+    fb_count = len(fb2_event_processor.process_events(fb_events))
 
     # processed_db_events 'todo'
-    new_events_data = {'metadata': {'events': eb_count}}
-    new_count = eb_count
+    new_events_data = {'metadata': {'events': eb_count + fb_count}}
+    new_count = eb_count + fb_count
    
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)

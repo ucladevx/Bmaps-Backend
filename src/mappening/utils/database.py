@@ -54,6 +54,8 @@ events_fb_collection = events_db.events_fb
 events_test_collection = events_db.events_test
 # the final, aggregated database of all events from all sources, processed for frontend
 events_current_processed_collection = events_db.events_current_processed
+# processed events from facebook
+events_facebook_processed_collection = events_db.events_facebook_processed
 
 events_internal_added_collection = events_db.events_internal_added
 
