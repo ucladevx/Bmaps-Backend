@@ -66,7 +66,7 @@ def categorizeEvents(events, threshold=.1):
             for cat in catList:
                 if cat != curCategory:
                     event['categories'].append(cat)
-        # UNDO initial empty desctiption and name adds and base category
+        # UNDO initial empty description and name adds and base category
         if 'category' in event:
             del event['category']
         if event['name'] == '':

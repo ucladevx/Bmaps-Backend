@@ -1,6 +1,7 @@
 # Interacting with events collection in mlab
 from mappening.utils.database import events_internal_added_collection, events_current_processed_collection, test_collection
 from mappening.api.utils.events import event_collector, event_processor, event_filter
+from mappening.api.utils.facebook2 import fb2_event_collector, fb2_event_processor
 
 from flask import Flask, jsonify, request, json, Blueprint
 import requests, urllib
@@ -30,6 +31,16 @@ def get_all_events():
 @events.route('/test')
 def test():
     return jsonify("HELLO")
+
+@events.route('/facebook-test', methods=['GET'])
+def get_fb_events():
+  """
+  hakan added for facebook events testing
+  """
+  fb_events = fb2_event_collector.get_interested_events()
+  fb_events_cleaned = fb2_event_processor.process_events(fb_events)
+  return jsonify(len(fb_events_cleaned))
+
 
 # SEARCH
 @events.route('/search', methods=['GET'])
