@@ -1,11 +1,11 @@
-# Mappening-Backend
+# BMaps-Backend
 
 ## Documentation
-Hosted on GitHub Pages at http://ucladevx.com/Mappening-Backend/
+Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
 
 ## Setting Up the Environment
-- Follow instructions in main [Mappening](https://github.com/ucladevx/Mappening) repository
-- Get the `.env` file which contains sensitive information from a dev and add it to `src/mappening/utils/`
+- Follow instructions in main [BMaps](https://github.com/ucladevx/BMaps) repository
+- Get the `.env` file which contains sensitive information from a dev and add it to `src/bmaps/utils/`
 - Build the base image that contains all dependencies that are fairly static but take a while to install
   - `make build-base`
 - NOTE: the database connection doesn't seem to work over UCLA_WEB wifis, a more secure connection is needed (UCLA_WIFI)
