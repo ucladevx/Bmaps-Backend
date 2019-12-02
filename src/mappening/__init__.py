@@ -23,8 +23,6 @@ app.register_blueprint(auth, url_prefix='/auth') # Not actually public API
 app.register_blueprint(users, url_prefix='/api/users')
 
 app.config['SECRET_KEY'] = 'whats mappening'
-# app.permanent_session_lifetime = datetime.timedelta(minutes=20)
-# app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Enable Cross Origin Resource Sharing (CORS)
 # This makes the CORS feature cover all routes in the app

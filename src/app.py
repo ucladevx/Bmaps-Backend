@@ -32,12 +32,6 @@ def index():
 def test():
     return jsonify(addresses=[address.serialize() for address in Address.query.all()])
 
-# https://www.jordanbonser.com/flask-session-timeout.html
-# @app.before_request
-# def before_request():
-#     flask.session.permanent = True
-#     app.permanent_session_lifetime = datetime.timedelta(minutes=20)
-
 # Runs threads to periodically update events. Also updates database.
 # For dev purposes, only call this when we are in prod.
 def thread_scheduler(args):
@@ -66,6 +60,5 @@ if __name__ == "__main__":
         app.run(host='0.0.0.0', debug=True)
     else:
         print("\n~~~~~~~~~~~~~~~~~~~~\n~~~ IN PROD MODE ~~~\n~~~~~~~~~~~~~~~~~~~~\n")
-        # TODO: Breaks EB deployment. cron jobs?
         thread_scheduler(args)
         app.run(host='0.0.0.0', debug=False)

@@ -1,4 +1,7 @@
 RUNNER?=USER
+CURR_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+CORE_ABBREV_LENGTH?=7
+COMMIT_HASH=$(shell git merge-base master "$(CURR_BRANCH)" | head -c "$(CORE_ABBREV_LENGTH)")
 
 # Include Environment Variables from .env file if run as user
 ifeq ($(RUNNER), USER)
@@ -13,9 +16,12 @@ build-base:
 
 get-base:
 ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
-ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)
-  docker pull "$(BASE_NAME)"
+	echo "Skipping make build-base step..."
+else ifeq ($(shell docker inspect "$(BASE_NAME):$(COMMIT_HASH)"; echo "$?"), 0)
+	echo "Trying to pull"
+	docker pull "$(BASE_NAME):$(COMMIT_HASH)"
 else
+	echo "making base"
 	make build-base
 endif
 
@@ -25,7 +31,7 @@ dev: get-base
 
 # Run backend in prod mode with AWS Postgres database
 prod: get-base
-	docker-compose up --build
+	docker-compose up --build --exit-code-from api
 
 # Stops the stack. Can also Ctrl+C in the same terminal window stack was run.
 stop:
