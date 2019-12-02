@@ -1,5 +1,5 @@
 # from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
-from mappening.utils.secrets import FACEBOOK_ACCESS_TOKEN
+from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
 import os
 import sys
@@ -56,7 +56,7 @@ def get_interested_events(days_before=0):
     Gets all events marked as interested by the fake Bmaps account "Selim Alpay"
     """
 
-    app_access_token = "EAAFB1Et4EnkBAA7U1Wdhz90TdbU3UTkFOWz1iaNo0ZBB3BawALuyFxKpB1SEZBeZBrQtRbUr4NCgwnZBAgmuQgZCJkSZBxZAReBo8yNZBhsFmGJrpWQpBSdJB4uQr4pE2F0PV5IeQvfjH7jy5h478lhqTcYhBCJMGnzZCGqFILcAxIQZDZD"
+    app_access_token = FACEBOOK_USER_ACCESS_TOKEN
 
     time_window = get_event_time_bounds(days_before)
 
