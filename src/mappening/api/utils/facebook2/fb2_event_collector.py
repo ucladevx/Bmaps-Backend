@@ -363,7 +363,7 @@ def get_interested_events(days_before=0):
 
         responses = resp.json()
 
-        print(responses)
+        # print(responses)
 
         # first request has "events" field, subsequent requests don't
         if 'events' in responses:

@@ -245,7 +245,7 @@ def process_events(all_events):
 
 
     print("additional events")
-    print(additional_events)
+    print(len(additional_events))
 
     filtered_events.extend(additional_events)
 
