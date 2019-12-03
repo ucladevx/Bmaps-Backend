@@ -1,3 +1,6 @@
+# git-crypt
+.git-crypt-key
+
 # Mappening
 scraping/data/
 src/mappening/api/*/*.json
@@ -91,13 +94,13 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# .env
+# .venv
+# env/
+# venv/
+# ENV/
+# env.bak/
+# venv.bak/
 
 # Spyder project settings
 .spyderproject
