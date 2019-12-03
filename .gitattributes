@@ -1,1 +1,8 @@
 .env filter=git-crypt diff=git-crypt
+.venv filter=git-crypt diff=git-crypt
+env/ filter=git-crypt diff=git-crypt
+venv/ filter=git-crypt diff=git-crypt
+ENV/ filter=git-crypt diff=git-crypt
+env.bak/ filter=git-crypt diff=git-crypt
+venv.bak/ filter=git-crypt diff=git-crypt
+*.key filter=git-crypt diff=git-crypt
