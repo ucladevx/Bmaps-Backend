@@ -1,4 +1,4 @@
-# Takes around 15-20 minutes to run the first time (depending on your computer)
+# Takes around 40-50 minutes to run the first time (depending on your computer)
 FROM mappening/base
 
 # Install the rest of the packages

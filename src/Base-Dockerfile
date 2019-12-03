@@ -11,10 +11,7 @@ ENV PYTHONIOENCODING UTF-8
 # Lengthen timeout to allow downloading of scipy, pandas, and gensim over weak connections
 ENV PIP_DEFAULT_TIMEOUT=100
 
-# Install geos-dev and some other packages for shapely
 RUN apk update && apk upgrade && apk add --no-cache --update build-base git
-RUN echo "http://mirror.leaseweb.com/alpine/edge/testing/" >> /etc/apk/repositories
-
 
 # Install needed packages
 # https://github.com/jfloff/alpine-python/issues/24?fbclid=lwAR08KeopkO3ET6hz8iZ6bV0hEljjpHZaKR2bXMZAUjJsKnauzDLflzeTdpTY
@@ -40,7 +37,6 @@ RUN apk add --no-cache bash gcc gfortran python python-dev py-pip freetype-dev l
 # I could not easily roll back geos-version using apk because of geos's location in the edge repo and it only being 3.7.x there
 # Therefore, build from source an old geos-3.6.4 dist that does work with shapely.
 # TODO: remove shapely (which uses geos) in favor of alternatives
-# TODO: remove our dependencies on the /edge portion of alpine, as these packages are inherently unstable
 ADD http://download.osgeo.org/geos/geos-3.6.4.tar.bz2 .
 RUN tar -xjf geos-3.6.4.tar.bz2
 RUN cd geos-3.6.4 ; \
