@@ -33,6 +33,7 @@ EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_t
 s = requests.Session()
 
 app_access_token = FACEBOOK_USER_ACCESS_TOKEN
+
 # Process for frontend to use it 
 def process_events(all_events):
 

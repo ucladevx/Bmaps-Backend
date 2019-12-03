@@ -38,7 +38,7 @@ def test():
 #     flask.session.permanent = True
 #     app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 
-# Runs threads to periodically update events. Also updates database. 
+# Runs threads to periodically update events. Also updates database.
 # For dev purposes, only call this when we are in prod.
 def thread_scheduler(args):
     # Another thread to run the periodic events update, daily

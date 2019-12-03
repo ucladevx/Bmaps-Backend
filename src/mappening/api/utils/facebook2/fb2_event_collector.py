@@ -77,7 +77,6 @@ def get_interested_events(days_before=0):
         'access_token': app_access_token
     }
 
-
     events = []   
 
     page_num = 0
