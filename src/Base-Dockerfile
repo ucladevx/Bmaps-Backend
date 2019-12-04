@@ -37,6 +37,10 @@ RUN apk add --no-cache bash gcc gfortran python python-dev py-pip freetype-dev l
 # I could not easily roll back geos-version using apk because of geos's location in the edge repo and it only being 3.7.x there
 # Therefore, build from source an old geos-3.6.4 dist that does work with shapely.
 # TODO: remove shapely (which uses geos) in favor of alternatives
+<<<<<<< HEAD
+=======
+# TODO: remove our dependencies on the /edge portion of alpine, as these packages are inherently unstable
+>>>>>>> b9c26e661a71630f6b045c96ec4cd7e0f594bb08
 ADD http://download.osgeo.org/geos/geos-3.6.4.tar.bz2 .
 RUN tar -xjf geos-3.6.4.tar.bz2
 RUN cd geos-3.6.4 ; \
