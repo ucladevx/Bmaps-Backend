@@ -11,7 +11,7 @@ import requests
 from flask import jsonify
 import eventbrite
 
-# eventbrite = eventbrite.Eventbrite(EVENTBRITE_USER_KEY)
+s = requests.Session()
 
 from definitions import CENTER_LATITUDE, CENTER_LONGITUDE
 
@@ -34,6 +34,57 @@ Government & Politics [Government] | Fashion & Beauty [Fashion] | Home & Lifesty
 Hobbies & Special Interest [Hobbies] | Other | School Activities
 """
 
+# Eventbrite closed their event search in December 2019, now we have to hardcode the venue ids and find events through each one
+# This also means we don't really need to worry about pagination because each venue doesn't have enough events to be paginated.
+venue_ids = [23819658,
+             29902700,
+             36549987,
+             36766165,
+             37513703,
+             38085179,
+             39006121,
+             39718935,
+             40055415,
+             40130169,
+             40304155,
+             40632529,
+             40783475,
+             41096995,
+             41196205,
+             41197033,
+             41454477,
+             41465307,
+             41531729,
+             41682667,
+             41872749,
+             41950517,
+             42142291,
+             42452299,
+             42543427,
+             42556307,
+             42638817,
+             42703699,
+             42779809,
+             43003357,
+             43066275,
+             43182603,
+             43218439,
+             43270877,
+             43288447,
+             43291911,
+             43465913,
+             43507461,
+             43523745,
+             43773109,
+             43790291,
+             44044679,
+             44187749,
+             44273031,
+             44276537,
+             44281423,
+             44328647]
+
+
 # TODO: like other APIs, split this method up
 # 1st part = get raw data and put in DB (updating repeats), 2nd part = process for events_current_processed
 
@@ -47,72 +98,43 @@ def get_raw_events(days_back_in_time):
     past_bound = (now - datetime.timedelta(days=days_back)).strftime('%Y-%m-%dT%H:%M:%S')
     future_bound = (now + datetime.timedelta(days=days_forward)).strftime('%Y-%m-%dT%H:%M:%S')
 
-    # session = requests.Session()
+    all_events = []
+    for venue_id in venue_ids:
 
-    eb = eventbrite.Eventbrite(EVENTBRITE_USER_KEY)
+        headers = {
+            'Authorization': 'Bearer ' + EVENTBRITE_USER_KEY
+        }
+        # request = Request(f'https://www.eventbriteapi.com/v3/venues/{venue_id}/events/?status=live&order_by=start_asc&start_date=&only_public=true', headers=headers)
 
-    # personal_token = EVENTBRITE_USER_KEY
-    # base_endpoint = 'https://www.eventbriteapi.com/v3'
-    # sample_headers = {
-    #     'Authorization': 'Bearer ' + personal_token,
-    # }
+        # old search args:
+        # search_args = {
+        #     "location.latitude": CENTER_LATITUDE,
+        #     "location.longitude": CENTER_LONGITUDE,
+        #     "location.within": "1mi",
+        #     "start_date.range_start": past_bound,
+        #     "start_date.range_end": future_bound,
+        #     "sort_by": "best"
+        # }
 
-    # Most events on 1 page = 50, want more
-    # page_num = 1
-    # request_new_results = True
+        params = {
+            "status": "live",
+            "order_by": "start_asc",
+            "start_date.range_start": past_bound,
+            "start_date.range_end": future_bound,
+            "only_public": True
+        }
 
-    # events_search_ep = '/events/search'
-    search_args = {
-        "location.latitude": CENTER_LATITUDE,
-        "location.longitude": CENTER_LONGITUDE,
-        "location.within": "1mi",
-        "start_date.range_start": past_bound,
-        "start_date.range_end": future_bound,
-        "sort_by": "best"
-    }
+        response = s.get(f'https://www.eventbriteapi.com/v3/venues/{venue_id}/events', params=params, headers=headers)
+        # print(response)
+        # print(response.json())
+        all_events.extend(response.json()['events'])
 
-    response = eb.event_search(**search_args)
-
-    # print(response)
-
-    all_events = response.get('events')
-
-    # TODO: We need to add pagination back. Cindy can try scheduling this to get
-    # each page after every 10 minutes until has_more_items is false
-    # to get around rate limiting.
-
-    # Loop through returned pages of events until no more, or enough
-    # while request_new_results and page_num <= 20:
-
-    #     response = eventbrite2.event_search(**search_args)
-
-    #     print(response)
- 
-    #     # There's always a 1st page result that works
-    #     search_args["page"] = page_num
-    #     print("search_args")
-    #     print(search_args)
-    #     # responseSession = session.get(
-    #     #     base_endpoint + events_search_ep,
-    #     #     headers = sample_headers,
-    #     #     verify = True,  # Verify SSL certificate
-    #     #     params = search_args,
-    #     # ).json()
+    # print("all_events")
+    # print(all_events)
+    print(len(all_events))
 
 
-    #     # print(responseSession)
-    #     # print(responseSession.text)
-        
-    #     # Extend, not append!
-    #     # combines elements of two lists as expected vs adds in the new list as ONE element
-    #     all_events.extend(response.get('events'))
-    #     if 'pagination' in response and response['pagination']['has_more_items']:
-    #         request_new_results = True
-    #         page_num += 1
-    #     else:
-    #         request_new_results = False
-
-    # print('Finished collecting Eventbrite events!')
+    print('Finished collecting Eventbrite events!')
     return all_events
 
 # Database updating 
