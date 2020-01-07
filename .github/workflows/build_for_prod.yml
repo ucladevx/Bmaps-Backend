@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Unlock git-crypt secrets
+        uses: sliteteam/github-action-git-crypt-unlock@1.0.2
       # can't really use caching here AFAIK as pip doesn't store installed packages in repo
       - name: Build Production Server
         env:
