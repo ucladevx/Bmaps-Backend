@@ -25,7 +25,7 @@ RUN set -ex ;\
 #   2) save us a ton of time for future requirements.txt modifications
 RUN pip3 install git+https://github.com/mitsuhiko/flask-oauth
 RUN pip3 install Cython
-RUN pip3 install numpy scipy gensim
+RUN pip3 install --force numpy scipy gensim
 RUN pip3 install scikit-learn==0.20.3
 RUN pip3 install pandas
 
