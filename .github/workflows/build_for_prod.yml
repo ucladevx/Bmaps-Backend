@@ -9,6 +9,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Unlock git-crypt secrets
         uses: sliteteam/github-action-git-crypt-unlock@1.0.2
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
       # can't really use caching here AFAIK as pip doesn't store installed packages in repo
       - name: Build Production Server
         env:
