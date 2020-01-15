@@ -1,15 +1,15 @@
-RUNNER?=USER
+# Include Environment Variables from .env file
+include .env
 
-# Include Environment Variables from .env file if run as user
-ifeq ($(RUNNER), USER)
-	include .env
-endif
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
 # Build backend image. Must be built before dev work (and only once unless changed)
 build-base:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
+
+build-dev:
+	docker build ./src -f $(DEV_DOCKERFILE)
 
 get-base:
 ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))

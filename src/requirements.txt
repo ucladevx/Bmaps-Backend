@@ -7,6 +7,8 @@ requests
 python-dateutil
 schedule
 python-dotenv
+# optional dependency for fuzzywuzzy that speeds up sequence matching
+python-Levenshtein
 pytz
 tqdm
 nltk==3.2.5
