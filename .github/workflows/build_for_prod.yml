@@ -3,7 +3,7 @@ name: Production Server Build Dry-Run
 on: [pull_request]
 
 jobs:
-  setup:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -11,10 +11,6 @@ jobs:
         uses: sliteteam/github-action-git-crypt-unlock@1.0.2
         env:
           GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
       - name: Source .env files
         run: ls -a && source .env && source ./src/mappening/utils/.env
       # can't really use caching here AFAIK as pip doesn't store installed packages in repo
