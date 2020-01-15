@@ -73,7 +73,7 @@ def get_raw_events(days_back_in_time):
 
     response = eb.event_search(**search_args)
 
-    print(response)
+    # print(response)
 
     all_events = response.get('events')
 
