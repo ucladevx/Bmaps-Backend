@@ -11,6 +11,9 @@ endif
 build-base:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
+build-dev:
+	docker build ./src -f $(DEV_DOCKERFILE)
+
 get-base:
 ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
 #ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)

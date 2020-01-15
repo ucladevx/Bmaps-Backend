@@ -44,4 +44,4 @@ jobs:
           GOOGLE_API_KEY_3: ${{ secrets.GOOGLE_API_KEY_3 }}
           GOOGLE_API_KEY_4: ${{ secrets.GOOGLE_API_KEY_4 }}
           EVENTBRITE_USER_KEY: ${{ secrets.EVENTBRITE_USER_KEY }}
-        run: make prod
+        run: make build-base && make build-dev
