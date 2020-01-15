@@ -1,9 +1,6 @@
-RUNNER?=USER
+# Include Environment Variables from .env file
+include .env
 
-# Include Environment Variables from .env file if run as user
-ifeq ($(RUNNER), USER)
-	include .env
-endif
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
