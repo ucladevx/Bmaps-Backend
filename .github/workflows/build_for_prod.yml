@@ -3,7 +3,7 @@ name: Production Server Build Dry-Run
 on: [pull_request]
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -11,37 +11,12 @@ jobs:
         uses: sliteteam/github-action-git-crypt-unlock@1.0.2
         env:
           GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Source .env files
+        needs: setup
+        run: source .env && source ./src/mappening/utils/.env
       # can't really use caching here AFAIK as pip doesn't store installed packages in repo
       - name: Build Production Server
-        env:
-          RUNNER: GITHUB
-          BASE_NAME: ${{ secrets.BASE_NAME }}
-          BASE_DOCKERFILE: ${{ secrets.BASE_DOCKERFILE }}
-          DEV_DOCKER_COMPOSE: ${{ secrets.DEV_DOCKER_COMPOSE }}
-          AWS_PG_URL: ${{ secrets.AWS_PG_URL }}
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_IMAGE: ${{ secrets.POSTGRES_IMAGE }}
-          API_SERVER_PORT: ${{ secrets.API_SERVER_PORT }}
-          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
-          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
-          FACEBOOK_SECRET_KEY: ${{ secrets.FACEBOOK_SECRET_KEY }}
-          FACEBOOK_USER_ACCESS_TOKEN: ${{ secrets.FACEBOOK_USER_ACCESS_TOKEN }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          MLAB_USERNAME: ${{ secrets.MLAB_USERNAME }}
-          MLAB_PASSWORD: ${{ secrets.MLAB_PASSWORD }}
-          MLAB_HOST: ${{ secrets.MLAB_HOST }}
-          POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
-          AWS_PG_URI: ${{ secrets.AWS_PG_URI }}
-          APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          GOOGLE_API_KEY_1: ${{ secrets.GOOGLE_API_KEY_1 }}
-          GOOGLE_API_KEY_2: ${{ secrets.GOOGLE_API_KEY_2 }}
-          GOOGLE_API_KEY_3: ${{ secrets.GOOGLE_API_KEY_3 }}
-          GOOGLE_API_KEY_4: ${{ secrets.GOOGLE_API_KEY_4 }}
-          EVENTBRITE_USER_KEY: ${{ secrets.EVENTBRITE_USER_KEY }}
         run: make build-base && make build-dev
