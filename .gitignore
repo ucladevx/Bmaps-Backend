@@ -1,6 +1,3 @@
-# git-crypt
-.git-crypt-key
-
 # Mappening
 scraping/data/
 src/mappening/api/*/*.json
