@@ -5,7 +5,9 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
 
 ## Setting Up the Environment
 - Follow instructions in main [BMaps](https://github.com/ucladevx/BMaps) repository
-- Get the `.env` file which contains sensitive information from a dev and add it to `src/bmaps/utils/`
+- Install git-crypt
+- Generate an RSA gpg key at least 2048 bits in length. Email the key to a bmaps member familiar with the operation of git-crypt. Pull down the changes from the master branch after the bmaps member has told you to do so.
+- Run `git-crypt unlock`
 - Build the base image that contains all dependencies that are fairly static but take a while to install
   - `make build-base`
 - NOTE: the database connection doesn't seem to work over UCLA_WEB wifis, a more secure connection is needed (UCLA_WIFI)
