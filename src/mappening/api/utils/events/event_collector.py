@@ -1,7 +1,7 @@
 from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection, events_facebook_processed_collection
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
 from mappening.api.utils.facebook2 import fb2_event_collector, fb2_event_processor
-from mappening.api.utils.events import event_processor 
+from mappening.api.utils.events import event_processor
 
 from flask import jsonify
 import time, datetime, dateutil.parser, pytz
@@ -23,7 +23,7 @@ def get_month(month):
         month = int(month)
     except:
         return None
-        
+
     if 1 <= month <= 12:
         return "{0:0=2d}".format(month)
     else:
@@ -73,9 +73,11 @@ def get_events_in_database(find_dict={}, one_result_expected=False, print_result
                     # unicode strings have 'u' in the front, as below
                     # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
                     print(u'Event: {0}'.format(event.get('name', '<NONE>')))
-        
+
         if events_fb_cursor.count() > 0:
             for event in events_fb_cursor:
+                if "location" not in event["place"]:
+                    continue
                 output.append(event_processor.process_event_info(event))
                 if print_results:
                     # Python 2 sucks
@@ -108,5 +110,5 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
     # processed_db_events 'todo'
     new_events_data = {'metadata': {'events': eb_count + fb_count}}
     new_count = eb_count + fb_count
-   
+
     return 'Updated with {0} retrieved events, {1} new ones.'.format(new_events_data['metadata']['events'], new_count)
