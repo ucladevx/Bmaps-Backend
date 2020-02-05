@@ -1,16 +1,9 @@
-# from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
-# import os
 import sys
 import requests
-# import json
-import  datetime, dateutil.parser, pytz
-# from dateutil.tz import tzlocal
-# from pprint import pprint
+import datetime, dateutil.parser, pytz
 from tqdm import tqdm   # a progress bar, pretty
-
-# from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
 
 # Need this to run file locally, or else won't know where to find mappening.utils.*
 sys.path.insert(0, './../../..')
@@ -22,21 +15,15 @@ BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 # Got APP_ID and APP_SECRET from Mappening app with developers.facebook.com
 ACCESS_TOKEN_URL = BASE_URL + 'oauth/access_token'
 
-SEARCH_URL = BASE_URL + 'search'
-
-SEARCH_TERMS = ['ucla', 'bruin', 'ucla theta', 'ucla kappa', 'ucla beta']
-UCLA_ZIP_STRINGS = ['90024', '90095']
-
-# Get events by adding page ID and events field
-BASE_EVENT_URL = BASE_URL
-
 BASE_ME_URL = BASE_URL + "me/events/"
 
 # Id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
 # added 'owner' and 'id'
-EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
-                'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
-                'ticket_uri', 'cover', 'owner', 'id']
+# UPDATE: The following event fields are the only fields that don't restrict the events
+# returned from ~900 to ~70. For some reason, asking for "owner", "category", and some others
+# causes the Facebook API to only return a few events (even tho every event has an owner??)
+EVENT_FIELDS = ['id', 'name', 'cover', 'description', 'start_time', 'end_time',
+                'place', 'event_times']
 
 
 s = requests.Session()
@@ -60,35 +47,22 @@ def get_interested_events(days_before=0):
 
     time_window = get_event_time_bounds(days_before)
 
-    # event_args = [
-    #     'events',
-    #     'fields({})'.format(','.join(EVENT_FIELDS)),
-    #     'since({})'.format(time_window[0]),
-    #     'until({})'.format(time_window[1]),
-    #     'limit({})'.format(1000) # not sure what the best limit is
-    # ]
-
-    # info_desired = ['name', '.'.join(event_args)] # join all event params with periods between
-    # ids field added later to search many pages at the same time
-
-
-    place_search_args = {
-        # 'fields': "events{category,cover,description,start_time,is_canceled,name,owner,updated_time,id,place,maybe_count,noreply_count,interested_count,attending_count,end_time,event_times}",
-        'fields': "id,name,cover,description,start_time,end_time,place,event_times",
-        'access_token': app_access_token, 
+    event_args = {
+        'fields': ','.join(EVENT_FIELDS),
+        'access_token': app_access_token,
         'limit': 100
     }
 
-    events = []   
+    events = []
 
-    # total = 0
     page_num = 0
     total = 0
     curr_url = BASE_ME_URL
+
     while curr_url:
 
         # only need params on first get ?
-        resp = s.get(curr_url, params=place_search_args)
+        resp = s.get(curr_url, params=event_args)
 
         if resp.status_code != 200:
             print(
@@ -100,67 +74,20 @@ def get_interested_events(days_before=0):
 
         data = resp.json()
 
-
         try:
-            if page_num == 1:
-                events += data['data']
+            events += data['data']
 
-                total += len(data['data'])
-                curr_url = data['paging']['next']
-            elif page_num >= 2:
-                events += data['data']
+            total += len(data['data'])
+            curr_url = data['paging']['next']
 
-                total += len(data['data'])
-                curr_url = data['paging']['next']
+            # print (curr_url)
 
-            print (curr_url)
             page_num += 1
         except KeyError:
             break
 
-        # responses = resp.json()
-
-        # print(responses)
-
-        # first request has "events" field, subsequent requests don't
-        # if page_num == 0:
-        #     data = resp.json()['events']
-        # elif page_num >= 1:  
-        #     data = resp.json()
-
-
-
-        # if 'data' not in data:
-        #     print('Missing events field from interested events search results!')
-        #     break
-
-        # now we have all the facebook event data
-        # we have to clean it up before we insert it into the database
-        # so it is the same as the eventbrite events and it has the free food tag
-
-        # we have to modify the event_processor to copy eb_event_processor
-        # that's where we will insert into the database
-        # events += data['data']
-
-        # total += len(data['data'])
-        
-        # # check if there is a next page of results
-        # if 'paging' not in data or 'next' not in data['paging']:
-        #     # no more responses
-        #     break
-        # else:
-        #     curr_url = data['paging']['next']
-
-        print(page_num)
-        # try:
-        #     curr_url = data['paging']['next']
-        #     page_num += 1
-        # except KeyError:
-        #     break
-        print(resp.json())
-
-
-    # a dictionary, to keep only unique pages
+        # print(page_num)
+        # print(resp.json())
 
     print(f"collected {len(events)} events from facebook")
 
