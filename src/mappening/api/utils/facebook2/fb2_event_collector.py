@@ -1,13 +1,13 @@
 # from mappening.utils.database import fb_pages_saved_collection, fb_pages_ignored_collection, unknown_locations_collection
 from mappening.utils.secrets import FACEBOOK_USER_ACCESS_TOKEN
 
-import os
+# import os
 import sys
 import requests
-import json
-import time, datetime, dateutil.parser, pytz
-from dateutil.tz import tzlocal
-from pprint import pprint
+# import json
+import  datetime, dateutil.parser, pytz
+# from dateutil.tz import tzlocal
+# from pprint import pprint
 from tqdm import tqdm   # a progress bar, pretty
 
 # from definitions import CENTER_LATITUDE, CENTER_LONGITUDE, BASE_EVENT_START_BOUND
@@ -30,7 +30,7 @@ UCLA_ZIP_STRINGS = ['90024', '90095']
 # Get events by adding page ID and events field
 BASE_EVENT_URL = BASE_URL
 
-BASE_ME_URL = BASE_URL + "me/"
+BASE_ME_URL = BASE_URL + "me/events/"
 
 # Id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
 # added 'owner' and 'id'
@@ -42,9 +42,9 @@ EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_t
 s = requests.Session()
 
 def get_event_time_bounds(days_before):
-    # back_jump = 60        # for repeating events that started a long time ago
-    back_jump = days_before # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
-    forward_jump = 60       # and 60 days into the future
+    # back_jump = 60         # for repeating events that started a long time ago
+    back_jump = days_before  # arbitrarily allow events that start 1 day ago (allows refresh to keep current day's events)
+    forward_jump = 60        # and 60 days into the future
     now = datetime.datetime.now()
     before_time = now - datetime.timedelta(days=back_jump)
     after_time = now + datetime.timedelta(days=forward_jump)
@@ -60,55 +60,79 @@ def get_interested_events(days_before=0):
 
     time_window = get_event_time_bounds(days_before)
 
-    event_args = [
-        'events',
-        'fields({})'.format(','.join(EVENT_FIELDS)),
-        'since({})'.format(time_window[0]),
-        'until({})'.format(time_window[1]),
-        'limit({})'.format(1000) # not sure what the best limit is
-    ]
+    # event_args = [
+    #     'events',
+    #     'fields({})'.format(','.join(EVENT_FIELDS)),
+    #     'since({})'.format(time_window[0]),
+    #     'until({})'.format(time_window[1]),
+    #     'limit({})'.format(1000) # not sure what the best limit is
+    # ]
 
-    info_desired = ['name', '.'.join(event_args)] # join all event params with periods between
+    # info_desired = ['name', '.'.join(event_args)] # join all event params with periods between
     # ids field added later to search many pages at the same time
 
 
     place_search_args = {
-        'fields': "events.limit(100){category,cover,description,start_time,is_canceled,name,owner,updated_time,id,place,maybe_count,noreply_count,interested_count,attending_count,end_time,event_times}",
-        'access_token': app_access_token
+        # 'fields': "events{category,cover,description,start_time,is_canceled,name,owner,updated_time,id,place,maybe_count,noreply_count,interested_count,attending_count,end_time,event_times}",
+        'fields': "id,name,cover,description,start_time,end_time,place,event_times",
+        'access_token': app_access_token, 
+        'limit': 100
     }
 
     events = []   
 
+    # total = 0
     page_num = 0
+    total = 0
     curr_url = BASE_ME_URL
-    while page_num < 10:
+    while curr_url:
 
         # only need params on first get ?
-        if page_num == 0:
-            resp = s.get(curr_url, params=place_search_args)
-        else:
-            resp = s.get(curr_url)
+        resp = s.get(curr_url, params=place_search_args)
 
         if resp.status_code != 200:
             print(
                 'Error getting interested events, on results page {0}! Status code {1}'
                 .format(page_num, resp.status_code)
             )
+            print(resp.json())
             break
 
-        responses = resp.json()
+        data = resp.json()
+
+
+        try:
+            if page_num == 1:
+                events += data['data']
+
+                total += len(data['data'])
+                curr_url = data['paging']['next']
+            elif page_num >= 2:
+                events += data['data']
+
+                total += len(data['data'])
+                curr_url = data['paging']['next']
+
+            print (curr_url)
+            page_num += 1
+        except KeyError:
+            break
+
+        # responses = resp.json()
 
         # print(responses)
 
         # first request has "events" field, subsequent requests don't
-        if 'events' in responses:
-            data = responses['events']
-        else:
-            data = responses
+        # if page_num == 0:
+        #     data = resp.json()['events']
+        # elif page_num >= 1:  
+        #     data = resp.json()
 
-        if 'data' not in data:
-            print('Missing events field from interested events search results!')
-            break
+
+
+        # if 'data' not in data:
+        #     print('Missing events field from interested events search results!')
+        #     break
 
         # now we have all the facebook event data
         # we have to clean it up before we insert it into the database
@@ -116,15 +140,28 @@ def get_interested_events(days_before=0):
 
         # we have to modify the event_processor to copy eb_event_processor
         # that's where we will insert into the database
-        events += data['data']
+        # events += data['data']
+
+        # total += len(data['data'])
         
-        # check if there is a next page of results
-        if 'paging' not in data or 'next' not in data['paging']:
-            # no more responses
-            break
-        else:
-            curr_url = data['paging']['next']
-        page_num += 1
+        # # check if there is a next page of results
+        # if 'paging' not in data or 'next' not in data['paging']:
+        #     # no more responses
+        #     break
+        # else:
+        #     curr_url = data['paging']['next']
+
+        print(page_num)
+        # try:
+        #     curr_url = data['paging']['next']
+        #     page_num += 1
+        # except KeyError:
+        #     break
+        print(resp.json())
+
 
     # a dictionary, to keep only unique pages
+
+    print(f"collected {len(events)} events from facebook")
+
     return events

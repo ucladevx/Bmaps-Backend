@@ -39,11 +39,15 @@ def process_events(all_events):
 
     filtered_events = []
 
+    print(len(all_events))
+
     for event in all_events:
 
         # some events don't have a place, if they don't maybe just remove them for now and later try to get the place
         # TODO: find place from owner's location if place is not present
         if "place" not in event:
+            print("no place")
+            print(event)
             # don't add to filtered_events
             continue
 
@@ -53,6 +57,8 @@ def process_events(all_events):
         # if this happens we can just exclude them from the facebook database collection
         # this might even be a good thing because if they are eventbrite events, it would be difficult to dedupe across collections anyways
         if "location" not in event["place"]:
+            print ("no location")
+            print(event)
             continue
 
         # change "zip" of place.location to "zipcode"
@@ -61,6 +67,7 @@ def process_events(all_events):
         
         # if event does not have an endtime, give it an endtime 1 hour into the future
         if "end_time" not in event:
+            print("no end_time")
             event["end_time"] = (datetime.datetime.strptime(event["start_time"], '%Y-%m-%dT%H:%M:%S%z') + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S%z')
             print(event["end_time"])
 
@@ -69,7 +76,8 @@ def process_events(all_events):
 
     # URL parameters for refreshing / updating events info, including subevents
     sub_event_call_args = {
-        'fields': ','.join(EVENT_FIELDS),
+        # 'fields': ','.join(EVENT_FIELDS),
+        'fields': "id,name,cover,description,start_time,end_time,place,event_times",
         'access_token': app_access_token
     }
 
@@ -88,7 +96,10 @@ def process_events(all_events):
 
             for id in sub_ids:
                 
+                print(BASE_EVENT_URL + id)
+                print(sub_event_call_args)
                 resp = s.get(BASE_EVENT_URL + id, params=sub_event_call_args)
+                print(resp.json())
                 # print(resp.url)
                 if resp.status_code != 200:
                     print(
@@ -119,6 +130,9 @@ def process_events(all_events):
     print(len(additional_events))
 
     filtered_events.extend(additional_events)
+
+    print("filtered events")
+    print(len(filtered_events))
 
     # need to map facebook categories to bmaps categories
     # also do we need to run the ML for figuring out the categories?
