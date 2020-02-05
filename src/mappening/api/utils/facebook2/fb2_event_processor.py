@@ -8,8 +8,6 @@ import sys
 import requests
 import json
 import time, datetime, dateutil.parser, pytz
-from dateutil.tz import tzlocal
-from pprint import pprint
 from tqdm import tqdm   # a progress bar, pretty
 
 from definitions import API_UTILS_PATH
@@ -21,13 +19,9 @@ sys.path.insert(0, './../../..')
 API_VERSION_STR = 'v5.0/'
 BASE_URL = 'https://graph.facebook.com/' + API_VERSION_STR
 
-# Get events by adding page ID and events field
-BASE_EVENT_URL = BASE_URL
-
-# Id is ALWAYS returned, for any field, explicitly requested or not, as long as there is data
-EVENT_FIELDS = ['name', 'category', 'place', 'description', 'start_time', 'end_time', 'event_times',
-                'attending_count', 'maybe_count', 'interested_count', 'noreply_count', 'is_canceled',
-                'ticket_uri', 'cover']
+# Straight from fb2_event_collector.py
+EVENT_FIELDS = ['id', 'name', 'cover', 'description', 'start_time', 'end_time',
+                'place', 'event_times']
 
 
 s = requests.Session()
@@ -39,11 +33,16 @@ def process_events(all_events):
 
     filtered_events = []
 
+    print(len(all_events))
+
     for event in all_events:
 
         # some events don't have a place, if they don't maybe just remove them for now and later try to get the place
         # TODO: find place from owner's location if place is not present
         if "place" not in event:
+            # print("no place")
+            # print(event)
+
             # don't add to filtered_events
             continue
 
@@ -53,6 +52,10 @@ def process_events(all_events):
         # if this happens we can just exclude them from the facebook database collection
         # this might even be a good thing because if they are eventbrite events, it would be difficult to dedupe across collections anyways
         if "location" not in event["place"]:
+            # print ("no location")
+            # print(event)
+
+            # don't add to filtered_events
             continue
 
         # change "zip" of place.location to "zipcode"
@@ -61,19 +64,21 @@ def process_events(all_events):
         
         # if event does not have an endtime, give it an endtime 1 hour into the future
         if "end_time" not in event:
+            # print("no end_time")
             event["end_time"] = (datetime.datetime.strptime(event["start_time"], '%Y-%m-%dT%H:%M:%S%z') + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S%z')
-            print(event["end_time"])
-
+            # print(event["end_time"])
 
         filtered_events.append(event)
 
     # URL parameters for refreshing / updating events info, including subevents
     sub_event_call_args = {
         'fields': ','.join(EVENT_FIELDS),
+        # 'fields': "id,name,cover,description,start_time,end_time,place,event_times",
         'access_token': app_access_token
     }
 
     additional_events = []
+
     # check for multiday events
     for event in all_events:
         expanded_event_dict = {}
@@ -88,7 +93,10 @@ def process_events(all_events):
 
             for id in sub_ids:
                 
-                resp = s.get(BASE_EVENT_URL + id, params=sub_event_call_args)
+                # print(BASE_URL + id)
+                # print(sub_event_call_args)
+                resp = s.get(BASE_URL + id, params=sub_event_call_args)
+                # print(resp.json())
                 # print(resp.url)
                 if resp.status_code != 200:
                     print(
@@ -100,7 +108,7 @@ def process_events(all_events):
                 
                 expanded_event_dict = resp.json()
 
-                # not sure if this is needed --haki
+                # not sure if expanded_event_dict is needed --haki
                 # # add special "duplicate_occurrence" tag for event occurrences in the future that
                 # # won't be searchable, because the 1st event start time has passed already
                 # # don't need to refresh for the 1st event, since that matches the total event start time
@@ -110,21 +118,23 @@ def process_events(all_events):
                 #         sub_event['duplicate_occurrence'] = True
 
                 additional_events.append(expanded_event_dict)
-        # I have no idea what this else statement is doing --haki
+        # More expanded_event_dict stuff: --haki
         # else:
         #     expanded_event_dict.update({event['id']: event})
 
-
-    print("additional events")
+    print("additional facebook events")
     print(len(additional_events))
 
     filtered_events.extend(additional_events)
+
+    print("filtered facebook events")
+    print(len(filtered_events))
 
     # need to map facebook categories to bmaps categories
     # also do we need to run the ML for figuring out the categories?
     categorized_clean_events = categorizeEvents(filtered_events)
     categorized_clean_events = labelFreeFood(categorized_clean_events)
-        
+    
     # Autocategorization has a cleaner way to do this path switching
     savedPath = os.getcwd()
     os.chdir(API_UTILS_PATH)
@@ -132,9 +142,8 @@ def process_events(all_events):
         json.dump(categorized_clean_events, f, sort_keys=True, indent=4, separators=(',', ': '))
     os.chdir(savedPath)
 
-    # add filtered events to database
+    # add filtered events to database by deleting them all and readding (this prevents duplication hahaha)
     events_facebook_processed_collection.delete_many({})
     events_facebook_processed_collection.insert_many(categorized_clean_events)
 
     return categorized_clean_events
-        
