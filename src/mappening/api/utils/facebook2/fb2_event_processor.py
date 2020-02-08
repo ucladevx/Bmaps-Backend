@@ -31,45 +31,11 @@ app_access_token = FACEBOOK_USER_ACCESS_TOKEN
 # Process for frontend to use it 
 def process_events(all_events):
 
-    filtered_events = []
+    
 
     print(len(all_events))
 
-    for event in all_events:
-
-        # some events don't have a place, if they don't maybe just remove them for now and later try to get the place
-        # TODO: find place from owner's location if place is not present
-        if "place" not in event:
-            # print("no place")
-            # print(event)
-
-            # don't add to filtered_events
-            continue
-
-        # some events have "place" but no "place.location"
-        # this happens with some events that are imported to facebook from eventbrite
-        # I.E. they have "owner" == Eventbrite
-        # if this happens we can just exclude them from the facebook database collection
-        # this might even be a good thing because if they are eventbrite events, it would be difficult to dedupe across collections anyways
-        if "location" not in event["place"]:
-            # print ("no location")
-            # print(event)
-
-            # don't add to filtered_events
-            continue
-
-        # change "zip" of place.location to "zipcode"
-        if 'location' in event['place'] and 'zip' in event['place']['location']:
-            event['place']['location']['zipcode'] = event['place']['location'].pop('zip')
-        
-        # if event does not have an endtime, give it an endtime 1 hour into the future
-        if "end_time" not in event:
-            # print("no end_time")
-            event["end_time"] = (datetime.datetime.strptime(event["start_time"], '%Y-%m-%dT%H:%M:%S%z') + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S%z')
-            # print(event["end_time"])
-
-        filtered_events.append(event)
-
+    
     # URL parameters for refreshing / updating events info, including subevents
     sub_event_call_args = {
         'fields': ','.join(EVENT_FIELDS),
@@ -77,7 +43,7 @@ def process_events(all_events):
         'access_token': app_access_token
     }
 
-    additional_events = []
+    complete_events = []
 
     # check for multiday events
     for event in all_events:
@@ -117,15 +83,60 @@ def process_events(all_events):
                 #     if sub_event['start_time'] != event['start_time']:
                 #         sub_event['duplicate_occurrence'] = True
 
-                additional_events.append(expanded_event_dict)
+                # additional_events.append(expanded_event_dict)
+                complete_events.append(expanded_event_dict)
+            
+            # finally we want to remove this top level event to prevent duplication,
+            # so just don't add it to complete_events
+            
         # More expanded_event_dict stuff: --haki
-        # else:
-        #     expanded_event_dict.update({event['id']: event})
+        else:
+            complete_events.append(event)
+            # expanded_event_dict.update({event['id']: event})
 
-    print("additional facebook events")
-    print(len(additional_events))
+    # print("additional facebook events")
+    # print(len(additional_events))
 
-    filtered_events.extend(additional_events)
+    # filtered_events.extend(additional_events)
+
+    filtered_events = []
+
+    for event in complete_events:
+
+        # some events don't have a place, if they don't maybe just remove them for now and later try to get the place
+        # TODO: find place from owner's location if place is not present
+        if "place" not in event:
+            # print("no place")
+            # print(event)
+
+            # don't add to filtered_events
+            continue
+
+        # some events have "place" but no "place.location"
+        # this happens with some events that are imported to facebook from eventbrite
+        # I.E. they have "owner" == Eventbrite
+        # if this happens we can just exclude them from the facebook database collection
+        # this might even be a good thing because if they are eventbrite events, it would be difficult to dedupe across collections anyways
+        if "location" not in event["place"]:
+            # print ("no location")
+            # print(event)
+
+            # don't add to filtered_events
+            continue
+
+        # change "zip" of place.location to "zipcode"
+        if 'location' in event['place'] and 'zip' in event['place']['location']:
+            event['place']['location']['zipcode'] = event['place']['location'].pop('zip')
+        
+        # if event does not have an endtime, give it an endtime 1 hour into the future
+        if "end_time" not in event:
+            # print("no end_time")
+            event["end_time"] = (datetime.datetime.strptime(event["start_time"], '%Y-%m-%dT%H:%M:%S%z') + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S%z')
+            # print(event["end_time"])
+
+        filtered_events.append(event)
+
+
 
     print("filtered facebook events")
     print(len(filtered_events))
