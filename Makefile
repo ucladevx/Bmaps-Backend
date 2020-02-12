@@ -9,7 +9,7 @@ build-base:
 	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
 build-dev:
-	docker build ./src -f $(DEV_DOCKERFILE)
+	docker build ./src -f $(DEV_DOCKERFILE) -t mappening_backend
 
 get-base:
 ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
