@@ -31,3 +31,24 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
 - tkinter GUIs is in `tkinter/`
 - Autodocumentation is in `docs/`
 - Beautiful Soup Scraping is in `scraping/` 
+
+## Using git crypt to get access to .env files
+
+- Generate a rsa2048 gpg key using the gpg tool
+  - `gpg full-generate-key`
+  - Make sure to record your passphrase in a secure location, and also to generate a revocation certificate for the key in case it gets compromised or lost
+    - `gpg --output revocation-cert.asc --gen-revoke <PUB-KEY-SIG>`
+- Convey your gpg key through a keyfile securely to a project member, either using a pub key server, or through another clandestine channel
+  - To generate the key file:
+    - `gpg --output <YOUR_NAME>.gpg --export <PUB-KEY-SIG>`
+- The team member will then add your pub-key to their gpg key-chain using 
+  - `gpg --import <keyfile>`
+  - Note that keyfile in this step is the same as the <YOUR_NAME>.gpg file generated in the previous step
+  - They may also choose to sign the key if they trust you.
+- Finally, the team member will run
+  - `git-crypt --add-gpg-user <team member to be added's email or any other identifier of key>`
+  - Then they must push their changes (adding your pub key) made to the repository to the remote, and those changes pulled by you
+  - Note that their changes will not appear when `git status` is run, so it may be necessary to make some other change in the repository to successfully push the newly added pub key within git crypt
+- Finally, once you have the updated repository they pushed, run
+  - `git-crypt unlock`
+  - you will not need to run git-crypt unlock again, since git-crypt will automatically encrypt your .envs as you push them within this repo, and decrypt them as they are pulled from the remote. GLHF.
