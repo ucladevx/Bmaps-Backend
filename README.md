@@ -45,7 +45,7 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
   - `gpg --import <keyfile>`
   - Note that keyfile in this step is the same as the <YOUR_NAME>.gpg file generated in the previous step
   - They may also choose to sign the key if they trust you.
-- Finally, the team member will run
+- Finally, the team member will run:
   - `git-crypt --add-gpg-user <team member to be added's email or any other identifier of key>`
   - Then they must push their changes (adding your pub key) made to the repository to the remote, and those changes pulled by you
   - Note that their changes will not appear when `git status` is run, so it may be necessary to make some other change in the repository to successfully push the newly added pub key within git crypt
