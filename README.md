@@ -26,11 +26,10 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
 
 ## Repo Breakdown
 
-- Database config/data is in `/database`
-- Backend source code is in `src/`
-- tkinter GUIs is in `tkinter/`
-- Autodocumentation is in `docs/`
-- Beautiful Soup Scraping is in `scraping/` 
+- Database config/data in `/database`
+- Backend source code in `src/`
+- Autodocumentation in `docs/`
+- Beautiful Soup Scraping in `scraping/` 
 
 ## Using git crypt to get access to .env files
 
