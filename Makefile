@@ -6,7 +6,7 @@ include .env
 
 # Build backend image. Must be built before dev work (and only once unless changed)
 build-base:
-	docker build ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
+	docker build --no-cache ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
 
 build-dev:
 	docker build ./src -f $(DEV_DOCKERFILE)
@@ -34,6 +34,9 @@ stop:
 # Kill any running containers
 kill:
 	-docker ps | tail -n +2 | cut -d ' ' -f 1 | xargs docker kill
+
+clean:
+	rm -rf *.pyc
 
 ##################           LOCAL POSTGRES DATABASE          ##################
 

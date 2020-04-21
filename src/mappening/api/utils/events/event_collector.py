@@ -1,6 +1,6 @@
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection, events_facebook_processed_collection
+from mappening.utils.database import events_eventbrite_collection, events_current_processed_collection, events_facebook_processed_collection
 from mappening.api.utils.eventbrite import eb_event_collector, eb_event_processor
-from mappening.api.utils.facebook2 import fb2_event_collector, fb2_event_processor
+from mappening.api.utils.facebook import fb_event_collector, fb_event_processor
 from mappening.api.utils.events import event_processor
 
 from flask import jsonify
@@ -10,13 +10,6 @@ import json
 import re
 
 from definitions import BASE_EVENT_START_BOUND
-
-# each website source has its own database, where raw event info is stored
-all_raw_collections = {
-    'eventbrite': events_eventbrite_collection,
-    'facebook': events_fb_collection,
-    'test': events_test_collection
-}
 
 def get_month(month):
     try:
@@ -29,64 +22,62 @@ def get_month(month):
     else:
         return None
 
+class ListCursor(list):
+    def __init__(self, l):
+        self.l = l
+
+    def __iter__(self):
+        yield from self.l
+
+    def count(self):
+        return len(self.l)
+
+def find_one(collection, find_dict):
+    doc = collection.find_one(find_dict)
+    res = ListCursor([])
+    if doc:
+        res = ListCursor([doc])
+    return res
+
+def collect_events_from(cursor, print_results=False, discard_no_loc_events=False):
+    output = []
+    if cursor.count() > 0:
+        for event in cursor:
+            if discard_no_loc_events and "location" not in event["place"]:
+                continue
+            output.append(event_processor.process_event_info(event))
+            if print_results:
+                # Python 2 sucks
+                # event['name'] returns unicode string
+                # to use with format(), another unicode string must be parent
+                # unicode strings have 'u' in the front, as below
+                # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
+                print(u'Event: {0}'.format(event.get('name', '<NONE>')))
+    return output
+
 def get_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = []
+    # generator function that generates a collection.find() function that returns 
+    # either a cursor or a list with a count function attached 
+    # (to emulate a cursor in the case of only one result being expected)
+    gen_find = lambda events_collection : lambda find_dict : find_one(events_collection, find_dict) if one_result_expected else events_collection.find(find_dict)
 
-    if one_result_expected:
-        # check if it is in eventbrite database
-        single_event = events_current_processed_collection.find_one(find_dict)
-        if single_event:
-            output.append(event_processor.process_event_info(single_event))
-            if print_results:
-                print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
-        else:
-            # if not, check if it's in facebook database
-            single_event = events_facebook_processed_collection.find_one(find_dict)
-            if single_event:
-                output.append(event_processor.process_event_info(single_event))
-                if print_results:
-                    print(u'Event: {0}'.format(single_event.get('name', '<NONE>')))
-            else:
-                # not in either database
+    find_in_eventbrite = gen_find(events_current_processed_collection)
+    find_in_facebook = gen_find(events_facebook_processed_collection)
 
-                # careful: output is still empty here; make sure output list never set ANYWHERE else
-                # i.e. no other conditional branch is entered after this one, same with multiple event case below
-                print('No single event with attributes:' + str(find_dict))
-    else:
-        # eventbrite database
-        events_cursor = events_current_processed_collection.find(find_dict)
+    eventbrite_events_cursor = find_in_eventbrite(find_dict)
+    facebook_events_cursor = find_in_facebook(find_dict)
 
-        # facebook database
-        events_fb_cursor = events_facebook_processed_collection.find(find_dict)
+    if eventbrite_events_cursor.count() <= 0 and facebook_events_cursor.count() <= 0:
+        print('No events found with attributes:' + str(find_dict))
+        return []
 
-        if events_cursor.count() <= 0 and events_fb_cursor.count() <= 0:
-            print('No events found with attributes:' + str(find_dict))
-            return []
+    output += collect_events_from(eventbrite_events_cursor)
+    if not one_result_expected or len(output) <= 0:
+        output += collect_events_from(facebook_events_cursor, print_results, True)
 
-        if events_cursor.count() > 0:
-            for event in events_cursor:
-                output.append(event_processor.process_event_info(event))
-                if print_results:
-                    # Python 2 sucks
-                    # event['name'] returns unicode string
-                    # to use with format(), another unicode string must be parent
-                    # unicode strings have 'u' in the front, as below
-                    # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
-                    print(u'Event: {0}'.format(event.get('name', '<NONE>')))
-
-        if events_fb_cursor.count() > 0:
-            for event in events_fb_cursor:
-                if "location" not in event["place"]:
-                    continue
-                output.append(event_processor.process_event_info(event))
-                if print_results:
-                    # Python 2 sucks
-                    # event['name'] returns unicode string
-                    # to use with format(), another unicode string must be parent
-                    # unicode strings have 'u' in the front, as below
-                    # THEN: make sure Docker container locale / environment variable set, so print() itself works!!!!
-                    print(u'Event: {0}'.format(event.get('name', '<NONE>')))
     return output
+    
 
 def find_events_in_database(find_dict={}, one_result_expected=False, print_results=False):
     output = get_events_in_database(find_dict, one_result_expected, print_results)
@@ -103,9 +94,9 @@ def update_ucla_events_database(use_test=False, days_back_in_time=0, clear_old_d
 
     # Facebook Events
     # TODO
-    fb_events = fb2_event_collector.get_interested_events(days_back_in_time)
-    # fb2_event_collector.update_database(events)
-    fb_count = len(fb2_event_processor.process_events(fb_events))
+    fb_events = fb_event_collector.get_interested_events(days_back_in_time)
+    # fb_event_collector.update_database(events)
+    fb_count = len(fb_event_processor.process_events(fb_events))
 
     # processed_db_events 'todo'
     new_events_data = {'metadata': {'events': eb_count + fb_count}}

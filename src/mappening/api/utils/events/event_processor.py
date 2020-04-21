@@ -1,4 +1,4 @@
-from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_test_collection, events_current_processed_collection, events_internal_added_collection
+from mappening.utils.database import events_fb_collection, events_eventbrite_collection, events_current_processed_collection, events_internal_added_collection
 
 from flask import jsonify
 import time, datetime, dateutil.parser, pytz

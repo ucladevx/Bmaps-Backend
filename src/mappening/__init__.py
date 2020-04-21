@@ -5,8 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from mappening.api.events import events
 from mappening.api.locations import locations
-from mappening.api.users import users
-from mappening.auth.auth import auth
 from mappening.utils.secrets import POSTGRES_URI
 
 # Configure app and register blueprints
@@ -19,12 +17,8 @@ db.Model.metadata.reflect(db.engine)
 
 app.register_blueprint(events, url_prefix='/api/events')
 app.register_blueprint(locations, url_prefix='/api/locations')
-app.register_blueprint(auth, url_prefix='/auth') # Not actually public API
-app.register_blueprint(users, url_prefix='/api/users')
 
 app.config['SECRET_KEY'] = 'whats mappening'
-# app.permanent_session_lifetime = datetime.timedelta(minutes=20)
-# app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Enable Cross Origin Resource Sharing (CORS)
 # This makes the CORS feature cover all routes in the app
