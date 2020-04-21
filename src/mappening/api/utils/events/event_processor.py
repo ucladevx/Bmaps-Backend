@@ -36,6 +36,8 @@ def process_event_info(event):
         event['hoster'] = host
 
     # Create GeoJSON
+
+    # TODO: Check if coordinates are outside UCLA
     formatted_info = {
         # will ALWAYS have an ID
         'id': eId,

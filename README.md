@@ -34,7 +34,7 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
 ## Using git crypt to get access to .env files
 
 - Generate a rsa2048 gpg key using the gpg tool
-  - `gpg full-generate-key`
+  - `gpg --full-generate-key`
   - Make sure to record your passphrase in a secure location, and also to generate a revocation certificate for the key in case it gets compromised or lost
     - `gpg --output revocation-cert.asc --gen-revoke <PUB-KEY-SIG>`
 - Convey your gpg key through a keyfile securely to a project member, either using a pub key server, or through another clandestine channel
