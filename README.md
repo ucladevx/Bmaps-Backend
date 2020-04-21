@@ -49,6 +49,6 @@ Hosted on GitHub Pages at http://ucladevx.com/BMaps-Backend/
   - Then they must push their changes (adding your pub key) made to the repository to the remote, and those changes pulled by you
   - Note that their changes will not appear when `git status` is run, so it may be necessary to make some other change in the repository to successfully push the newly added pub key within git crypt
 - Finally, once you have the updated repository they pushed, run
-  - `git-crypt unlock`
+  - run `git-crypt unlock`
   - you will not need to run git-crypt unlock again, since git-crypt will automatically encrypt your .envs as you push them within this repo, and decrypt them as they are pulled from the remote. GLHF.
 
