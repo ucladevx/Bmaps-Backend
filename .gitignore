@@ -1,7 +1,7 @@
-# Mappening
+# Bmaps
 scraping/data/
-src/mappening/api/*/*.json
-src/mappening/api/*.json
+src/bmaps/api/*/*.json
+src/bmaps/api/*.json
 database/postgres/
 
 # Mac Stuff
