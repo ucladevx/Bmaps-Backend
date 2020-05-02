@@ -11,7 +11,7 @@ python-dotenv
 python-Levenshtein
 pytz
 tqdm
-nltk==3.2.5
+nltk==3.4.5
 # specify --no-binary to link with existing geos library on alpine image built
 # from source
 shapely --no-binary=shapely
