@@ -2,7 +2,7 @@ name: Push Base Image
 on:
     push:
         branches:
-            - master
+            - will-zom-events-refactor
         paths:
             - 'src/Base-Dockerfile'
 jobs:
