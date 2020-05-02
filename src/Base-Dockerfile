@@ -50,3 +50,4 @@ RUN cd geos-3.6.4 ; \
   ./configure ; \
   make -j3 -s ; \
   make -s install ;
+
