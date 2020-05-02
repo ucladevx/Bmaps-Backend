@@ -29,7 +29,7 @@ jobs:
             ECR_REPOSITORY: bmaps_backend
             IMAGE_TAG: ${{ github.sha }}
           run: |
-            docker build -f ${{ secrets.BASE_DOCKERFILE }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./src
+            docker build -f Base-Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./src
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         - name: Logout of Amazon ECR
           if: always()
