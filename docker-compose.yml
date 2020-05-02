@@ -1,9 +1,12 @@
 version: "3"
 services:
 
-  api:
+  backend:
+    image: ${BACKEND_REPO}
     build: ./src
+    expose:
+      - 3031
     ports:
-      - ${API_SERVER_PORT}:${API_SERVER_PORT}
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
       - ENV=production

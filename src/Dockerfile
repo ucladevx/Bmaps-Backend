@@ -3,6 +3,7 @@ FROM mappening/base
 
 ## Install the rest of the packages
 COPY requirements.txt /tmp
+RUN apk add supervisor nginx uwsgi
 RUN cd /tmp && pip3 install -r requirements.txt
 COPY nginx/conf/nginx.conf /etc/nginx/nginx.conf
 COPY uwsgi/conf/mappening.ini /etc/uwsgi/mappening.ini

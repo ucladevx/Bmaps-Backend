@@ -21,3 +21,4 @@ unidecode
 psycopg2
 Flask-SQLAlchemy
 eventbrite
+Werkzeug
