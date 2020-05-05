@@ -1,23 +1,29 @@
 # Include Environment Variables from .env file
 include .env
+include ../.env
 
+whoami := $(shell whoami)
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
 # Build backend image. Must be built before dev work (and only once unless changed)
+# This command is being deprecated in favor of AWS ECR pulling
 build-base:
-	docker build --no-cache ./src -t $(BASE_NAME) -f $(BASE_DOCKERFILE)
+	docker build --no-cache ./src -t $(BASE_NAME):$(whoami) -f $(BASE_DOCKERFILE)
 
 build-dev:
 	docker build ./src -f $(DEV_DOCKERFILE)
 
-get-base:
-ifneq ($(shell docker images --filter=reference="$(BASE_NAME)" --format "{{.Repository}}"), $(BASE_NAME))
-#ifeq ($(shell docker inspect "$(BASE_NAME)"; echo "$?"), 0)
-#	docker pull $(BASE_NAME)
-#else
-	make build-base
-endif
+pull-base: ecr-login
+	docker pull $(ECR_URI)/$(BASE_NAME):latest
+
+# Authenticate Docker client
+ecr-login:
+	$(shell aws ecr get-login --no-include-email --region $(AWS_REGION))
+
+push-base: ecr-login
+	docker tag $(BASE_NAME):latest $(ECR_URI)/$(BASE_NAME):$(whoami)
+	docker push $(ECR_URI)/$(BASE_NAME):$(whoami)
 
 # Run backend in dev mode with local Postgres database
 dev: get-base
