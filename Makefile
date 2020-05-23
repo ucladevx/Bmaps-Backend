@@ -3,6 +3,7 @@ include .env
 include ../.env
 
 whoami := $(shell whoami)
+basecheck := $(shell docker images $(BASE_NAME) | grep $(BASE_NAME))
 
 ##################       LOCAL DEVELOPMENT (Backend Only)     ##################
 
@@ -16,6 +17,7 @@ build-dev:
 
 pull-base: ecr-login
 	docker pull $(ECR_URI)/$(BASE_NAME):latest
+	docker tag $(ECR_URI)/$(BASE_NAME):latest $(BASE_NAME):latest
 
 # Authenticate Docker client
 ecr-login:
@@ -26,12 +28,17 @@ push-base: ecr-login
 	docker push $(ECR_URI)/$(BASE_NAME):$(whoami)
 
 # Run backend in dev mode with local Postgres database
-dev: get-base
+dev:
 	docker-compose -f $(DEV_DOCKER_COMPOSE) up --build
 
 # Run backend in prod mode with AWS Postgres database
-prod: get-base
+prod:
 	docker-compose up --build
+
+check-for-base:
+	docker images $(BASE_NAME) | grep $(BASE_NAME) \
+	 || echo "Base Dockerfile with image tag $(BASE_NAME) not found! \
+	Please run 'make pull-base' to get it"
 
 # Stops the stack. Can also Ctrl+C in the same terminal window stack was run.
 stop:
